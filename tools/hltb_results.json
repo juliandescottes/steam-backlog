@@ -1,0 +1,3314 @@
+{
+ "1313": {
+  "name": "SiN Gold (1998)",
+  "match": null
+ },
+ "1520": {
+  "name": "DEFCON",
+  "match": "DEFCON",
+  "id": 2402,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 1.16,
+  "main_extra": 3.63,
+  "completionist": 6.5
+ },
+ "2290": {
+  "name": "Final DOOM",
+  "match": "Final Doom",
+  "id": 3478,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 12.97,
+  "main_extra": 15.55,
+  "completionist": 18.2
+ },
+ "2300": {
+  "name": "DOOM II",
+  "match": "Doom II: Hell on Earth",
+  "id": 2711,
+  "sim": 0.71,
+  "steamMatch": false,
+  "main": 7,
+  "main_extra": 9.79,
+  "completionist": 14.14
+ },
+ "2600": {
+  "name": "Vampire: The Masquerade - Bloodlines",
+  "match": "Vampire: The Masquerade - Bloodlines",
+  "id": 10890,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 22.49,
+  "main_extra": 28.66,
+  "completionist": 38.89
+ },
+ "3170": {
+  "name": "King's Bounty: Armored Princess",
+  "match": "King's Bounty: Armored Princess",
+  "id": 5017,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 27.7,
+  "main_extra": 43.63,
+  "completionist": 74.72
+ },
+ "4700": {
+  "name": "Total War: MEDIEVAL II – Definitive Edition",
+  "match": "Total War: MEDIEVAL III",
+  "id": 178550,
+  "sim": 0.95,
+  "steamMatch": false,
+  "main": null,
+  "main_extra": null,
+  "completionist": null
+ },
+ "6010": {
+  "name": "Indiana Jones® and the Fate of Atlantis™",
+  "match": "Indiana Jones and the Fate of Atlantis",
+  "id": 4664,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 8.2,
+  "main_extra": 10.13,
+  "completionist": 10.16
+ },
+ "6040": {
+  "name": "The Dig®",
+  "match": "The Dig",
+  "id": 9837,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 6.92,
+  "main_extra": 7.62,
+  "completionist": 7.87
+ },
+ "6800": {
+  "name": "Commandos: Behind Enemy Lines",
+  "match": "Commandos: Behind Enemy Lines",
+  "id": 1870,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 24.51,
+  "main_extra": 28.28,
+  "completionist": 30.67
+ },
+ "6810": {
+  "name": "Commandos: Beyond the Call of Duty",
+  "match": "Commandos: Beyond the Call of Duty",
+  "id": 1871,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 15.85,
+  "main_extra": 21.26,
+  "completionist": 25.05
+ },
+ "6830": {
+  "name": "Commandos 2: Men of Courage",
+  "match": "Commandos 2: Men of Courage",
+  "id": 1867,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 21.35,
+  "main_extra": 33.54,
+  "completionist": 34.93
+ },
+ "6840": {
+  "name": "Commandos 3: Destination Berlin",
+  "match": "Commandos 3: Destination Berlin",
+  "id": 1868,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 13.27,
+  "main_extra": 16.18,
+  "completionist": 18.79
+ },
+ "6920": {
+  "name": "Deus Ex: Invisible War",
+  "match": "Deus Ex: Invisible War",
+  "id": 2491,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 9.11,
+  "main_extra": 13.5,
+  "completionist": 20.17
+ },
+ "7650": {
+  "name": "X-COM: Terror From the Deep",
+  "match": "X-COM: Terror from the Deep",
+  "id": 11366,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 34.42,
+  "main_extra": 60.48,
+  "completionist": 92.25
+ },
+ "7660": {
+  "name": "X-COM: Apocalypse",
+  "match": "X-COM: Apocalypse",
+  "id": 11363,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 32.55,
+  "main_extra": 59.7,
+  "completionist": 63.82
+ },
+ "7730": {
+  "name": "X-COM: Interceptor",
+  "match": "X-COM: Interceptor",
+  "id": 11365,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 13.09,
+  "main_extra": null,
+  "completionist": 20.17
+ },
+ "7760": {
+  "name": "X-COM: UFO Defense",
+  "match": "X-COM: UFO Defense",
+  "id": 11367,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 39.03,
+  "main_extra": 47.66,
+  "completionist": 71.72
+ },
+ "7770": {
+  "name": "X-COM: Enforcer",
+  "match": "X-COM: Enforcer",
+  "id": 11364,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 4.46,
+  "main_extra": 5.94,
+  "completionist": 7.66
+ },
+ "8000": {
+  "name": "Tomb Raider: Anniversary",
+  "match": "Tomb Raider: Anniversary",
+  "id": 10476,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 12.15,
+  "main_extra": 15.23,
+  "completionist": 20.71
+ },
+ "8880": {
+  "name": "Freedom Force",
+  "match": "Freedom Force",
+  "id": 3694,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 17.11,
+  "main_extra": 23.98,
+  "completionist": 29.87
+ },
+ "8890": {
+  "name": "Freedom Force vs. the Third Reich",
+  "match": null
+ },
+ "9160": {
+  "name": "Master Levels for Doom II",
+  "match": "Master Levels for Doom II",
+  "id": 5719,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 6.18,
+  "main_extra": 7.59,
+  "completionist": 10.83
+ },
+ "9350": {
+  "name": "Supreme Commander",
+  "match": "Supreme Commander",
+  "id": 9483,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 18.68,
+  "main_extra": 38.89,
+  "completionist": 50.59
+ },
+ "9420": {
+  "name": "Supreme Commander: Forged Alliance",
+  "match": "Supreme Commander: Forged Alliance",
+  "id": 9485,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 18.04,
+  "main_extra": 22.71,
+  "completionist": 31.78
+ },
+ "9500": {
+  "name": "Gish",
+  "match": "Gish",
+  "id": 3938,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 4.32,
+  "main_extra": 6.95,
+  "completionist": 20.19
+ },
+ "9740": {
+  "name": "Indigo Prophecy",
+  "match": "Indigo Prophecy",
+  "id": 4672,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 8.11,
+  "main_extra": 9.15,
+  "completionist": 10.14
+ },
+ "10500": {
+  "name": "Total War: EMPIRE – Definitive Edition",
+  "match": "Total War: Empire - Definitive Edition",
+  "id": 116323,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 59.99,
+  "main_extra": 140.65,
+  "completionist": 245.04
+ },
+ "10680": {
+  "name": "Aliens vs. Predator™",
+  "match": "Aliens vs. Predator",
+  "id": 381,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 8.11,
+  "main_extra": 11.64,
+  "completionist": 24.21
+ },
+ "12130": {
+  "name": "Manhunt",
+  "match": "Manhunt",
+  "id": 5600,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 10.91,
+  "main_extra": 13.14,
+  "completionist": 18.84
+ },
+ "12150": {
+  "name": "Max Payne 2: The Fall of Max Payne",
+  "match": "Max Payne 2: The Fall of Max Payne",
+  "id": 5738,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 6.16,
+  "main_extra": 7.69,
+  "completionist": 9.61
+ },
+ "12250": {
+  "name": "Grand Theft Auto: San Andreas",
+  "match": "Grand Theft Auto: San Andreas",
+  "id": 4073,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 30.1,
+  "main_extra": 44.26,
+  "completionist": 69.18
+ },
+ "12810": {
+  "name": "Overlord II",
+  "match": "Overlord II",
+  "id": 6850,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 16.33,
+  "main_extra": 20.57,
+  "completionist": 26.24
+ },
+ "15700": {
+  "name": "Oddworld: Abe's Oddysee®",
+  "match": "Oddworld: Abe's Oddysee",
+  "id": 6701,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 12.58,
+  "main_extra": 14.51,
+  "completionist": 14.83
+ },
+ "15710": {
+  "name": "Oddworld: Abe's Exoddus®",
+  "match": "Oddworld: Abe's Exoddus",
+  "id": 6700,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 15.03,
+  "main_extra": 15.54,
+  "completionist": 15.58
+ },
+ "20570": {
+  "name": "Warhammer® 40,000: Dawn of War® II Chaos Rising",
+  "match": "Warhammer 40,000: Dawn of War II - Chaos Rising",
+  "id": 11044,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 10.27,
+  "main_extra": 13.42,
+  "completionist": 16.48
+ },
+ "20710": {
+  "name": "Mr. Robot",
+  "match": "Mr. Robot",
+  "id": 6250,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 14.09,
+  "main_extra": 17.17,
+  "completionist": 20.93
+ },
+ "20900": {
+  "name": "The Witcher: Enhanced Edition Director's Cut",
+  "match": "The Witcher",
+  "id": 10267,
+  "sim": 0.6,
+  "steamMatch": false,
+  "main": 35.2,
+  "main_extra": 46.01,
+  "completionist": 63.77
+ },
+ "21690": {
+  "name": "Resident Evil 5",
+  "match": "Resident Evil 5",
+  "id": 7722,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 12.05,
+  "main_extra": 16.71,
+  "completionist": 35.37
+ },
+ "22120": {
+  "name": "Penumbra: Black Plague Gold Edition",
+  "match": "Penumbra: Black Plague",
+  "id": 6962,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 5,
+  "main_extra": 5.09,
+  "completionist": 5.89
+ },
+ "22140": {
+  "name": "Penumbra: Requiem",
+  "match": "Penumbra: Requiem",
+  "id": 6964,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 3.12,
+  "main_extra": 3.57,
+  "completionist": 3.89
+ },
+ "24400": {
+  "name": "King Arthur - The Role-playing Wargame",
+  "match": "King Arthur: The Role-playing Wargame",
+  "id": 5009,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 33.95,
+  "main_extra": 52.09,
+  "completionist": 74.17
+ },
+ "32310": {
+  "name": "Indiana Jones® and the Last Crusade™",
+  "match": "Indiana Jones and the Last Crusade",
+  "id": 4668,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 5.47,
+  "main_extra": 6.52,
+  "completionist": 6.73
+ },
+ "32340": {
+  "name": "LOOM™",
+  "match": "Loom",
+  "id": 5367,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 2.97,
+  "main_extra": 3.12,
+  "completionist": 3.42
+ },
+ "32370": {
+  "name": "STAR WARS™ Knights of the Old Republic™",
+  "match": "Star Wars: Knights of the Old Republic",
+  "id": 9111,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 28.74,
+  "main_extra": 36.74,
+  "completionist": 49.1
+ },
+ "33680": {
+  "name": "eversion",
+  "match": "Eversion",
+  "id": 3231,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 0.94,
+  "main_extra": 1.85,
+  "completionist": 3.05
+ },
+ "34010": {
+  "name": "Alpha Protocol™",
+  "match": "Alpha Protocol",
+  "id": 401,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 12.94,
+  "main_extra": 17.39,
+  "completionist": 26.16
+ },
+ "34030": {
+  "name": "Total War: NAPOLEON – Definitive Edition",
+  "match": "Total War: Empire - Definitive Edition",
+  "id": 116323,
+  "sim": 0.84,
+  "steamMatch": false,
+  "main": 59.99,
+  "main_extra": 140.65,
+  "completionist": 245.04
+ },
+ "34330": {
+  "name": "Total War: SHOGUN 2",
+  "match": "Total War: Shogun 2",
+  "id": 10548,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 27.69,
+  "main_extra": 71.81,
+  "completionist": 216.14
+ },
+ "35140": {
+  "name": "Batman: Arkham Asylum Game of the Year Edition",
+  "match": "Batman: Arkham Asylum",
+  "id": 881,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 11.96,
+  "main_extra": 16.45,
+  "completionist": 25.14
+ },
+ "35720": {
+  "name": "Trine 2: Complete Story",
+  "match": "Trine 2: Complete Story",
+  "id": 15660,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 9.1,
+  "main_extra": 13.69,
+  "completionist": 34.81
+ },
+ "38700": {
+  "name": "Toki Tori",
+  "match": "Toki Tori",
+  "id": 10403,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 3.65,
+  "main_extra": 6,
+  "completionist": 13.7
+ },
+ "38720": {
+  "name": "RUSH",
+  "match": "RUSH",
+  "id": 8029,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 3.13,
+  "main_extra": 6.62,
+  "completionist": 7.34
+ },
+ "39150": {
+  "name": "FINAL FANTASY VIII",
+  "match": "Final Fantasy VIII",
+  "id": 3524,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 38.18,
+  "main_extra": 52.2,
+  "completionist": 73.43
+ },
+ "40400": {
+  "name": "AI War: Fleet Command",
+  "match": "AI War: Fleet Command",
+  "id": 288,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 24.65,
+  "main_extra": 123,
+  "completionist": null
+ },
+ "40720": {
+  "name": "Samorost 2",
+  "match": "Samorost 2",
+  "id": 8122,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 1.05,
+  "main_extra": 1.07,
+  "completionist": 1.1
+ },
+ "40930": {
+  "name": "The Misadventures of P.B. Winterbottom",
+  "match": "The Misadventures of P.B. Winterbottom",
+  "id": 10097,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 3.49,
+  "main_extra": 4.92,
+  "completionist": 8.88
+ },
+ "44100": {
+  "name": "Super Laser  Racer",
+  "match": "Super Laser Racer",
+  "id": 9359,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 3,
+  "main_extra": null,
+  "completionist": 15.97
+ },
+ "45300": {
+  "name": "Wings of Prey: Special Edition",
+  "match": "Wings of Prey",
+  "id": 4618,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 8.07,
+  "main_extra": 10.02,
+  "completionist": null
+ },
+ "45740": {
+  "name": "Dead Rising® 2",
+  "match": "Dead Rising 2",
+  "id": 2327,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 14.39,
+  "main_extra": 17.87,
+  "completionist": 51.94
+ },
+ "45770": {
+  "name": "Dead Rising 2: Off the Record",
+  "match": "Dead Rising 2: Off the Record",
+  "id": 2329,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 13.07,
+  "main_extra": 19.37,
+  "completionist": 38.99
+ },
+ "48900": {
+  "name": "Saira",
+  "match": "Saira",
+  "id": 8080,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 4.44,
+  "main_extra": 4.71,
+  "completionist": 4.65
+ },
+ "56400": {
+  "name": "Warhammer 40,000: Dawn of War II: Retribution",
+  "match": "Warhammer 40,000: Dawn of War II - Retribution",
+  "id": 11045,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 8.92,
+  "main_extra": 14.91,
+  "completionist": 47.75
+ },
+ "57300": {
+  "name": "Amnesia: The Dark Descent",
+  "match": "Amnesia: The Dark Descent",
+  "id": 440,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 7.95,
+  "main_extra": 9.11,
+  "completionist": 11.82
+ },
+ "67000": {
+  "name": "The Polynomial - Space of the music",
+  "match": "The Polynomial",
+  "id": 10134,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 0.38,
+  "main_extra": 1.48,
+  "completionist": 4.41
+ },
+ "67370": {
+  "name": "The Darkness II",
+  "match": "The Darkness II",
+  "id": 9830,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 6.04,
+  "main_extra": 8.26,
+  "completionist": 15.33
+ },
+ "70400": {
+  "name": "Recettear: An Item Shop's Tale",
+  "match": "Recettear: An Item Shop's Tale",
+  "id": 7666,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 13.23,
+  "main_extra": 24.51,
+  "completionist": 44.42
+ },
+ "71260": {
+  "name": "Space Channel 5: Part 2",
+  "match": "Space Channel 5: Part 2",
+  "id": 8841,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 2.69,
+  "main_extra": 5.36,
+  "completionist": 10.76
+ },
+ "91700": {
+  "name": "E.Y.E: Divine Cybermancy",
+  "match": "E.Y.E: Divine Cybermancy",
+  "id": 3022,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 10.88,
+  "main_extra": 22.55,
+  "completionist": 51.4
+ },
+ "92200": {
+  "name": "Gundemonium Recollection",
+  "match": "Gundemonium Recollection",
+  "id": 4202,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 1.99,
+  "main_extra": 20.94,
+  "completionist": null
+ },
+ "92210": {
+  "name": "Hitogata Happa",
+  "match": "Hitogata Happa",
+  "id": 4480,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 1.44,
+  "main_extra": null,
+  "completionist": null
+ },
+ "92220": {
+  "name": "GundeadliGne",
+  "match": "GundeadliGne",
+  "id": 4201,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 0.56,
+  "main_extra": 0.68,
+  "completionist": null
+ },
+ "99700": {
+  "name": "NightSky",
+  "match": "NightSky",
+  "id": 6607,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 2.67,
+  "main_extra": 3.84,
+  "completionist": 7.64
+ },
+ "102600": {
+  "name": "Orcs Must Die!",
+  "match": "Orcs Must Die!",
+  "id": 6795,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 8.29,
+  "main_extra": 13.47,
+  "completionist": 27.09
+ },
+ "104100": {
+  "name": "Inside a Star-filled Sky",
+  "match": "Inside a Star-filled Sky",
+  "id": 4701,
+  "sim": 1,
+  "steamMatch": false,
+  "main": null,
+  "main_extra": null,
+  "completionist": null
+ },
+ "107300": {
+  "name": "Breath of Death VII",
+  "match": "Breath of Death VII: The Beginning",
+  "id": 1317,
+  "sim": 0.58,
+  "steamMatch": false,
+  "main": 5.21,
+  "main_extra": 6.04,
+  "completionist": 7.03
+ },
+ "107310": {
+  "name": "Cthulhu Saves the World",
+  "match": "Cthulhu Saves The World",
+  "id": 2090,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 7.8,
+  "main_extra": 10.39,
+  "completionist": 13.55
+ },
+ "110800": {
+  "name": "L.A. Noire",
+  "match": "L.A. Noire",
+  "id": 5146,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 22.32,
+  "main_extra": 29.45,
+  "completionist": 43.08
+ },
+ "113020": {
+  "name": "Monaco: What's Yours Is Mine",
+  "match": "Monaco: What's Yours is Mine",
+  "id": 6131,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 8.32,
+  "main_extra": 15.48,
+  "completionist": 34.68
+ },
+ "200260": {
+  "name": "Batman: Arkham City - Game of the Year Edition",
+  "match": "Batman: Arkham City",
+  "id": 882,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 12.65,
+  "main_extra": 22.14,
+  "completionist": 45
+ },
+ "200390": {
+  "name": "Oil Rush",
+  "match": "Oil Rush",
+  "id": 6721,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 9.83,
+  "main_extra": 10.97,
+  "completionist": 15.53
+ },
+ "202410": {
+  "name": "Scoregasm",
+  "match": "Scoregasm",
+  "id": 8182,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 0.71,
+  "main_extra": 3.35,
+  "completionist": 16.01
+ },
+ "203140": {
+  "name": "Hitman: Absolution™",
+  "match": "Hitman: Absolution",
+  "id": 4475,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 12.3,
+  "main_extra": 19.85,
+  "completionist": 37.25
+ },
+ "203630": {
+  "name": "Warlock - Master of the Arcane",
+  "match": "Warlock: Master of the Arcane",
+  "id": 11081,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 11,
+  "main_extra": 21.26,
+  "completionist": 42.39
+ },
+ "204240": {
+  "name": "The Bridge",
+  "match": "The Bridge",
+  "id": 9793,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 3.47,
+  "main_extra": 5.95,
+  "completionist": 7.57
+ },
+ "204880": {
+  "name": "Sins of a Solar Empire®: Rebellion",
+  "match": "Sins of a Solar Empire: Rebellion",
+  "id": 8591,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 9.7,
+  "main_extra": 49.05,
+  "completionist": 182.7
+ },
+ "206190": {
+  "name": "Gunpoint",
+  "match": "Gunpoint",
+  "id": 4214,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 3.04,
+  "main_extra": 4.26,
+  "completionist": 6.51
+ },
+ "207650": {
+  "name": "A Virus Named TOM",
+  "match": "A Virus Named Tom",
+  "id": 143,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 4.09,
+  "main_extra": 11.22,
+  "completionist": 27.59
+ },
+ "207670": {
+  "name": "AVSEQ",
+  "match": "AVSEQ",
+  "id": 752,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 1.68,
+  "main_extra": 3.5,
+  "completionist": 4
+ },
+ "208580": {
+  "name": "STAR WARS™ Knights of the Old Republic™ II - The Sith Lords™",
+  "match": "Star Wars: Knights of the Old Republic II - The Sith Lords",
+  "id": 9112,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 30.37,
+  "main_extra": 40.89,
+  "completionist": 54.86
+ },
+ "208650": {
+  "name": "Batman™: Arkham Knight",
+  "match": "Batman: Arkham Knight",
+  "id": 18005,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 17.18,
+  "main_extra": 31.5,
+  "completionist": 51.3
+ },
+ "209790": {
+  "name": "Splice",
+  "match": "Splice",
+  "id": 8974,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 2.12,
+  "main_extra": 4.47,
+  "completionist": 5.93
+ },
+ "209830": {
+  "name": "Lone Survivor: The Director's Cut",
+  "match": "Lone Survivor",
+  "id": 5359,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 4.08,
+  "main_extra": 4.96,
+  "completionist": 10.42
+ },
+ "210970": {
+  "name": "The Witness",
+  "match": "The Witness",
+  "id": 10273,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 16.94,
+  "main_extra": 24.1,
+  "completionist": 37.36
+ },
+ "211160": {
+  "name": "Viking: Battle for Asgard",
+  "match": "Viking: Battle for Asgard",
+  "id": 10942,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 13.31,
+  "main_extra": 16.16,
+  "completionist": 19.72
+ },
+ "211420": {
+  "name": "DARK SOULS™: Prepare To Die™ Edition",
+  "match": "Dark Souls: Prepare to Die Edition",
+  "id": 2227,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 45.81,
+  "main_extra": 62.93,
+  "completionist": 106.01
+ },
+ "214550": {
+  "name": "Eets Munchies",
+  "match": "Eets Munchies",
+  "id": 13483,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 1.5,
+  "main_extra": 3.01,
+  "completionist": 3.76
+ },
+ "214560": {
+  "name": "Mark of the Ninja",
+  "match": "Mark of the Ninja",
+  "id": 5671,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 8.39,
+  "main_extra": 12.41,
+  "completionist": 21.04
+ },
+ "214950": {
+  "name": "Total War: ROME II - Emperor Edition",
+  "match": "Rome: Total War",
+  "id": 7980,
+  "sim": 0.64,
+  "steamMatch": false,
+  "main": 34.12,
+  "main_extra": 52.84,
+  "completionist": 127.19
+ },
+ "215510": {
+  "name": "Rocketbirds: Hardboiled Chicken",
+  "match": "Rocketbirds: Hardboiled Chicken",
+  "id": 7929,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 3.49,
+  "main_extra": 5.07,
+  "completionist": 8.15
+ },
+ "220440": {
+  "name": "DmC: Devil May Cry",
+  "match": "DmC: Devil May Cry",
+  "id": 2653,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 9.16,
+  "main_extra": 12.17,
+  "completionist": 40.39
+ },
+ "221040": {
+  "name": "Resident Evil 6",
+  "match": "Resident Evil 6",
+  "id": 7725,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 20.8,
+  "main_extra": 27.19,
+  "completionist": 51.79
+ },
+ "221380": {
+  "name": "Age of Empires II (Retired)",
+  "match": null
+ },
+ "221910": {
+  "name": "The Stanley Parable",
+  "match": "The Stanley Parable",
+  "id": 14083,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 1.48,
+  "main_extra": 2.93,
+  "completionist": 9.17
+ },
+ "222480": {
+  "name": "Resident Evil Revelations",
+  "match": "Resident Evil: Revelations",
+  "id": 7742,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 8.33,
+  "main_extra": 12.63,
+  "completionist": 38.23
+ },
+ "225080": {
+  "name": "Brothers - A Tale of Two Sons",
+  "match": "Brothers: A Tale of Two Sons",
+  "id": 12660,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 3.08,
+  "main_extra": 3.5,
+  "completionist": 4.05
+ },
+ "226840": {
+  "name": "Age of Wonders III",
+  "match": "Age of Wonders III",
+  "id": 17567,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 26.46,
+  "main_extra": 74.97,
+  "completionist": 145.33
+ },
+ "227300": {
+  "name": "Euro Truck Simulator 2",
+  "match": "Euro Truck Simulator 2",
+  "id": 3199,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 45.76,
+  "main_extra": 117.65,
+  "completionist": 461
+ },
+ "228360": {
+  "name": "Full Throttle Remastered",
+  "match": "Full Throttle Remastered",
+  "id": 44400,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 4.03,
+  "main_extra": 4.46,
+  "completionist": 4.63
+ },
+ "233130": {
+  "name": "Shadow Warrior",
+  "match": "Shadow Warrior",
+  "id": 8352,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 12.28,
+  "main_extra": 15.44,
+  "completionist": 36.02
+ },
+ "233150": {
+  "name": "LUFTRAUSERS",
+  "match": "Luftrausers",
+  "id": 17394,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 3.99,
+  "main_extra": 5.5,
+  "completionist": 14.26
+ },
+ "234390": {
+  "name": "Teleglitch: Die More Edition",
+  "match": "Teleglitch: Die More Edition",
+  "id": 12392,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 5.4,
+  "main_extra": 17.5,
+  "completionist": 17.8
+ },
+ "234650": {
+  "name": "Shadowrun Returns",
+  "match": "Shadowrun Returns",
+  "id": 8367,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 11.6,
+  "main_extra": 14.39,
+  "completionist": 17.77
+ },
+ "236090": {
+  "name": "Dust: An Elysian Tail",
+  "match": "Dust: An Elysian Tail",
+  "id": 2981,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 10.15,
+  "main_extra": 13.54,
+  "completionist": 18.42
+ },
+ "236930": {
+  "name": "Blackwell Epiphany",
+  "match": "The Blackwell Epiphany",
+  "id": 18013,
+  "sim": 0.82,
+  "steamMatch": false,
+  "main": 6.54,
+  "main_extra": 7.64,
+  "completionist": 11.22
+ },
+ "238210": {
+  "name": "System Shock® 2 (1999)",
+  "match": null
+ },
+ "239070": {
+  "name": "Hammerwatch",
+  "match": "Hammerwatch",
+  "id": 12804,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 8.69,
+  "main_extra": 13.98,
+  "completionist": 31.32
+ },
+ "239200": {
+  "name": "Amnesia: A Machine for Pigs",
+  "match": "Amnesia: A Machine for Pigs",
+  "id": 438,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 4.15,
+  "main_extra": 5,
+  "completionist": 5.89
+ },
+ "241600": {
+  "name": "Rogue Legacy",
+  "match": "Rogue Legacy",
+  "id": 11774,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 16.44,
+  "main_extra": 26.34,
+  "completionist": 39.05
+ },
+ "242550": {
+  "name": "Rayman® Legends",
+  "match": "Rayman Legends",
+  "id": 12655,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 10.04,
+  "main_extra": 16.21,
+  "completionist": 31.55
+ },
+ "244160": {
+  "name": "Homeworld Remastered Collection",
+  "match": "Homeworld: Remastered Collection",
+  "id": 24517,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 21,
+  "main_extra": 22.76,
+  "completionist": 32.39
+ },
+ "249050": {
+  "name": "Dungeon of the ENDLESS™",
+  "match": "Dungeon of the Endless",
+  "id": 17454,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 7.71,
+  "main_extra": 26.33,
+  "completionist": 110.44
+ },
+ "250180": {
+  "name": "METAL SLUG 3",
+  "match": "Metal Slug 3",
+  "id": 5932,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 1.45,
+  "main_extra": 2.84,
+  "completionist": 4.59
+ },
+ "252410": {
+  "name": "SteamWorld Dig",
+  "match": "SteamWorld Dig",
+  "id": 12740,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 5.04,
+  "main_extra": 6.66,
+  "completionist": 8.42
+ },
+ "255340": {
+  "name": "Escape Goat 2",
+  "match": "Escape Goat 2",
+  "id": 17502,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 4.04,
+  "main_extra": 6.55,
+  "completionist": 10.52
+ },
+ "255520": {
+  "name": "Viscera Cleanup Detail: Shadow Warrior",
+  "match": "Viscera Cleanup Detail: Shadow Warrior",
+  "id": 15305,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 1.6,
+  "main_extra": 2.11,
+  "completionist": 2.2
+ },
+ "259130": {
+  "name": "Wasteland 1 - The Original Classic",
+  "match": null
+ },
+ "261030": {
+  "name": "The Walking Dead: Season Two",
+  "match": "The Walking Dead",
+  "id": 66845,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 0.53,
+  "main_extra": null,
+  "completionist": null
+ },
+ "265550": {
+  "name": "Dead Rising 3 Apocalypse Edition",
+  "match": null
+ },
+ "268050": {
+  "name": "The Evil Within",
+  "match": "The Evil Within",
+  "id": 9866,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 15.32,
+  "main_extra": 20.02,
+  "completionist": 41.29
+ },
+ "268500": {
+  "name": "XCOM® 2",
+  "match": "XCOM 2",
+  "id": 28279,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 33.24,
+  "main_extra": 48.18,
+  "completionist": 89.48
+ },
+ "269210": {
+  "name": "Hero Siege",
+  "match": "Hero Siege",
+  "id": 15539,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 10.02,
+  "main_extra": 34.12,
+  "completionist": 108.37
+ },
+ "272270": {
+  "name": "Torment: Tides of Numenera",
+  "match": "Torment: Tides of Numenera",
+  "id": 10533,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 25.17,
+  "main_extra": 34.56,
+  "completionist": 48.58
+ },
+ "274170": {
+  "name": "Hotline Miami 2: Wrong Number",
+  "match": "Hotline Miami 2: Wrong Number",
+  "id": 4531,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 8.78,
+  "main_extra": 12.93,
+  "completionist": 33.61
+ },
+ "282070": {
+  "name": "This War of Mine",
+  "match": "This War of Mine",
+  "id": 22658,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 11.29,
+  "main_extra": 20.24,
+  "completionist": 46.74
+ },
+ "285900": {
+  "name": "Gang Beasts",
+  "match": "Gang Beasts",
+  "id": 23050,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 2.42,
+  "main_extra": 5.11,
+  "completionist": 7.43
+ },
+ "287290": {
+  "name": "Resident Evil Revelations 2",
+  "match": "Resident Evil: Revelations 2",
+  "id": 21258,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 10.25,
+  "main_extra": 15.87,
+  "completionist": 35.09
+ },
+ "287390": {
+  "name": "Metro: Last Light Redux",
+  "match": "Metro: Last Light Redux",
+  "id": 20883,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 9.78,
+  "main_extra": 13.51,
+  "completionist": 27.73
+ },
+ "287700": {
+  "name": "METAL GEAR SOLID V: THE PHANTOM PAIN",
+  "match": "Metal Gear Solid V: The Phantom Pain",
+  "id": 5918,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 45.7,
+  "main_extra": 81.08,
+  "completionist": 162.74
+ },
+ "290260": {
+  "name": "Sokobond",
+  "match": "Sokobond",
+  "id": 19162,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 7.13,
+  "main_extra": 8.07,
+  "completionist": 8.71
+ },
+ "290510": {
+  "name": "GNOG",
+  "match": "GNOG",
+  "id": 45546,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 1.86,
+  "main_extra": 1.99,
+  "completionist": 2.07
+ },
+ "292030": {
+  "name": "The Witcher 3: Wild Hunt — Remastered",
+  "match": "The Witcher 3: Wild Hunt - Remastered",
+  "id": 40171,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 56.87,
+  "main_extra": 123.64,
+  "completionist": 189.19
+ },
+ "300550": {
+  "name": "Shadowrun: Dragonfall - Director's Cut",
+  "match": "Shadowrun: Dragonfall - Director's Cut",
+  "id": 21118,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 20.56,
+  "main_extra": 29.45,
+  "completionist": 41.66
+ },
+ "302330": {
+  "name": "Tex Murphy: Mean Streets",
+  "match": "Tex Murphy: Mean Streets",
+  "id": 9730,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 8.31,
+  "main_extra": 9.69,
+  "completionist": 14.1
+ },
+ "302340": {
+  "name": "Tex Murphy: Martian Memorandum",
+  "match": "Tex Murphy: Martian Memorandum",
+  "id": 9729,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 5.38,
+  "main_extra": 6.23,
+  "completionist": 7.09
+ },
+ "302360": {
+  "name": "Tex Murphy: The Pandora Directive",
+  "match": "The Pandora Directive",
+  "id": 10127,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 15.37,
+  "main_extra": 17.29,
+  "completionist": 20.29
+ },
+ "302370": {
+  "name": "Tex Murphy: Overseer",
+  "match": "Tex Murphy: Overseer",
+  "id": 9731,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 10.56,
+  "main_extra": 13.63,
+  "completionist": 16.74
+ },
+ "302510": {
+  "name": "Ryse: Son of Rome",
+  "match": "Ryse: Son of Rome",
+  "id": 14345,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 6.39,
+  "main_extra": 8.33,
+  "completionist": 20.28
+ },
+ "304650": {
+  "name": "SUNLESS SEA",
+  "match": "Sunless Sea",
+  "id": 23113,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 21.76,
+  "main_extra": 61.93,
+  "completionist": 123.14
+ },
+ "304930": {
+  "name": "Unturned",
+  "match": "Unturned",
+  "id": 19776,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 21.69,
+  "main_extra": 86.19,
+  "completionist": 118.97
+ },
+ "311340": {
+  "name": "METAL GEAR SOLID V: GROUND ZEROES",
+  "match": "Metal Gear Solid V: Ground Zeroes",
+  "id": 17291,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 1.88,
+  "main_extra": 6.67,
+  "completionist": 20.94
+ },
+ "312520": {
+  "name": "Rain World",
+  "match": "Rain World",
+  "id": 32976,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 20.04,
+  "main_extra": 35.36,
+  "completionist": 70.02
+ },
+ "316610": {
+  "name": "A Good Snowman Is Hard To Build",
+  "match": "A Good Snowman is Hard to Build",
+  "id": 24976,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 2.12,
+  "main_extra": 3.11,
+  "completionist": 4.33
+ },
+ "323320": {
+  "name": "Grow Home",
+  "match": "Grow Home",
+  "id": 23760,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 2.56,
+  "main_extra": 4.45,
+  "completionist": 7.79
+ },
+ "324800": {
+  "name": "Shadow Warrior 2",
+  "match": "Shadow Warrior 2",
+  "id": 39740,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 7.67,
+  "main_extra": 15.88,
+  "completionist": 24.75
+ },
+ "337000": {
+  "name": "Deus Ex: Mankind Divided",
+  "match": "Deus Ex: Mankind Divided",
+  "id": 25434,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 16.09,
+  "main_extra": 31.03,
+  "completionist": 52.8
+ },
+ "340000": {
+  "name": "Headlander",
+  "match": "Headlander",
+  "id": 38906,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 5.68,
+  "main_extra": 7.41,
+  "completionist": 8.88
+ },
+ "345240": {
+  "name": "SHOGUN: Total War™ - Collection",
+  "match": "SHOGUN: Total War - Gold Edition",
+  "id": 30373,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 18.33,
+  "main_extra": 23.53,
+  "completionist": null
+ },
+ "345260": {
+  "name": "Medieval: Total War™ - Collection",
+  "match": "Medieval: Total War",
+  "id": 5795,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 31.61,
+  "main_extra": 35.72,
+  "completionist": 40.36
+ },
+ "358190": {
+  "name": "Blake Stone: Aliens of Gold",
+  "match": "Blake Stone: Aliens of Gold",
+  "id": 1130,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 7.07,
+  "main_extra": 9.77,
+  "completionist": 16.75
+ },
+ "359870": {
+  "name": "FINAL FANTASY X/X-2 HD Remaster",
+  "match": "Final Fantasy X/X-2 HD Remaster",
+  "id": 16449,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 50.33,
+  "main_extra": 80.08,
+  "completionist": 162.39
+ },
+ "363440": {
+  "name": "Mega Man Legacy Collection",
+  "match": "Mega Man Legacy Collection",
+  "id": 29678,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 16.64,
+  "main_extra": 20.6,
+  "completionist": 36.57
+ },
+ "365160": {
+  "name": "Kona",
+  "match": "Kona",
+  "id": 20888,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 5.37,
+  "main_extra": 7.5,
+  "completionist": 10.22
+ },
+ "367580": {
+  "name": "Hook",
+  "match": "Hook",
+  "id": 27667,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 1.1,
+  "main_extra": 1.36,
+  "completionist": 1.41
+ },
+ "377840": {
+  "name": "FINAL FANTASY IX",
+  "match": "Final Fantasy IX",
+  "id": 3505,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 37.89,
+  "main_extra": 51.8,
+  "completionist": 81.56
+ },
+ "379430": {
+  "name": "Kingdom Come: Deliverance",
+  "match": "Kingdom Come: Deliverance",
+  "id": 21697,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 42.76,
+  "main_extra": 81.28,
+  "completionist": 136.47
+ },
+ "383270": {
+  "name": "Hue",
+  "match": "HUE",
+  "id": 38008,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 4.66,
+  "main_extra": 5.6,
+  "completionist": 6.78
+ },
+ "384110": {
+  "name": "Pathologic Classic HD",
+  "match": "Pathologic",
+  "id": 6939,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 28.57,
+  "main_extra": 41.96,
+  "completionist": 80.43
+ },
+ "384490": {
+  "name": "NECROPOLIS: BRUTAL EDITION",
+  "match": "Necropolis",
+  "id": 25038,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 6.64,
+  "main_extra": 9.53,
+  "completionist": 26.65
+ },
+ "391220": {
+  "name": "Rise of the Tomb Raider™",
+  "match": "Rise of the Tomb Raider",
+  "id": 19266,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 13.3,
+  "main_extra": 21.87,
+  "completionist": 35.44
+ },
+ "397540": {
+  "name": "Borderlands 3",
+  "match": "Borderlands 3",
+  "id": 65882,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 23.45,
+  "main_extra": 46.6,
+  "completionist": 84.53
+ },
+ "400430": {
+  "name": "The Vanishing of Ethan Carter Redux",
+  "match": "The Vanishing of Ethan Carter",
+  "id": 21142,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 3.76,
+  "main_extra": 4.16,
+  "completionist": 4.31
+ },
+ "403640": {
+  "name": "Dishonored 2",
+  "match": "Dishonored 2",
+  "id": 26731,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 12.52,
+  "main_extra": 22.76,
+  "completionist": 45.93
+ },
+ "404730": {
+  "name": "Wasteland 2: Director's Cut",
+  "match": "Wasteland 2",
+  "id": 11099,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 40.77,
+  "main_extra": 64.25,
+  "completionist": 100.86
+ },
+ "405830": {
+  "name": "Turok 2: Seeds of Evil",
+  "match": "Turok 2: Seeds of Evil",
+  "id": 10705,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 10.75,
+  "main_extra": 15.27,
+  "completionist": 16.94
+ },
+ "409720": {
+  "name": "BioShock™ 2 Remastered",
+  "match": "BioShock 2",
+  "id": 1066,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 10.52,
+  "main_extra": 14.4,
+  "completionist": 23.9
+ },
+ "435530": {
+  "name": "The Final Station",
+  "match": "The Final Station",
+  "id": 39668,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 4.57,
+  "main_extra": 5.95,
+  "completionist": 7.86
+ },
+ "461840": {
+  "name": "Zenge",
+  "match": "Zenge",
+  "id": 37475,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 1.55,
+  "main_extra": 1.69,
+  "completionist": 1.72
+ },
+ "466630": {
+  "name": "The Pedestrian",
+  "match": "The Pedestrian",
+  "id": 74727,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 4.04,
+  "main_extra": 4.13,
+  "completionist": 4.24
+ },
+ "489630": {
+  "name": "Warhammer 40,000: Gladius - Relics of War",
+  "match": "Warhammer 40,000: Gladius - Relics of War",
+  "id": 58533,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 10.97,
+  "main_extra": 23.69,
+  "completionist": 59.4
+ },
+ "495050": {
+  "name": "Mega Man Legacy Collection 2",
+  "match": "Mega Man Legacy Collection 2",
+  "id": 48058,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 16.19,
+  "main_extra": 19.45,
+  "completionist": 30.23
+ },
+ "499440": {
+  "name": "klocki",
+  "match": "klocki",
+  "id": 38708,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 1.06,
+  "main_extra": 1.11,
+  "completionist": 1.18
+ },
+ "501300": {
+  "name": "What Remains of Edith Finch",
+  "match": "What Remains of Edith Finch",
+  "id": 45392,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 2.12,
+  "main_extra": 2.53,
+  "completionist": 2.88
+ },
+ "502500": {
+  "name": "ACE COMBAT™ 7: SKIES UNKNOWN",
+  "match": "Ace Combat 7: Skies Unknown",
+  "id": 53763,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 12.27,
+  "main_extra": 18.27,
+  "completionist": 70.7
+ },
+ "510620": {
+  "name": "THOTH",
+  "match": "THOTH",
+  "id": 40388,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 1.51,
+  "main_extra": 2.34,
+  "completionist": 6.1
+ },
+ "532210": {
+  "name": "Life is Strange 2",
+  "match": "Life Is Strange 2",
+  "id": 57795,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 16.06,
+  "main_extra": 18.1,
+  "completionist": 19.96
+ },
+ "536220": {
+  "name": "The Walking Dead: A New Frontier",
+  "match": "The Walking Dead: A New Frontier",
+  "id": 41484,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 7.57,
+  "main_extra": 8.03,
+  "completionist": 8.24
+ },
+ "582160": {
+  "name": "Assassin's Creed® Origins",
+  "match": "Assassin's Creed Origins",
+  "id": 46402,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 30.17,
+  "main_extra": 52.6,
+  "completionist": 85.79
+ },
+ "583270": {
+  "name": "Cosmic Express",
+  "match": "Cosmic Express",
+  "id": 45489,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 7.31,
+  "main_extra": 14.17,
+  "completionist": 14.44
+ },
+ "603530": {
+  "name": "A Robot Named Fight!",
+  "match": "A Robot Named Fight!",
+  "id": 48832,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 3.71,
+  "main_extra": 10.2,
+  "completionist": 28.08
+ },
+ "609490": {
+  "name": "Minit",
+  "match": "Minit",
+  "id": 55140,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 1.68,
+  "main_extra": 2.23,
+  "completionist": 4.04
+ },
+ "617290": {
+  "name": "Remnant: From the Ashes",
+  "match": "Remnant: From the Ashes",
+  "id": 68318,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 13.27,
+  "main_extra": 21.06,
+  "completionist": 60.07
+ },
+ "635320": {
+  "name": "Last Day of June",
+  "match": "Last Day of June",
+  "id": 48621,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 3.12,
+  "main_extra": 3.54,
+  "completionist": 4.06
+ },
+ "638230": {
+  "name": "Journey",
+  "match": "Journey",
+  "id": 4867,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 2,
+  "main_extra": 2.52,
+  "completionist": 5.77
+ },
+ "667720": {
+  "name": "Red Faction Guerrilla Re-Mars-tered",
+  "match": "Red Faction: Guerrilla Re-Mars-tered",
+  "id": 58222,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 11.08,
+  "main_extra": 18.55,
+  "completionist": 42.53
+ },
+ "668980": {
+  "name": "Forsaken Remastered",
+  "match": "Forsaken",
+  "id": 3650,
+  "sim": 0.61,
+  "steamMatch": false,
+  "main": 9.87,
+  "main_extra": 11.21,
+  "completionist": null
+ },
+ "673130": {
+  "name": "AMID EVIL",
+  "match": "AMID EVIL",
+  "id": 58082,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 8.36,
+  "main_extra": 10.85,
+  "completionist": 13.06
+ },
+ "676430": {
+  "name": "PUSH",
+  "match": "PUSH",
+  "id": 50067,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 1.37,
+  "main_extra": 1.45,
+  "completionist": 1.39
+ },
+ "702670": {
+  "name": "Donut County",
+  "match": "Donut County",
+  "id": 51323,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 1.98,
+  "main_extra": 2.12,
+  "completionist": 2.58
+ },
+ "703320": {
+  "name": "Hidden & Dangerous 2: Courage Under Fire",
+  "match": "Hidden & Dangerous 2",
+  "id": 4454,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 19.19,
+  "main_extra": 20.99,
+  "completionist": 20.93
+ },
+ "722560": {
+  "name": "RAD",
+  "match": "RAD",
+  "id": 68753,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 8.49,
+  "main_extra": 26.16,
+  "completionist": null
+ },
+ "729000": {
+  "name": "Wytchwood",
+  "match": "Wytchwood",
+  "id": 97920,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 11.17,
+  "main_extra": 11.43,
+  "completionist": 11.89
+ },
+ "731040": {
+  "name": "The Invincible",
+  "match": "The Invincible",
+  "id": 83135,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 6.61,
+  "main_extra": 8.01,
+  "completionist": 12.1
+ },
+ "735290": {
+  "name": "Genesis Noir",
+  "match": "Genesis Noir",
+  "id": 49812,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 4.62,
+  "main_extra": 5.13,
+  "completionist": 5.25
+ },
+ "743890": {
+  "name": "Mega Man X Legacy Collection",
+  "match": "Mega Man X Legacy Collection 1",
+  "id": 59465,
+  "sim": 0.93,
+  "steamMatch": false,
+  "main": 17.81,
+  "main_extra": 25.14,
+  "completionist": 29.66
+ },
+ "746850": {
+  "name": "Cloudpunk",
+  "match": "Cloudpunk",
+  "id": 62579,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 8.87,
+  "main_extra": 11.48,
+  "completionist": 15.27
+ },
+ "750920": {
+  "name": "Shadow of the Tomb Raider: Definitive Edition",
+  "match": "Shadow of the Tomb Raider: Definitive Edition",
+  "id": 102192,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 12.85,
+  "main_extra": 26.02,
+  "completionist": 42.49
+ },
+ "757310": {
+  "name": "Sable",
+  "match": "Sable",
+  "id": 59371,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 7.52,
+  "main_extra": 14.2,
+  "completionist": 20.78
+ },
+ "757480": {
+  "name": "Broken Reality",
+  "match": "Broken Reality",
+  "id": 66470,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 7.07,
+  "main_extra": 7.3,
+  "completionist": 8.69
+ },
+ "764790": {
+  "name": "The Messenger",
+  "match": "The Messenger",
+  "id": 60176,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 12.04,
+  "main_extra": 14.47,
+  "completionist": 16.17
+ },
+ "782330": {
+  "name": "DOOM Eternal",
+  "match": "Doom Eternal",
+  "id": 57506,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 14.45,
+  "main_extra": 20.62,
+  "completionist": 29.86
+ },
+ "788690": {
+  "name": "Psychonauts in the Rhombus of Ruin",
+  "match": "Psychonauts in the Rhombus of Ruin",
+  "id": 43906,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 2.07,
+  "main_extra": 2.4,
+  "completionist": 3
+ },
+ "814380": {
+  "name": "Sekiro™: Shadows Die Twice - GOTY Edition",
+  "match": "Sekiro: Shadows Die Twice",
+  "id": 57415,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 30.25,
+  "main_extra": 43.02,
+  "completionist": 69.79
+ },
+ "835960": {
+  "name": "The Talos Principle 2",
+  "match": "The Talos Principle II",
+  "id": 129256,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 20.39,
+  "main_extra": 31.62,
+  "completionist": 38.12
+ },
+ "845070": {
+  "name": "The Awesome Adventures of Captain Spirit",
+  "match": "The Awesome Adventures of Captain Spirit",
+  "id": 57443,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 1.62,
+  "main_extra": 1.98,
+  "completionist": 2.15
+ },
+ "846110": {
+  "name": "The friends of Ringo Ishikawa",
+  "match": "The friends of Ringo Ishikawa",
+  "id": 56806,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 7.68,
+  "main_extra": 11.35,
+  "completionist": 15.87
+ },
+ "848350": {
+  "name": "Katamari Damacy REROLL",
+  "match": "Katamari Damacy Reroll",
+  "id": 62564,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 4.56,
+  "main_extra": 5.52,
+  "completionist": 24.16
+ },
+ "848450": {
+  "name": "Subnautica: Below Zero",
+  "match": "Subnautica: Below Zero",
+  "id": 64768,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 20.2,
+  "main_extra": 26.4,
+  "completionist": 30.92
+ },
+ "858810": {
+  "name": "Dawn of Man",
+  "match": "Dawn of Man",
+  "id": 65681,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 18.06,
+  "main_extra": 29.07,
+  "completionist": 98.15
+ },
+ "866800": {
+  "name": "The Walking Dead: The Final Season",
+  "match": "The Walking Dead: The Final Season",
+  "id": 47646,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 9.89,
+  "main_extra": 10.34,
+  "completionist": 13.79
+ },
+ "870780": {
+  "name": "CONTROL Ultimate Edition",
+  "match": "Control: Ultimate Edition",
+  "id": 82054,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 12.74,
+  "main_extra": 25.2,
+  "completionist": 38.72
+ },
+ "882100": {
+  "name": "XCOM®: Chimera Squad",
+  "match": "XCOM: Chimera Squad",
+  "id": 77090,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 21.27,
+  "main_extra": 27.06,
+  "completionist": 63.99
+ },
+ "898890": {
+  "name": "Endling - Extinction is Forever",
+  "match": "Endling: Extinction is Forever",
+  "id": 87488,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 3.94,
+  "main_extra": 4.17,
+  "completionist": 5.73
+ },
+ "936790": {
+  "name": "Life is Strange: True Colors",
+  "match": "Life Is Strange: True Colors",
+  "id": 89877,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 10.16,
+  "main_extra": 12.14,
+  "completionist": 13.09
+ },
+ "952060": {
+  "name": "Resident Evil 3",
+  "match": "Resident Evil 3",
+  "id": 72822,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 6.01,
+  "main_extra": 7.64,
+  "completionist": 20.26
+ },
+ "960690": {
+  "name": "One Step From Eden",
+  "match": "One Step From Eden",
+  "id": 64665,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 7.71,
+  "main_extra": 19.07,
+  "completionist": 49.01
+ },
+ "960990": {
+  "name": "Beyond: Two Souls",
+  "match": "Beyond: Two Souls",
+  "id": 1023,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 10.65,
+  "main_extra": 12.39,
+  "completionist": 28.38
+ },
+ "1010750": {
+  "name": "Blood™ Fresh Supply",
+  "match": "Blood: Fresh Supply",
+  "id": 67506,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 11.05,
+  "main_extra": 18.24,
+  "completionist": 19.65
+ },
+ "1030840": {
+  "name": "Mafia: Definitive Edition",
+  "match": "Mafia: Definitive Edition",
+  "id": 78135,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 10.63,
+  "main_extra": 13.19,
+  "completionist": 24.54
+ },
+ "1042490": {
+  "name": "Call of the Sea",
+  "match": "Call of the Sea",
+  "id": 77918,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 5.62,
+  "main_extra": 6.21,
+  "completionist": 7.25
+ },
+ "1052990": {
+  "name": "A Monster's Expedition",
+  "match": "A Monster's Expedition",
+  "id": 82946,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 9.02,
+  "main_extra": 16.06,
+  "completionist": 33.17
+ },
+ "1057090": {
+  "name": "Ori and the Will of the Wisps",
+  "match": "Ori and the Will of the Wisps",
+  "id": 46428,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 12,
+  "main_extra": 15.73,
+  "completionist": 18.32
+ },
+ "1062090": {
+  "name": "Timberborn",
+  "match": "Timberborn",
+  "id": 90472,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 22.88,
+  "main_extra": 43.11,
+  "completionist": 64.2
+ },
+ "1079000": {
+  "name": "Ord.",
+  "match": "Ord.",
+  "id": 80468,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 0.84,
+  "main_extra": 2.21,
+  "completionist": 3.9
+ },
+ "1080750": {
+  "name": "Mutazione",
+  "match": "Mutazione",
+  "id": 70711,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 6.2,
+  "main_extra": 8.34,
+  "completionist": 10.89
+ },
+ "1089130": {
+  "name": "Quake II RTX",
+  "match": "Quake II",
+  "id": 7455,
+  "sim": 0.67,
+  "steamMatch": false,
+  "main": 7.08,
+  "main_extra": 9.55,
+  "completionist": 16.67
+ },
+ "1118240": {
+  "name": "Lake",
+  "match": "Lake",
+  "id": 80207,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 6.12,
+  "main_extra": 6.85,
+  "completionist": 7.7
+ },
+ "1122680": {
+  "name": "The Artful Escape",
+  "match": "The Artful Escape",
+  "id": 80124,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 4.15,
+  "main_extra": 4.49,
+  "completionist": 4.63
+ },
+ "1138660": {
+  "name": "Black Book",
+  "match": "Black Book",
+  "id": 72957,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 20.64,
+  "main_extra": 30.4,
+  "completionist": 38.19
+ },
+ "1147550": {
+  "name": "Not For Broadcast",
+  "match": "Not For Broadcast",
+  "id": 74860,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 8.77,
+  "main_extra": 11.69,
+  "completionist": 59.3
+ },
+ "1147890": {
+  "name": "Bonfire Peaks",
+  "match": "Bonfire Peaks",
+  "id": 98603,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 11.4,
+  "main_extra": 21.99,
+  "completionist": 33.62
+ },
+ "1150760": {
+  "name": "Gloomwood",
+  "match": "Gloomwood",
+  "id": 80158,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 5.28,
+  "main_extra": 9.68,
+  "completionist": 16.3
+ },
+ "1155970": {
+  "name": "Roadwarden",
+  "match": "Roadwarden",
+  "id": 75561,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 12.01,
+  "main_extra": 19.62,
+  "completionist": 29.5
+ },
+ "1166290": {
+  "name": "Death and Taxes",
+  "match": "Death and Taxes",
+  "id": 75335,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 3.02,
+  "main_extra": 5.92,
+  "completionist": 17.82
+ },
+ "1172380": {
+  "name": "STAR WARS Jedi: Fallen Order™",
+  "match": "Star Wars Jedi: Fallen Order",
+  "id": 60145,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 17.27,
+  "main_extra": 22.29,
+  "completionist": 31.68
+ },
+ "1180660": {
+  "name": "Tell Me Why",
+  "match": "Tell Me Why",
+  "id": 71968,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 9.69,
+  "main_extra": 11.18,
+  "completionist": 13.72
+ },
+ "1196590": {
+  "name": "Resident Evil Village",
+  "match": "Resident Evil Village",
+  "id": 80038,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 9.85,
+  "main_extra": 12.95,
+  "completionist": 38.48
+ },
+ "1201270": {
+  "name": "A Space for the Unbound",
+  "match": "A Space For The Unbound",
+  "id": 78881,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 10.02,
+  "main_extra": 10.8,
+  "completionist": 12.27
+ },
+ "1206430": {
+  "name": "The Unfinished Swan",
+  "match": "The Unfinished Swan",
+  "id": 10243,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 2.49,
+  "main_extra": 3.07,
+  "completionist": 4.21
+ },
+ "1207650": {
+  "name": "Suzerain",
+  "match": "Suzerain",
+  "id": 83906,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 11.64,
+  "main_extra": 21.78,
+  "completionist": 36.42
+ },
+ "1213210": {
+  "name": "Command & Conquer™ Remastered Collection",
+  "match": "Command & Conquer Remastered Collection",
+  "id": 75821,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 32.27,
+  "main_extra": 57.25,
+  "completionist": 79.99
+ },
+ "1222140": {
+  "name": "Detroit: Become Human",
+  "match": "Detroit: Become Human",
+  "id": 31388,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 12.08,
+  "main_extra": 15.75,
+  "completionist": 32.17
+ },
+ "1227690": {
+  "name": "Severed Steel",
+  "match": "Severed Steel",
+  "id": 89786,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 3.01,
+  "main_extra": 6.18,
+  "completionist": 22.86
+ },
+ "1235140": {
+  "name": "Yakuza: Like a Dragon",
+  "match": "Yakuza: Like a Dragon",
+  "id": 71931,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 46.13,
+  "main_extra": 68,
+  "completionist": 102.83
+ },
+ "1259420": {
+  "name": "Days Gone",
+  "match": "Days Gone",
+  "id": 38003,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 36.58,
+  "main_extra": 50.62,
+  "completionist": 65.68
+ },
+ "1266030": {
+  "name": "The Pale Beyond",
+  "match": "The Pale Beyond",
+  "id": 107652,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 9.51,
+  "main_extra": 13.59,
+  "completionist": 19.41
+ },
+ "1271400": {
+  "name": "Adios",
+  "match": "Adios",
+  "id": 86459,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 1.33,
+  "main_extra": 1.5,
+  "completionist": 2.03
+ },
+ "1272320": {
+  "name": "Diplomacy is Not an Option",
+  "match": "Diplomacy is Not an Option",
+  "id": 103886,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 34.94,
+  "main_extra": 52.11,
+  "completionist": 77.73
+ },
+ "1272840": {
+  "name": "Dordogne",
+  "match": "Dordogne",
+  "id": 94126,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 3.56,
+  "main_extra": 4.28,
+  "completionist": 6.36
+ },
+ "1281790": {
+  "name": "SHEEPO",
+  "match": "Sheepo",
+  "id": 82272,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 3.56,
+  "main_extra": 4.17,
+  "completionist": 4.57
+ },
+ "1282730": {
+  "name": "Loop Hero",
+  "match": "Loop Hero",
+  "id": 86112,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 28.56,
+  "main_extra": 36.96,
+  "completionist": 54.71
+ },
+ "1286580": {
+  "name": "Ship of Fools",
+  "match": "Ship of Fools",
+  "id": 117032,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 6.11,
+  "main_extra": 14.93,
+  "completionist": 49.04
+ },
+ "1297300": {
+  "name": "The Shore",
+  "match": "The Shore",
+  "id": 88792,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 2.54,
+  "main_extra": 2.86,
+  "completionist": 2.98
+ },
+ "1307580": {
+  "name": "TOEM: A Photo Adventure",
+  "match": "Toem",
+  "id": 86977,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 3.4,
+  "main_extra": 4.47,
+  "completionist": 6.11
+ },
+ "1328670": {
+  "name": "Mass Effect™ Legendary Edition",
+  "match": "Mass Effect Legendary Edition",
+  "id": 84851,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 61.4,
+  "main_extra": 101.74,
+  "completionist": 138.14
+ },
+ "1328840": {
+  "name": "Lost in Play",
+  "match": "Lost in Play",
+  "id": 112178,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 4.62,
+  "main_extra": 4.66,
+  "completionist": 4.85
+ },
+ "1332010": {
+  "name": "Stray",
+  "match": "Stray",
+  "id": 79790,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 5.15,
+  "main_extra": 6.67,
+  "completionist": 10.33
+ },
+ "1335790": {
+  "name": "Operation: Tango",
+  "match": "Operation: Tango",
+  "id": 84033,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 4.16,
+  "main_extra": 5.44,
+  "completionist": 8.25
+ },
+ "1336490": {
+  "name": "Against the Storm",
+  "match": "Against the Storm",
+  "id": 102565,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 37.55,
+  "main_extra": 105.91,
+  "completionist": 267.73
+ },
+ "1345890": {
+  "name": "Deliver Us Mars",
+  "match": "Deliver Us Mars",
+  "id": 106075,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 8.18,
+  "main_extra": 9.23,
+  "completionist": 11.05
+ },
+ "1353230": {
+  "name": "Bomb Rush Cyberfunk",
+  "match": "Bomb Rush Cyberfunk",
+  "id": 81093,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 10.09,
+  "main_extra": 13.45,
+  "completionist": 23.27
+ },
+ "1364100": {
+  "name": "Lacuna – A Sci-Fi Noir Adventure",
+  "match": "Lacuna",
+  "id": 92555,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 5.38,
+  "main_extra": 6.24,
+  "completionist": 11.41
+ },
+ "1388590": {
+  "name": "Yakuza 6: The Song of Life",
+  "match": "Yakuza 6: The Song of Life",
+  "id": 42407,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 18.3,
+  "main_extra": 31.8,
+  "completionist": 54.93
+ },
+ "1390190": {
+  "name": "APICO",
+  "match": "APICO",
+  "id": 108347,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 47.25,
+  "main_extra": 51.15,
+  "completionist": 63
+ },
+ "1421490": {
+  "name": "Rise of the Triad: Ludicrous Edition",
+  "match": "Rise of the Triad: Ludicrous Edition",
+  "id": 129702,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 11.7,
+  "main_extra": 23.65,
+  "completionist": 45.02
+ },
+ "1424330": {
+  "name": "Wobbledogs",
+  "match": "Wobbledogs",
+  "id": 89154,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 5.44,
+  "main_extra": 17.39,
+  "completionist": 20.57
+ },
+ "1444300": {
+  "name": "Teacup",
+  "match": "Teacup",
+  "id": 98657,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 1.57,
+  "main_extra": 1.72,
+  "completionist": 1.91
+ },
+ "1449560": {
+  "name": "Metro Exodus Enhanced Edition",
+  "match": "Metro Exodus",
+  "id": 46401,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 15.91,
+  "main_extra": 24.03,
+  "completionist": 41.83
+ },
+ "1458140": {
+  "name": "Pacific Drive",
+  "match": "Pacific Drive",
+  "id": 113597,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 21.51,
+  "main_extra": 32.16,
+  "completionist": 47.47
+ },
+ "1466640": {
+  "name": "Road 96 🛣️",
+  "match": null
+ },
+ "1475810": {
+  "name": "Ghostwire: Tokyo",
+  "match": "Ghostwire: Tokyo",
+  "id": 68156,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 11.4,
+  "main_extra": 22.96,
+  "completionist": 42.29
+ },
+ "1488490": {
+  "name": "Nivalis Nights",
+  "match": "Nivalis Nights",
+  "id": 106740,
+  "sim": 1,
+  "steamMatch": false,
+  "main": null,
+  "main_extra": null,
+  "completionist": 64.33
+ },
+ "1492070": {
+  "name": "Sker Ritual",
+  "match": "Sker Ritual",
+  "id": 110126,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 8.76,
+  "main_extra": 13.95,
+  "completionist": 33.65
+ },
+ "1496590": {
+  "name": "Tchia",
+  "match": "Tchia",
+  "id": 85999,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 7.51,
+  "main_extra": 13.83,
+  "completionist": 22.65
+ },
+ "1497360": {
+  "name": "Open Roads",
+  "match": "Open Roads",
+  "id": 86000,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 2.59,
+  "main_extra": 2.97,
+  "completionist": 3.12
+ },
+ "1562430": {
+  "name": "DREDGE",
+  "match": "Dredge",
+  "id": 94128,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 9.65,
+  "main_extra": 12.9,
+  "completionist": 20.91
+ },
+ "1577120": {
+  "name": "The Quarry",
+  "match": "The Quarry",
+  "id": 105741,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 9.16,
+  "main_extra": 11,
+  "completionist": 33.51
+ },
+ "1593500": {
+  "name": "God of War",
+  "match": "God of War",
+  "id": 38050,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 20.57,
+  "main_extra": 32.89,
+  "completionist": 51.05
+ },
+ "1601580": {
+  "name": "Frostpunk 2",
+  "match": "Frostpunk 2",
+  "id": 96821,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 11.52,
+  "main_extra": 21.4,
+  "completionist": 54.31
+ },
+ "1604000": {
+  "name": "Milk outside a bag of milk outside a bag of milk",
+  "match": "Milk outside a bag of milk outside a bag of milk",
+  "id": 100046,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 0.99,
+  "main_extra": 1.48,
+  "completionist": 2.54
+ },
+ "1654660": {
+  "name": "En Garde!",
+  "match": "En Garde!",
+  "id": 129877,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 3.84,
+  "main_extra": 5.25,
+  "completionist": 12.81
+ },
+ "1659040": {
+  "name": "HITMAN World of Assassination",
+  "match": "Hitman: World of Assassination",
+  "id": 102780,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 25.32,
+  "main_extra": 48.78,
+  "completionist": 260.15
+ },
+ "1669420": {
+  "name": "Islets",
+  "match": "Islets",
+  "id": 109289,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 7.32,
+  "main_extra": 8.12,
+  "completionist": 9.35
+ },
+ "1678430": {
+  "name": "PowerSlave Exhumed",
+  "match": "PowerSlave",
+  "id": 3264,
+  "sim": 0.56,
+  "steamMatch": false,
+  "main": 7.12,
+  "main_extra": 7.85,
+  "completionist": 11.47
+ },
+ "1693980": {
+  "name": "Dead Space",
+  "match": "Dead Space",
+  "id": 95927,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 12.15,
+  "main_extra": 16.2,
+  "completionist": 30.14
+ },
+ "1695620": {
+  "name": "CHR$(143)",
+  "match": "CHR$(143)",
+  "id": 128420,
+  "sim": 1,
+  "steamMatch": false,
+  "main": null,
+  "main_extra": null,
+  "completionist": null
+ },
+ "1701330": {
+  "name": "Sokobond Express",
+  "match": "Sokobond Express",
+  "id": 146714,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 2.75,
+  "main_extra": 3.9,
+  "completionist": 6.81
+ },
+ "1730590": {
+  "name": "The Entropy Centre",
+  "match": "The Entropy Centre",
+  "id": 109185,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 8.88,
+  "main_extra": 10.38,
+  "completionist": 11.3
+ },
+ "1742930": {
+  "name": "Looking Up I See Only A Ceiling",
+  "match": "Looking Up I See Only A Ceiling",
+  "id": 125728,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 0.46,
+  "main_extra": 0.65,
+  "completionist": 1.26
+ },
+ "1783560": {
+  "name": "The Last Caretaker",
+  "match": "The Last Caretaker",
+  "id": 164485,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 38.27,
+  "main_extra": null,
+  "completionist": null
+ },
+ "1848450": {
+  "name": "Nightmare of Decay",
+  "match": "Nightmare of Decay",
+  "id": 107574,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 2.34,
+  "main_extra": 3.46,
+  "completionist": 10.38
+ },
+ "1902490": {
+  "name": "Aperture Desk Job",
+  "match": "Aperture Desk Job",
+  "id": 104608,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 0.54,
+  "main_extra": 0.54,
+  "completionist": 0.55
+ },
+ "1902960": {
+  "name": "Lost Records: Bloom & Rage",
+  "match": "Lost Records: Bloom & Rage",
+  "id": 141844,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 11.22,
+  "main_extra": 13.37,
+  "completionist": 16.59
+ },
+ "1920780": {
+  "name": "Stray Gods: The Roleplaying Musical",
+  "match": "Stray Gods: The Roleplaying Musical",
+  "id": 105790,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 6.35,
+  "main_extra": 7.86,
+  "completionist": 18.26
+ },
+ "1924430": {
+  "name": "Cookie Cutter: Overkill Edition",
+  "match": "Cookie Cutter",
+  "id": 121351,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 13.47,
+  "main_extra": 15.65,
+  "completionist": 18.01
+ },
+ "1931730": {
+  "name": "Fort Solis",
+  "match": "Fort Solis",
+  "id": 109103,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 3.75,
+  "main_extra": 4.41,
+  "completionist": 6.18
+ },
+ "1962700": {
+  "name": "Subnautica 2",
+  "match": "Subnautica 2",
+  "id": 158248,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 13.67,
+  "main_extra": 17.28,
+  "completionist": 30.23
+ },
+ "1964040": {
+  "name": "Do Not Feed the Monkeys 2099",
+  "match": "Do Not Feed the Monkeys 2099",
+  "id": 127746,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 4.28,
+  "main_extra": 6.01,
+  "completionist": 32.1
+ },
+ "1983260": {
+  "name": "Dungeons of Hinterberg",
+  "match": "Dungeons of Hinterberg",
+  "id": 129961,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 15.55,
+  "main_extra": 21.29,
+  "completionist": 25.99
+ },
+ "1996770": {
+  "name": "Turok 3: Shadow of Oblivion Remastered",
+  "match": "Turok 3: Shadow of Oblivion",
+  "id": 10706,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 4.3,
+  "main_extra": 5.71,
+  "completionist": 9.56
+ },
+ "2019810": {
+  "name": "Boxes: Lost Fragments",
+  "match": "Boxes: Lost Fragments",
+  "id": 144798,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 3.83,
+  "main_extra": 3.89,
+  "completionist": 4.08
+ },
+ "2095340": {
+  "name": "Road 96: Mile 0",
+  "match": "Road 96: Mile 0",
+  "id": 122955,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 4.45,
+  "main_extra": 5.34,
+  "completionist": 8.28
+ },
+ "2114740": {
+  "name": "Blasphemous 2",
+  "match": "Blasphemous II",
+  "id": 118447,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 16.44,
+  "main_extra": 20.83,
+  "completionist": 26.6
+ },
+ "2129530": {
+  "name": "REANIMAL",
+  "match": "Reanimal",
+  "id": 155644,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 4.57,
+  "main_extra": 5.27,
+  "completionist": 7.76
+ },
+ "2180700": {
+  "name": "ABI-DOS",
+  "match": "ABI-DOS",
+  "id": 161720,
+  "sim": 1,
+  "steamMatch": false,
+  "main": null,
+  "main_extra": null,
+  "completionist": 18.5
+ },
+ "2183900": {
+  "name": "Warhammer 40,000: Space Marine 2",
+  "match": "Warhammer 40,000: Space Marine II",
+  "id": 101254,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 9.41,
+  "main_extra": 15.67,
+  "completionist": 64.82
+ },
+ "2207440": {
+  "name": "LOK Digital",
+  "match": "LOK Digital",
+  "id": 151160,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 3.21,
+  "main_extra": 6.75,
+  "completionist": 10.72
+ },
+ "2259310": {
+  "name": "ORDER 13",
+  "match": "ORDER 13",
+  "id": 165076,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 3.32,
+  "main_extra": 4.52,
+  "completionist": 5.49
+ },
+ "2323580": {
+  "name": "Before The Green Moon",
+  "match": "Before The Green Moon",
+  "id": 131606,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 7.91,
+  "main_extra": 11.32,
+  "completionist": null
+ },
+ "2420110": {
+  "name": "Horizon Forbidden West™ Complete Edition",
+  "match": "Horizon Forbidden West - Complete Edition",
+  "id": 139665,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 47.43,
+  "main_extra": 73.03,
+  "completionist": 117.72
+ },
+ "2475490": {
+  "name": "Mouthwashing",
+  "match": "Mouthwashing",
+  "id": 145368,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 2.54,
+  "main_extra": 2.95,
+  "completionist": 3.57
+ },
+ "2478970": {
+  "name": "Tomb Raider I-III Remastered Starring Lara Croft",
+  "match": "Tomb Raider I-III Remastered Starring Lara Croft",
+  "id": 137867,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 38.24,
+  "main_extra": 70.37,
+  "completionist": 93.73
+ },
+ "2521380": {
+  "name": "Legacy of Kain™ Soul Reaver 1&2 Remastered",
+  "match": null
+ },
+ "2530430": {
+  "name": "Terror At Oakheart",
+  "match": "Terror at Oakheart",
+  "id": 146244,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 2.48,
+  "main_extra": 2.69,
+  "completionist": 3.07
+ },
+ "2580020": {
+  "name": "THRESHOLD",
+  "match": "THRESHOLD",
+  "id": 145745,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 1.41,
+  "main_extra": 1.94,
+  "completionist": 4.02
+ },
+ "2582320": {
+  "name": "Mixtape",
+  "match": "Mixtape",
+  "id": 152041,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 3.23,
+  "main_extra": 3.57,
+  "completionist": 5.15
+ },
+ "2653790": {
+  "name": "The Exit 8",
+  "match": "The Exit 8",
+  "id": 141499,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 0.68,
+  "main_extra": 1,
+  "completionist": 1.15
+ },
+ "2676840": {
+  "name": "No Case Should Remain Unsolved",
+  "match": "No Case Should Remain Unsolved",
+  "id": 143372,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 2.73,
+  "main_extra": 2.73,
+  "completionist": 3.01
+ },
+ "2719060": {
+  "name": "Mirage Feathers",
+  "match": "Mirage Feathers",
+  "id": 156540,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 1.23,
+  "main_extra": 1.81,
+  "completionist": 2.37
+ },
+ "2763670": {
+  "name": "Arctic Eggs",
+  "match": "Arctic Eggs",
+  "id": 146767,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 2.39,
+  "main_extra": 2.67,
+  "completionist": 3.09
+ },
+ "2794610": {
+  "name": "Massacre At The Mirage",
+  "match": "Massacre At The Mirage",
+  "id": 158830,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 2.28,
+  "main_extra": 3.1,
+  "completionist": 4.62
+ },
+ "2835570": {
+  "name": "Buckshot Roulette",
+  "match": "Buckshot Roulette",
+  "id": 143310,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 0.47,
+  "main_extra": 1.77,
+  "completionist": 9.64
+ },
+ "3048140": {
+  "name": "Daemonologie",
+  "match": "Daemonologie",
+  "id": 157509,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 0.6,
+  "main_extra": 0.92,
+  "completionist": 1.08
+ },
+ "3126330": {
+  "name": "Kiosk",
+  "match": "Kiosk",
+  "id": 154485,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 1.53,
+  "main_extra": 1.8,
+  "completionist": 1.94
+ },
+ "3352300": {
+  "name": "The Electrifying Incident: A Monster Mini-Expedition",
+  "match": "The Electrifying Incident: A Monster Mini-Expedition",
+  "id": 166970,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 0.85,
+  "main_extra": 1.33,
+  "completionist": 2.26
+ },
+ "3838370": {
+  "name": "TR-49",
+  "match": "TR-49",
+  "id": 180795,
+  "sim": 1,
+  "steamMatch": false,
+  "main": 5.97,
+  "main_extra": 6.31,
+  "completionist": 6.38
+ }
+}

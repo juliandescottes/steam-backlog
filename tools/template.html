@@ -1,0 +1,167 @@
+<title>Not Started Backlog</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: a header that totals the backlog and doubles as a band index, then one shelf of covers per length band. */
+:root {
+  --bg: #12141b; --surface: #1b1e28; --line: #2a2e3c; --fg: #ece9e2; --muted: #9c9fae; --accent: #f2b84b;
+  --b0: #3fc1b0; --b1: #6fcf6a; --b2: #c9d44f; --b3: #f2b84b; --b4: #f08a4b; --b5: #e5566d; --b6: #b46ee0; --bnone: #5d6275;
+  --display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+  --body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) {
+  --bg: #eef0f4; --surface: #ffffff; --line: #d6d9e2; --fg: #1a1c24; --muted: #5d6070; --accent: #a8680c;
+  --b0: #13897b; --b1: #3a8f35; --b2: #8a9113; --b3: #b07806; --b4: #c05a1c; --b5: #c02a45; --b6: #8a45b8; --bnone: #7b8094;
+  color-scheme: light; } }
+:root[data-theme="light"] {
+  --bg: #eef0f4; --surface: #ffffff; --line: #d6d9e2; --fg: #1a1c24; --muted: #5d6070; --accent: #a8680c;
+  --b0: #13897b; --b1: #3a8f35; --b2: #8a9113; --b3: #b07806; --b4: #c05a1c; --b5: #c02a45; --b6: #8a45b8; --bnone: #7b8094;
+  color-scheme: light; }
+
+body { background: var(--bg); color: var(--fg); font: 15px/1.5 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width: 1240px; margin: 0 auto; padding-block: 28px 64px; display: grid; gap: 36px; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+header { display: grid; gap: 18px; }
+.eyebrow { font: 700 12px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+h1 { font: 800 clamp(40px, 7vw, 76px)/.9 var(--display); letter-spacing: .01em; margin: 0; text-wrap: balance; text-transform: uppercase; }
+h1 em { font-style: normal; color: var(--accent); }
+.lede { color: var(--muted); max-width: 62ch; margin: 0; }
+.lede b { color: var(--fg); font-variant-numeric: tabular-nums; }
+
+.index { display: grid; gap: 10px; }
+.bar { display: flex; height: 14px; border-radius: 3px; overflow: hidden; background: var(--line); }
+.bar a { display: block; min-width: 2px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 8px; }
+.legend a { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 999px;
+  text-decoration: none; font: 500 13px/1 var(--mono); background: var(--surface); }
+.legend a:hover { border-color: var(--muted); }
+.legend i { width: 9px; height: 9px; border-radius: 2px; background: var(--c); }
+.legend span { color: var(--muted); }
+
+.tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.tools input[type=search] { flex: 1 1 220px; min-width: 0; padding: 10px 12px; border-radius: 6px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--fg); font: inherit; }
+.tools label { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 14px; cursor: pointer; }
+
+section.band { display: grid; gap: 14px; scroll-margin-top: 16px; }
+.band-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; border-bottom: 2px solid var(--c); padding-bottom: 8px; }
+.band-head h2 { font: 800 clamp(28px, 4vw, 40px)/1 var(--display); text-transform: uppercase; margin: 0; color: var(--c); letter-spacing: .02em; }
+.band-head p { margin: 0; color: var(--muted); font: 500 13px/1.3 var(--mono); font-variant-numeric: tabular-nums; }
+
+.shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 22px 16px; }
+.game { display: grid; gap: 8px; align-content: start; min-width: 0; }
+.cover { position: relative; aspect-ratio: 2 / 3; max-width: 100%; border-radius: 4px; overflow: hidden; background: var(--surface);
+  box-shadow: 0 1px 0 var(--line); display: block; }
+.cover img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .25s ease; }
+.cover.wide .bg { position: absolute; inset: -12px; width: calc(100% + 24px); height: calc(100% + 24px); filter: blur(14px) saturate(1.2); opacity: .7; }
+.cover.wide .fg { position: absolute; inset: 0; object-fit: contain; }
+.cover .none { position: absolute; inset: 0; display: grid; place-items: center; padding: 10px; text-align: center;
+  font: 800 18px/1 var(--display); text-transform: uppercase; color: var(--muted); }
+.cover:hover img.fg, .cover:hover img:only-child { transform: scale(1.03); }
+.hrs { position: absolute; left: 6px; bottom: 6px; padding: 4px 7px; border-radius: 3px; background: rgba(10, 11, 16, .82); color: #fff;
+  font: 700 13px/1 var(--mono); font-variant-numeric: tabular-nums; border-left: 3px solid var(--c); }
+.meta { display: grid; gap: 2px; min-width: 0; }
+.name { font-weight: 700; font-size: 14px; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.sub { font: 500 11.5px/1.35 var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.sub a { text-decoration: none; border-bottom: 1px dotted var(--muted); }
+.sub a:hover { color: var(--fg); }
+.flag { color: var(--b4); }
+.empty { color: var(--muted); font-style: italic; }
+footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); padding-top: 16px; }
+@media (prefers-reduced-motion: reduce) { .cover img { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Steam collection · __COLLECTION__</div>
+    <h1>__COUNT__ games, <em>__TOTAL__ hours</em> to clear</h1>
+    <p class="lede">Every unstarted game, shortest first, by HowLongToBeat's <b>Main + Extras</b> time: the main story plus the side content most players do. Click a cover to open it on Steam, or a time to see its HLTB page.</p>
+    <nav class="index" aria-label="Length bands">
+      <div class="bar" id="bar"></div>
+      <div class="legend" id="legend"></div>
+    </nav>
+    <div class="tools">
+      <input type="search" id="q" placeholder="Filter by name" aria-label="Filter games by name">
+      <label for="flagged"><input type="checkbox" id="flagged"> Only uncertain matches</label>
+    </div>
+  </header>
+  <main id="bands" style="display:grid;gap:44px"></main>
+  <footer>Times from howlongtobeat.com, matched by Steam ID when HLTB lists one, otherwise by closest name. A <span class="flag">?</span> marks a fuzzy name match worth checking. Box art from Steam. Built __DATE__.</footer>
+</div>
+
+<script>
+const GAMES = __GAMES__;
+const ART = __ART__;
+const BANDS = [
+  { id: "under-3", label: "Under 3 h", max: 3, c: "--b0" },
+  { id: "3-6", label: "3 to 6 h", max: 6, c: "--b1" },
+  { id: "6-10", label: "6 to 10 h", max: 10, c: "--b2" },
+  { id: "10-20", label: "10 to 20 h", max: 20, c: "--b3" },
+  { id: "20-40", label: "20 to 40 h", max: 40, c: "--b4" },
+  { id: "40-80", label: "40 to 80 h", max: 80, c: "--b5" },
+  { id: "80-plus", label: "80 h and up", max: Infinity, c: "--b6" },
+  { id: "no-data", label: "No HLTB time", max: null, c: "--bnone" },
+];
+const fmt = h => {
+  if (h == null) return "–";
+  return Math.max(.25, Math.round(h * 4) / 4) + " h";
+};
+const bandOf = g => g.me == null ? BANDS[7] : BANDS.find(b => b.max != null && g.me < b.max);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+GAMES.sort((a, b) => (a.me == null) - (b.me == null) || (a.me ?? 0) - (b.me ?? 0) || a.name.localeCompare(b.name));
+const groups = BANDS.map(b => ({ ...b, games: GAMES.filter(g => bandOf(g) === b) })).filter(b => b.games.length);
+
+function card(g, color) {
+  const a = ART[g.id];
+  const img = !a ? `<span class="none">${esc(g.name)}</span>`
+    : a.w ? `<img class="bg" src="${a.d}" alt=""><img class="fg" src="${a.d}" alt="" loading="lazy">`
+    : `<img src="${a.d}" alt="" loading="lazy">`;
+  const flag = g.me != null && g.uncertain ? ` <span class="flag" title="Matched to “${esc(g.match)}”">?</span>` : "";
+  const hltb = g.hltb ? `<a href="${g.hltb}" target="_blank" rel="noopener">${g.me != null ? "HLTB" : "Search HLTB"}</a>` : "";
+  const detail = g.me != null ? `Story ${fmt(g.main)} · 100% ${fmt(g.comp)}` : "";
+  return `<article class="game" style="--c:var(${color})" data-name="${esc(g.name.toLowerCase())}" data-uncertain="${g.uncertain ? 1 : 0}">
+    <a class="cover${a && a.w ? " wide" : ""}" href="https://store.steampowered.com/app/${g.id}" target="_blank" rel="noopener" aria-label="${esc(g.name)} on Steam">
+      ${img}${g.me != null ? `<span class="hrs">${fmt(g.me)}</span>` : ""}
+    </a>
+    <div class="meta"><div class="name">${esc(g.name)}${flag}</div>
+      <div class="sub">${detail}${detail && hltb ? " · " : ""}${hltb}</div></div>
+  </article>`;
+}
+
+const total = groups.reduce((s, b) => s + b.games.length, 0);
+document.getElementById("bar").innerHTML = groups.map(b =>
+  `<a href="#${b.id}" style="flex:${b.games.length};background:var(${b.c})" title="${b.label}: ${b.games.length}" aria-label="${b.label}, ${b.games.length} games"></a>`).join("");
+document.getElementById("legend").innerHTML = groups.map(b =>
+  `<a href="#${b.id}" style="--c:var(${b.c})"><i></i>${b.label} <span>${b.games.length}</span></a>`).join("");
+document.getElementById("bands").innerHTML = groups.map(b => {
+  const hrs = b.games.reduce((s, g) => s + (g.me || 0), 0);
+  const sub = b.max === null ? `${b.games.length} games` : `${b.games.length} games · ${Math.round(hrs).toLocaleString("en")} h together`;
+  return `<section class="band" id="${b.id}" style="--c:var(${b.c})">
+    <div class="band-head"><h2>${b.label}</h2><p>${sub}</p></div>
+    <div class="shelf">${b.games.map(g => card(g, b.c)).join("")}</div>
+    <p class="empty" hidden>No matches in this band.</p></section>`;
+}).join("");
+
+const q = document.getElementById("q"), fl = document.getElementById("flagged");
+function filter() {
+  const t = q.value.trim().toLowerCase(), only = fl.checked;
+  document.querySelectorAll("section.band").forEach(sec => {
+    let shown = 0;
+    sec.querySelectorAll(".game").forEach(el => {
+      const ok = (!t || el.dataset.name.includes(t)) && (!only || el.dataset.uncertain === "1");
+      el.hidden = !ok; if (ok) shown++;
+    });
+    sec.hidden = shown === 0 && (t || only);
+  });
+}
+q.addEventListener("input", filter); fl.addEventListener("change", filter);
+const h = location.hash.slice(1); if (h) document.getElementById(h)?.scrollIntoView();
+</script>
