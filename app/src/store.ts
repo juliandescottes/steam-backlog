@@ -5,7 +5,8 @@ import { compare, matches, type Entry, type Filter, type SortKey } from "@backlo
 import { resolveLength } from "@backlog/shared/lengths";
 import { normalizeName } from "@backlog/shared/names";
 import { userFields, type GameFields, type Op } from "@backlog/shared/sync";
-import { STATUS_LABEL, type Game, type LenKind, type Lengths, type Measure, type Status } from "@backlog/shared/types";
+import { STATUSES, STATUS_LABEL, type Game, type LenKind, type Lengths, type Measure, type Status } from "@backlog/shared/types";
+import { builtInViews, canonical, sameView, type View } from "@backlog/shared/views";
 import * as db from "./db.ts";
 import { download } from "./util.ts";
 
@@ -22,9 +23,12 @@ export const loaded = signal(false);
 export const triaged = signal(false);
 
 export async function load() {
-  const [all, s, t] = await Promise.all([db.loadGames(), db.getMeta<Settings>("settings"), db.getMeta<boolean>("triaged")]);
+  const [all, s, t, v] = await Promise.all([
+    db.loadGames(), db.getMeta<Settings>("settings"), db.getMeta<boolean>("triaged"), db.loadViews(),
+  ]);
   batch(() => {
     games.value = new Map(all.map(g => [g.appid, g]));
+    userViews.value = v;
     settings.value = { ...DEFAULT_SETTINGS, ...s };
     triaged.value = t ?? false;
     loaded.value = true;
@@ -96,10 +100,46 @@ export const statuses = signal<Status[]>(["backlog", "playing"]);
 export const played = signal<NonNullable<Filter["played"]>>("any");
 export const sortKey = signal<SortKey>("length");
 
+/** Filter fields the toolbar has no control for (length range, dates); set by views, shown as removable pills. */
+export const extra = signal<Filter>({});
+
+/** What the library shows, without the search text: compared against views to find the active one. */
+export const currentFilter = computed(() => canonical({ statuses: statuses.value, played: played.value, ...extra.value }));
+
 export const visible = computed(() => {
-  const f: Filter = { statuses: statuses.value, q: query.value, played: played.value };
+  const f: Filter = { ...currentFilter.value, q: query.value };
   return entries.value.filter(e => matches(e, f)).sort(compare(sortKey.value));
 });
+
+// ---- Smart views ----
+
+export const userViews = signal<View[]>([]);
+export const views = computed(() => [...builtInViews(), ...[...userViews.value].sort((a, b) => a.position.localeCompare(b.position))]);
+export const activeView = computed(() => views.value.find(v => sameView(v, { filter: currentFilter.value, sort: sortKey.value })) ?? null);
+
+export function applyView(v: View) {
+  const { statuses: st, played: pl, q: _q, ...rest } = v.filter;
+  batch(() => {
+    statuses.value = st?.length ? st : STATUSES;
+    played.value = pl ?? "any";
+    extra.value = rest;
+    sortKey.value = v.sort;
+  });
+}
+
+export function saveView(name: string) {
+  const v: View = { id: crypto.randomUUID(), name, filter: currentFilter.value, sort: sortKey.value, position: Date.now().toString(36) };
+  userViews.value = [...userViews.value, v];
+  void db.putView(v);
+}
+
+export function deleteView(id: string) {
+  const v = userViews.value.find(x => x.id === id);
+  if (!v) return;
+  const remove = () => { userViews.value = userViews.value.filter(x => x.id !== id); void db.deleteView(id); };
+  remove();
+  pushUndo({ label: `View "${v.name}" deleted`, patches: [], revert: () => { userViews.value = [...userViews.value, v]; void db.putView(v); } });
+}
 
 /** What the library shows: one shelf per length band, or a single one for other sorts. */
 export const shelves = computed<{ band: Band | null; entries: Entry[] }[]>(() => {
@@ -178,7 +218,8 @@ export function showToast(message: string, undoable = false) {
 // ---- Commands with undo ----
 
 type Patch = { appid: number; before: Partial<Game>; after: Partial<Game> };
-type Command = { label: string; patches: Patch[] };
+/** An undoable action: game patches, or `revert` for anything else (views). */
+type Command = { label: string; patches: Patch[]; revert?: () => void };
 const undoStack: Command[] = [];
 const UNDO_LIMIT = 100;
 
@@ -223,15 +264,20 @@ function patches(appids: number[], change: (g: Game) => Partial<Game> | null): P
 function run(label: string, ps: Patch[]) {
   if (!ps.length) return;
   apply(ps, "after");
-  undoStack.push({ label, patches: ps });
+  pushUndo({ label, patches: ps });
+}
+
+function pushUndo(c: Command) {
+  undoStack.push(c);
   if (undoStack.length > UNDO_LIMIT) undoStack.shift();
-  showToast(label, true);
+  showToast(c.label, true);
 }
 
 export function undo() {
   const c = undoStack.pop();
   if (!c) return showToast("Nothing to undo");
-  apply(c.patches, "before");
+  if (c.revert) c.revert();
+  else apply(c.patches, "before");
   showToast(`Undone: ${c.label}`);
 }
 
@@ -372,6 +418,7 @@ export async function deleteEverything() {
     settings.value = DEFAULT_SETTINGS;
     triaged.value = false;
     selection.value = new Set();
+    userViews.value = [];
     openId.value = null;
     settingsOpen.value = false;
   });

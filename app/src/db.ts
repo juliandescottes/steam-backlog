@@ -1,22 +1,36 @@
 import { openDB, type IDBPDatabase } from "idb";
 import type { Op } from "@backlog/shared/sync";
 import type { Game } from "@backlog/shared/types";
+import type { View } from "@backlog/shared/views";
 
 /** IndexedDB persistence. The store keeps everything in memory; this only saves and restores it. */
 let dbp: Promise<IDBPDatabase> | null = null;
 const db = () =>
-  (dbp ??= openDB("backlog", 2, {
+  (dbp ??= openDB("backlog", 3, {
     upgrade(d, old) {
       if (old < 1) {
         d.createObjectStore("games", { keyPath: "appid" });
         d.createObjectStore("meta");
       }
       if (old < 2) d.createObjectStore("outbox", { keyPath: "id" });
+      if (old < 3) d.createObjectStore("views", { keyPath: "id" });
     },
   }));
 
 export async function loadGames(): Promise<Game[]> {
   return (await db()).getAll("games");
+}
+
+export async function loadViews(): Promise<View[]> {
+  return (await db()).getAll("views");
+}
+
+export async function putView(v: View): Promise<void> {
+  await (await db()).put("views", v);
+}
+
+export async function deleteView(id: string): Promise<void> {
+  await (await db()).delete("views", id);
 }
 
 export async function getMeta<T>(key: string): Promise<T | undefined> {
@@ -70,5 +84,5 @@ export async function removeOps(ids: string[]): Promise<void> {
 export async function clearAll(): Promise<void> {
   pending.clear();
   const d = await db();
-  await Promise.all([d.clear("games"), d.clear("meta"), d.clear("outbox")]);
+  await Promise.all([d.clear("games"), d.clear("meta"), d.clear("outbox"), d.clear("views")]);
 }

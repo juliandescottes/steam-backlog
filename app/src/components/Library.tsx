@@ -6,6 +6,7 @@ import {
 } from "../store.ts";
 import { count, thousands } from "../util.ts";
 import { Shelf } from "./Shelf.tsx";
+import { ConditionPills, ViewTabs } from "./Views.tsx";
 
 const MEASURE_TEXT = {
   main_extra: <>by <b>Main + Extras</b> time: the main story plus the side content most players do</>,
@@ -94,6 +95,7 @@ function Toolbar() {
       <select aria-label="Sort" value={sortKey.value} onChange={e => (sortKey.value = e.currentTarget.value as SortKey)}>
         {Object.entries(SORT_LABEL).map(([k, label]) => <option key={k} value={k}>Sort: {label}</option>)}
       </select>
+      <ConditionPills />
     </div>
   );
 }
@@ -108,6 +110,7 @@ export function Library() {
     <div class="wrap">
       <Header />
       <Triage />
+      <ViewTabs />
       {byLength && bands.length > 0 && <BandIndex groups={bands} />}
       <Toolbar />
       <main class={`bands${selection.value.size ? " selecting" : ""}`}>

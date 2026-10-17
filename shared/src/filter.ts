@@ -12,6 +12,8 @@ export type Filter = {
   needsLength?: boolean;
   addedAfter?: number;
   addedBefore?: number;
+  finishedAfter?: number;
+  finishedBefore?: number;
 };
 
 export type SortKey = "length" | "name" | "added" | "playtime" | "changed";
@@ -36,6 +38,8 @@ export function matches(e: Entry, f: Filter): boolean {
   if (f.played === "never" && g.playtimeMin > 0) return false;
   if (f.addedAfter != null && g.addedAt < f.addedAfter) return false;
   if (f.addedBefore != null && g.addedAt >= f.addedBefore) return false;
+  if (f.finishedAfter != null && !(g.finishedAt != null && g.finishedAt >= f.finishedAfter)) return false;
+  if (f.finishedBefore != null && !(g.finishedAt != null && g.finishedAt < f.finishedBefore)) return false;
   return true;
 }
 

@@ -288,3 +288,40 @@ test("command palette: jump to a game, run actions", async ({ page }) => {
   await page.keyboard.press("Escape");
   await expect(palette).toHaveCount(0);
 });
+
+test("smart views: built-in ones, conditions as pills, save and delete your own", async ({ page }) => {
+  await openLibrary(page);
+  const views = page.getByRole("navigation", { name: "Views" });
+  await expect(views.locator("[aria-current]")).toHaveText("To play");
+
+  await views.getByRole("button", { name: "Under 5 h" }).click();
+  await expect(page.locator(".game .name")).toHaveText(["Short One"]);
+  await page.getByRole("button", { name: "Remove condition: Under 5 h" }).click();
+  await expect(views.locator("[aria-current]")).toHaveText("To play");
+  await expect(page.locator(".game")).toHaveCount(6);
+
+  await views.getByRole("button", { name: "Needs a length" }).click();
+  await expect(page.locator(".game")).toHaveCount(3);
+
+  await page.getByRole("button", { name: "Dropped", exact: true }).click();
+  await expect(views.locator("[aria-current]")).toHaveCount(0);
+  await views.getByRole("button", { name: "+ Save view" }).click();
+  await page.keyboard.type("Unknown incl. dropped");
+  await page.keyboard.press("Enter");
+  await expect(views.locator("[aria-current]")).toHaveText("Unknown incl. dropped");
+
+  await page.waitForFunction(() => new Promise(resolve => {
+    indexedDB.open("backlog").onsuccess = e => {
+      const all = (e.target as IDBOpenDBRequest).result.transaction("views").objectStore("views").count();
+      all.onsuccess = () => resolve(all.result === 1);
+    };
+  }));
+  await page.reload();
+  await expect(page.locator("h1")).toHaveText(/^6 games/);
+  await views.getByRole("button", { name: "Unknown incl. dropped", exact: true }).click();
+  await expect(page.locator(".game")).toHaveCount(3);
+  await views.getByRole("button", { name: "Delete view Unknown incl. dropped" }).click();
+  await expect(views.getByRole("button", { name: "Unknown incl. dropped", exact: true })).toHaveCount(0);
+  await page.locator(".toast").getByRole("button", { name: "Undo" }).click();
+  await expect(views.getByRole("button", { name: "Unknown incl. dropped", exact: true })).toHaveCount(1);
+});

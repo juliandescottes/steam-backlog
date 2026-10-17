@@ -82,6 +82,16 @@ h1 em { font-style: normal; color: var(--accent); }
 .tools select { padding: 8px 10px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { padding: 7px 11px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--muted); cursor: pointer; font-size: 13.5px; }
+.chip.pill { background: var(--surface-2); color: var(--fg); border-color: var(--line); }
+.views { display: flex; flex-wrap: wrap; gap: 4px 18px; border-bottom: 1px solid var(--line); }
+.view { display: inline-flex; align-items: center; gap: 2px; margin-bottom: -1px; border-bottom: 2px solid transparent; }
+.view button, .view.save { padding: 8px 0 9px; border: 0; background: none; color: var(--muted); font-size: 14.5px; font-weight: 600; cursor: pointer; }
+.view button:hover, .view.save:hover { color: var(--fg); }
+.view.active { border-bottom-color: var(--accent); }
+.view.active button { color: var(--fg); }
+.view .remove { padding: 4px 6px; font-size: 12px; }
+.view.save { margin-left: auto; font-weight: 500; }
+.view.naming input { margin: 4px 0; padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); font-size: 14px; width: 14em; }
 .chip[aria-pressed="true"] { background: var(--surface); color: var(--fg); border-color: var(--muted); }
 
 /* Bands and shelves */

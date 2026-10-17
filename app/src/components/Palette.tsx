@@ -3,11 +3,11 @@ import { formatHours } from "@backlog/shared/bands";
 import { SORT_LABEL, type Entry, type SortKey } from "@backlog/shared/filter";
 import { normalizeName } from "@backlog/shared/names";
 import { rank } from "@backlog/shared/rank";
-import { STATUSES, STATUS_LABEL, type Status } from "@backlog/shared/types";
+import { STATUSES, STATUS_LABEL } from "@backlog/shared/types";
 import { account, refreshLibrary, signIn } from "../account.ts";
 import {
-  clearSelection, entries, exportBackup, openId, paletteOpen, selectAll, selection, setStatus, settingsOpen, shortcutsOpen,
-  sortKey, startFillIn, statuses, undo, updateSettings, type Theme,
+  applyView, clearSelection, entries, exportBackup, openId, paletteOpen, selectAll, selection, setStatus, settingsOpen, shortcutsOpen,
+  sortKey, startFillIn, statuses, undo, updateSettings, views, type Theme,
 } from "../store.ts";
 import { isMac } from "../util.ts";
 
@@ -31,10 +31,8 @@ function actions(): Item[] {
     { label: "Select all shown", keys: `${MOD}A`, run: selectAll },
     { label: "Undo", keys: `${MOD}Z`, run: undo },
   );
-  const show = (label: string, list: Status[]) => out.push({ label, run: () => (statuses.value = list) });
-  show("Show Backlog and Playing", ["backlog", "playing"]);
-  show("Show Finished", ["finished"]);
-  show("Show all statuses", STATUSES);
+  for (const v of views.value) out.push({ label: `View: ${v.name}`, run: () => applyView(v) });
+  out.push({ label: "Show all statuses", run: () => (statuses.value = STATUSES) });
   for (const [k, label] of Object.entries(SORT_LABEL)) out.push({ label: `Sort by ${label.toLowerCase()}`, run: () => (sortKey.value = k as SortKey) });
   if (account.value) out.push({ label: "Refresh library", run: () => void refreshLibrary() });
   else out.push({ label: "Sign in with Steam", run: signIn });

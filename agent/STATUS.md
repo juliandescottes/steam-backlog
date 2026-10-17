@@ -14,9 +14,9 @@ Updated 2026-10-17. Branch: `m2-speed-layer` (from `m3-accounts-sync`).
 
 Milestone 2. M3 was done first (decided 2026-10-17).
 
-Done: keyboard grid nav (`shared/grid.ts`, `focusTarget` scrolls unmounted cards into view), `?` shortcut sheet, bulk select (checkbox / `x`, shift range, Ctrl+A, bar at the bottom; selection keeps only shown games and clears after an action), command palette (`shared/rank.ts`; games + contextual actions).
+Done: keyboard grid nav (`shared/grid.ts`, `focusTarget` scrolls unmounted cards into view), `?` shortcut sheet, bulk select (checkbox / `x`, shift range, Ctrl+A, bar at the bottom; selection keeps only shown games and clears after an action), command palette (`shared/rank.ts`; games + contextual actions), smart views (`shared/views.ts`; built-ins, save/delete own, local only so far).
 
-Next: smart views, Now playing shelf.
+Next: sync views (ops of type "view", D1 `views`), Now playing shelf.
 
 Production check (2026-10-17, 761-game library): callback 594 ms, import 5.3 s wall / 26 ms CPU, sync 8–14 ms CPU, cron 3–4.5 s wall / 10–14 ms CPU. All over the free plan's 10 ms CPU but none failed; watch `wrangler tail` for "exceeded CPU" (fix: Workers Paid, or paged sync and smaller batches).
 
