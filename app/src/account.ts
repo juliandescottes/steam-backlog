@@ -12,7 +12,12 @@ export type Me = {
   id: string; steamId: string; handle: string | null; name: string; avatar: string | null; librarySyncedAt: number | null;
   shareLengths: boolean; profilePublic: boolean; showStats: boolean;
 };
-type Cursor = { since: number; catalogSince: number };
+/**
+ * Where the last sync left off. `schema` says what the client understood then: a client that didn't read lists yet
+ * moved past them, so a cursor from an older schema starts over with a full sync. Bump it when sync responses gain a kind of data.
+ */
+type Cursor = { since: number; catalogSince: number; schema?: number };
+const SCHEMA = 2; // 2: views, lists and items
 
 export const account = signal<Me | null>(null);
 /** Steam library import, shown full screen on first sign-in. */
@@ -199,12 +204,13 @@ export function syncNow(replace = false): Promise<boolean> {
   return running;
 }
 
-async function syncOnce(replace: boolean): Promise<boolean> {
+async function syncOnce(asked: boolean): Promise<boolean> {
   const who = account.value?.id;
   if (!who) return false;
-  // A full sync when asked, and to repair a signed-in browser that lost its games
-  const cursor = replace || !games.value.size ? { since: 0, catalogSince: 0 }
-    : (await db.getMeta<Cursor>("cursor")) ?? { since: 0, catalogSince: 0 };
+  // A full sync when asked, to repair a signed-in browser that lost its games, and after a schema change
+  const stored = await db.getMeta<Cursor>("cursor");
+  const replace = asked || !games.value.size || stored?.schema !== SCHEMA;
+  const cursor = replace ? { since: 0, catalogSince: 0 } : { since: stored!.since, catalogSince: stored!.catalogSince };
   const sent = outbox.slice(0, MAX_OPS);
   let r: SyncResponse;
   try {
@@ -225,7 +231,7 @@ async function syncOnce(replace: boolean): Promise<boolean> {
   applyServerLists(r.lists ?? [], r.items ?? [], outbox, replace);
   await db.removeOps([...done]);
   if (account.value?.id !== who) return false;
-  await db.setMeta("cursor", { since: r.rev, catalogSince: r.catalogAt } satisfies Cursor);
+  await db.setMeta("cursor", { since: r.rev, catalogSince: r.catalogAt, schema: SCHEMA } satisfies Cursor);
   if (outbox.length) again = true;
   return true;
 }

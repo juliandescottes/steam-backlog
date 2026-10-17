@@ -97,7 +97,7 @@ POST /api/sync
 → { rev: <new cursor>, catalogAt, games: [<Game>...] }
 ```
 
-Types and op validation in `shared/src/sync.ts`, server in `worker/src/sync.ts`, client in `app/src/account.ts`. Ops of type `game`, `view`, `list` and `item` (a game's place in a list, `deleted` to take it out); the response carries changed games, views, lists and items.
+The client's cursor carries a `schema` number (`app/src/account.ts`): when sync responses gain a kind of data, bumping it makes older cursors do one full sync, since older code moved past what it didn't read (lists were lost that way on 2026-10-17). Types and op validation in `shared/src/sync.ts`, server in `worker/src/sync.ts`, client in `app/src/account.ts`. Ops of type `game`, `view`, `list` and `item` (a game's place in a list, `deleted` to take it out); the response carries changed games, views, lists and items.
 
 - **Ops carry values, not actions** ("status = finished, finishedAt = …", not "finish"). Undo is just another op, and replaying one is harmless.
 - Ops are `game` (by appid) or `view` (by view id: name, filter, sort, position, `deleted`). Views are created on first op and only their owner's ops update them.

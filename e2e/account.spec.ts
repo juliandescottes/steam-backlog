@@ -300,3 +300,27 @@ test("public profile: off until turned on with a username, shows the lists picke
     await expect(viewer.locator("h1")).toHaveText("Profile not found", { timeout: 1000 });
   }).toPass({ timeout: 10_000 });
 });
+
+test("a browser that synced with older code, which skipped lists, gets them in full once", async ({ page }) => {
+  await signIn(page, steamId());
+  await expect(page.locator(".bands .game .name")).toHaveText(DEV_GAMES);
+  for (const name of ["Portal", "Terraria"]) await card(page, name).getByRole("checkbox").click();
+  await page.keyboard.press("a");
+  await page.getByRole("combobox", { name: "Find or create a list" }).fill("Skipped");
+  await page.keyboard.press("Enter");
+
+  // Wait for the sync, then make this browser look like one whose old code moved past the list's games
+  const idb = (fn: string) => page.evaluate(fn);
+  await expect.poll(() => idb(`new Promise(r => { const q = indexedDB.open("backlog"); q.onsuccess = () => {
+    const g = q.result.transaction("outbox").objectStore("outbox").count(); g.onsuccess = () => r(g.result); }; })`)).toBe(0);
+  await idb(`new Promise(r => { const q = indexedDB.open("backlog"); q.onsuccess = () => {
+    const tx = q.result.transaction(["listItems", "meta"], "readwrite");
+    tx.objectStore("listItems").clear();
+    const m = tx.objectStore("meta"); const c = m.get("cursor");
+    c.onsuccess = () => m.put({ since: c.result.since, catalogSince: c.result.catalogSince }, "cursor");
+    tx.oncomplete = () => r(null); }; })`);
+  await page.reload();
+  await page.getByRole("button", { name: "Lists" }).click();
+  await page.getByRole("link", { name: /Skipped/ }).click();
+  await expect(page.locator(".bands .game .name")).toHaveText(["Portal", "Terraria"]);
+});
