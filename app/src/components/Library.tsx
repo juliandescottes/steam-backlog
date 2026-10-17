@@ -4,7 +4,7 @@ import { STATUSES, STATUS_LABEL, type Status } from "@backlog/shared/types";
 import {
   editingId, played, query, settings, settingsOpen, sortKey, startFillIn, statuses, totals, visible,
 } from "../store.ts";
-import { thousands } from "../util.ts";
+import { count, thousands } from "../util.ts";
 import { Card } from "./Card.tsx";
 
 const MEASURE_TEXT = {
@@ -21,12 +21,12 @@ function Header() {
         <div class="eyebrow">Backlog</div>
         <button type="button" class="btn ghost" onClick={() => (settingsOpen.value = true)}>Settings</button>
       </div>
-      <h1>{thousands(t.left)} games, <em>{thousands(t.leftHours)} hours</em> to clear</h1>
+      <h1>{count(t.left, "game")}, <em>{count(t.leftHours, "hour")}</em> to clear</h1>
       <p class="lede">
         Shortest first, {MEASURE_TEXT[settings.value.measure]}.
         {t.unknown > 0 && <> Plus <button type="button" class="link" onClick={() => startFillIn()}>{t.unknown} without a length</button>.</>}
       </p>
-      <div class="progress" title={`${t.finished} finished, ${thousands(t.finishedHours)} h`}>
+      <div class="progress" title={`${t.finished} finished, ${thousands(t.finishedHours)}h`}>
         <div class="progress-bar" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(done * 100)}
           aria-label="Hours cleared"><i style={{ width: `${done * 100}%` }} /></div>
         <span>{t.finished} finished · {Math.round(done * 100)}% of hours cleared</span>
@@ -45,7 +45,7 @@ function BandIndex({ groups }: { groups: ReturnType<typeof groupByBand> }) {
       <div class="bar">
         {groups.map(({ band, entries }) => (
           <a key={band.id} href={`#${band.id}`} style={{ flex: entries.length, background: `var(${band.color})` }}
-            title={`${band.label}: ${entries.length}`} aria-label={`${band.label}, ${entries.length} games`} />
+            title={`${band.label}: ${entries.length}`} aria-label={`${band.label}, ${count(entries.length, "game")}`} />
         ))}
       </div>
       <div class="legend">
@@ -106,7 +106,7 @@ export function Library() {
             <section key={band.id} class="band" id={band.id} style={{ "--c": `var(${band.color})` }}>
               <div class="band-head">
                 <h2>{band.label}</h2>
-                <p>{entries.length} games{band.max != null && ` · ${thousands(hours)} h together`}</p>
+                <p>{count(entries.length, "game")}{band.max != null && ` · ${thousands(hours)}h together`}</p>
                 {band === UNKNOWN_BAND && (
                   <button type="button" class="btn primary" onClick={() => startFillIn(entries.map(e => e.game.appid))}>Fill in lengths</button>
                 )}

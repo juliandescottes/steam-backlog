@@ -24,12 +24,20 @@ export function bandOf(r: Resolved): Band {
   return TIMED_BANDS.find(b => r.hours! < b.max!)!;
 }
 
-/** Hours rounded to a quarter, as decimals ("1.75 h"), with a floor of 0.25 h. */
+/** Hours rounded to a quarter, as decimals ("1.75h"), with a floor of 0.25 h. */
 export function roundHours(h: number): number {
   return Math.max(0.25, Math.round(h * 4) / 4);
 }
 
-export function formatHours(h: number | null | undefined, approx = false): string {
+/** Below this, quarter hours matter ("1.75h"); above it, whole hours read better ("113h"). */
+export const PRECISE_BELOW = 3;
+
+/**
+ * Hours for display. Quarters under 3 h, whole hours above, unless `precise` asks for the stored
+ * quarter-hour value (detail panel, input preview).
+ */
+export function formatHours(h: number | null | undefined, approx = false, precise = false): string {
   if (h == null) return "–";
-  return `${approx ? "~" : ""}${roundHours(h)} h`;
+  const shown = precise || h < PRECISE_BELOW ? roundHours(h) : Math.round(h);
+  return `${approx ? "~" : ""}${shown}h`;
 }

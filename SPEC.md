@@ -21,7 +21,7 @@ Re-sync: a "Refresh library" action picks up newly bought games (they arrive as 
 - **Header:** "212 games · 3,140 h to clear", with a progress bar (finished hours / total hours).
 - **Now playing shelf:** horizontal row of games with status Playing, above the grid. Hidden when empty.
 - **Length bands:** like the prototype: stacked bar + legend; click a band to jump to it. Bands: <3, 3–6, 6–10, 10–20, 20–40, 40–80, 80+, No ending, Unknown.
-- **Cover card:** box art, hours badge (rounded to 0.25 h, colored by band), small status chip if not Backlog, played-hours marker if any. Hover/focus reveals quick actions (Playing / Finished / Dropped / Add to list).
+- **Cover card:** box art, hours badge (quarter hours under 3 h like `1.75h`, whole hours above, no space before the unit; colored by band), small status chip if not Backlog, played-hours marker if any. Hover/focus reveals quick actions (Playing / Finished / Dropped / Add to list).
 - **Click a cover** → detail panel (side sheet; on mobile, bottom sheet): name, art, length (Main / Main+Extras / Completionist when known), Steam playtime, status, lists it's in, personal note, links to Steam store and the length source page.
 - Games with no length data sit in the **Unknown** band. Filling them in is its own flow (§4).
 

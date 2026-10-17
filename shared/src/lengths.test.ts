@@ -72,10 +72,17 @@ describe("bands and formatting", () => {
     expect(band(3)).toBe("3-6");
     expect(band(80)).toBe("80-plus");
   });
-  it("rounds to quarters as decimals", () => {
-    expect(formatHours(1.8)).toBe("1.75 h");
-    expect(formatHours(0.05)).toBe("0.25 h");
-    expect(formatHours(6, true)).toBe("~6 h");
+  it("shows quarters under 3h and whole hours above", () => {
+    expect(formatHours(1.8)).toBe("1.75h");
+    expect(formatHours(0.05)).toBe("0.25h");
+    expect(formatHours(2.9)).toBe("3h");
+    expect(formatHours(3.25)).toBe("3h");
+    expect(formatHours(112.75, true)).toBe("~113h");
+    expect(formatHours(6, true)).toBe("~6h");
     expect(formatHours(null)).toBe("–");
+  });
+  it("keeps quarters everywhere when asked for precision", () => {
+    expect(formatHours(12.5, false, true)).toBe("12.5h");
+    expect(formatHours(112.75, true, true)).toBe("~112.75h");
   });
 });

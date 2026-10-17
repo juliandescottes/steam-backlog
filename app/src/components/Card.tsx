@@ -2,7 +2,8 @@ import { memo } from "preact/compat";
 import { bandOf, formatHours } from "@backlog/shared/bands";
 import type { Entry } from "@backlog/shared/filter";
 import { STATUS_LABEL, type Status } from "@backlog/shared/types";
-import { editingId, openId, setStatus } from "../store.ts";
+import { approxReason } from "../lengthText.ts";
+import { editingId, openId, setStatus, settings } from "../store.ts";
 import { playtime } from "../util.ts";
 import { Art } from "./Art.tsx";
 import { LengthEditor } from "./LengthEditor.tsx";
@@ -29,7 +30,8 @@ export const Card = memo(function Card({ e, editing }: { e: Entry; editing: bool
         {unknown
           ? <button type="button" class="hrs unknown" onClick={() => (editingId.value = editing ? null : g.appid)}
               aria-label={`Add a length for ${g.name}`} aria-expanded={editing}>?</button>
-          : <span class="hrs">{len.endless ? "∞" : formatHours(len.hours, len.approx)}</span>}
+          : <span class={`hrs${len.approx ? " approx" : ""}`} title={len.endless ? "No ending" : approxReason(e, settings.peek().measure) ?? undefined}>
+              {len.endless ? "∞" : formatHours(len.hours)}</span>}
         {g.status !== "backlog" && <span class="status-chip">{STATUS_LABEL[g.status]}</span>}
         <div class="quick" role="group" aria-label="Set status">
           {QUICK.map(q => (

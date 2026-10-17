@@ -4,7 +4,7 @@ import type { Measure } from "@backlog/shared/types";
 import {
   deleteEverything, games, importLengths, mergeLibrary, restoreBackup, settings, settingsOpen, showToast, updateSettings, type Theme,
 } from "../store.ts";
-import { download, readFile } from "../util.ts";
+import { count, download, readFile } from "../util.ts";
 
 function FilePick({ label, accept, onFile }: { label: string; accept: string; onFile: (text: string) => void }) {
   const input = useRef<HTMLInputElement>(null);
@@ -72,7 +72,7 @@ export function Settings() {
           <p class="row-actions">
             <FilePick label="Open library file" accept=".json,application/json" onFile={guard(text => {
               const r = mergeLibrary(parseLibrary(text));
-              showToast(`${r.added} games added, ${r.updated} updated`);
+              showToast(`${count(r.added, "game")} added, ${r.updated} updated`);
             })} />
             <FilePick label="Import lengths" accept=".json,.csv,application/json,text/csv" onFile={guard(text => {
               const r = importLengths(parseLengths(text));
@@ -90,7 +90,7 @@ export function Settings() {
           </p>
           {backup && (
             <div class="callout">
-              <p>Backup from {new Date(backup.exportedAt).toLocaleString()}: {backup.games.length} games,{" "}
+              <p>Backup from {new Date(backup.exportedAt).toLocaleString()}: {count(backup.games.length, "game")},{" "}
                 {backup.games.filter(g => g.status !== "backlog").length} with a status, {backup.games.filter(g => g.myKind).length} with your own length.</p>
               <p class="row-actions">
                 <button type="button" class="btn primary" onClick={async () => {

@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import { formatHours } from "@backlog/shared/bands";
-import { MIN_COUNT, SOURCE_LABEL } from "@backlog/shared/lengths";
+import { SOURCE_LABEL } from "@backlog/shared/lengths";
 import { STATUSES, STATUS_LABEL } from "@backlog/shared/types";
-import { byId, openId, setMyLength, setStatus, updateQuietly } from "../store.ts";
+import { approxReason } from "../lengthText.ts";
+import { byId, openId, setMyLength, setStatus, settings, updateQuietly } from "../store.ts";
 import { date, hltbSearchUrl, playtime, steamUrl } from "../util.ts";
 import { Art } from "./Art.tsx";
 import { LengthEditor } from "./LengthEditor.tsx";
@@ -22,11 +23,9 @@ export function Detail() {
 
   const { game: g, len } = e;
   const unknown = len.hours == null && !len.endless;
-  const source = len.source && [
-    SOURCE_LABEL[len.source],
-    len.source === "igdb" && g.igdb?.count != null && `${g.igdb.count} submission${g.igdb.count === 1 ? "" : "s"}`,
-    len.approx && (len.source === "igdb" && (g.igdb?.count ?? 0) < MIN_COUNT ? "few submissions, approximate" : "approximate"),
-  ].filter(Boolean).join(" · ");
+  const source = !len.source ? null
+    : len.approx ? `Approximate · ${approxReason(e, settings.value.measure)}`
+    : [SOURCE_LABEL[len.source], len.source === "igdb" && g.igdb?.count != null && `${g.igdb.count} submissions`].filter(Boolean).join(" · ");
 
   return (
     <div class="sheet-backdrop" onClick={ev => ev.target === ev.currentTarget && (openId.value = null)}>
@@ -51,13 +50,13 @@ export function Detail() {
 
         <section class="detail-section">
           <h3>Length</h3>
-          <p class="big-len">{len.endless ? "No ending" : unknown ? "Unknown" : formatHours(len.hours, len.approx)}
+          <p class="big-len">{len.endless ? "No ending" : unknown ? "Unknown" : formatHours(len.hours, len.approx, true)}
             {source && <span class="source">{source}</span>}</p>
           {len.lengths && (
             <dl class="len-table">
-              <div><dt>Main story</dt><dd>{formatHours(len.lengths.main)}</dd></div>
-              <div><dt>Main + Extras</dt><dd>{formatHours(len.lengths.main_extra)}</dd></div>
-              <div><dt>Completionist</dt><dd>{formatHours(len.lengths.comp)}</dd></div>
+              <div><dt>Main story</dt><dd>{formatHours(len.lengths.main, false, true)}</dd></div>
+              <div><dt>Main + Extras</dt><dd>{formatHours(len.lengths.main_extra, false, true)}</dd></div>
+              <div><dt>Completionist</dt><dd>{formatHours(len.lengths.comp, false, true)}</dd></div>
             </dl>
           )}
           {unknown || editing

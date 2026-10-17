@@ -16,7 +16,7 @@ A working prototype exists: `backlog/index.html`, built by `tools/build.py` from
 - Games grouped into length bands: under 3 h, 3-6, 6-10, 10-20, 20-40, 40-80, 80+, no data. A stacked bar plus legend at the top jumps to each band.
 - Box art covers in a grid. Wide header art falls back with a blurred background. Hours badge on each cover, styled by band color.
 - Name filter, "only uncertain matches" toggle, dark/light themes, works at phone width.
-- Hours shown as decimals rounded to 0.25 (e.g. `1.75 h`, not fractions). User preference.
+- Hours shown as decimals, not fractions. User preference: quarter-hour precision only matters under 3 h (`1.75h`); from 3 h, badges show whole hours (`113h`), with no space before the unit. Lengths are still stored to the quarter hour, and the detail panel shows that value.
 - Covers link to the Steam store page; times link to the HLTB page.
 
 Data already collected (in `tools/`): `hltb_20_-_Not_started.csv` (names, app IDs), `hltb_results.json` (HLTB times keyed by Steam app ID). The `art/` folder (341 covers) is not in the repo; the real app loads covers from Steam's CDN instead.

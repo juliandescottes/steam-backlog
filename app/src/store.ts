@@ -181,7 +181,7 @@ export function setMyLength(appid: number, my: Lengths | null, kind: LenKind | n
   const ps = patches([appid], () => ({ my, myKind: kind }));
   const label = kind === "endless" ? "no ending"
     : !my ? "length removed"
-    : formatHours(my[settings.value.measure] ?? my.main_extra ?? my.main ?? my.comp, kind === "approx");
+    : formatHours(my[settings.value.measure] ?? my.main_extra ?? my.main ?? my.comp, kind === "approx", true);
   run(`${nameOf(appid)}: ${label}`, ps);
 }
 

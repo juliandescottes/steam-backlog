@@ -20,7 +20,10 @@ test("opens a library file and groups games by length", async ({ page }) => {
   await expect(page.locator("h1")).toHaveText(/6 games, 107 hours to clear/i);
   await expect(band(page, "under-3")).toContainText("Short One");
   await expect(band(page, "10-20")).toContainText("Mid Game");
-  await expect(card(page, "Long Haul").locator(".hrs")).toHaveText("~90 h"); // 1 IGDB submission
+  const longHaul = card(page, "Long Haul").locator(".hrs");
+  await expect(longHaul).toHaveText("90h");
+  await expect(longHaul).toHaveClass(/approx/); // 1 IGDB submission
+  await expect(longHaul).toHaveAttribute("title", "IGDB, only 1 submission");
   await expect(band(page, "unknown").locator(".game")).toHaveCount(3);
   await expect(card(page, "Sandbox & Friends")).toBeVisible(); // entity decoded
 });
@@ -53,7 +56,7 @@ test("fill-in mode: typed time, rough guess, no ending", async ({ page }) => {
 
   await expect(dialog.locator("h3")).toHaveText("Mystery B"); // played games come first
   await page.keyboard.type("12h30");
-  await expect(dialog.locator(".len-preview")).toHaveText("→ 12.5 h");
+  await expect(dialog.locator(".len-preview")).toHaveText("→ 12.5h");
   await page.keyboard.press("Enter");
 
   await expect(dialog.locator("h3")).toHaveText("Mystery A");
@@ -65,7 +68,8 @@ test("fill-in mode: typed time, rough guess, no ending", async ({ page }) => {
   await expect(dialog).toContainText("3 lengths added");
   await dialog.getByRole("button", { name: "Done" }).click();
   await expect(band(page, "10-20")).toContainText("Mystery B");
-  await expect(card(page, "Mystery A").locator(".hrs")).toHaveText("~8 h");
+  await expect(card(page, "Mystery A").locator(".hrs")).toHaveText("8h");
+  await expect(card(page, "Mystery A").locator(".hrs")).toHaveAttribute("title", "Your rough guess");
   await expect(band(page, "no-ending")).toContainText("Sandbox & Friends");
   await expect(band(page, "unknown")).toHaveCount(0);
 });
@@ -94,17 +98,17 @@ test("paste a times block into the inline editor", async ({ page }) => {
     data.setData("text", "Main Story\n5 Hours\n\nMain + Extras\n7½ Hours\n\nCompletionist\n9 Hours");
     el.dispatchEvent(new ClipboardEvent("paste", { clipboardData: data, bubbles: true, cancelable: true }));
   });
-  await expect(page.locator(".popover .len-preview")).toHaveText("→ Main 5 h · Main + Extras 7.5 h · Completionist 9 h");
+  await expect(page.locator(".popover .len-preview")).toHaveText("→ Main 5h · Main + Extras 7.5h · Completionist 9h");
   await input.press("Enter");
   await expect(band(page, "6-10")).toContainText("Mystery A");
-  await expect(card(page, "Mystery A").locator(".hrs")).toHaveText("7.5 h");
+  await expect(card(page, "Mystery A").locator(".hrs")).toHaveText("8h"); // whole hours from 3h
 });
 
 test("detail panel edits status and survives a reload", async ({ page }) => {
   await openLibrary(page);
   await card(page, "Long Haul").locator("button.cover").click();
   const sheet = page.getByRole("dialog", { name: "Long Haul" });
-  await expect(sheet).toContainText("IGDB · 1 submission · few submissions, approximate");
+  await expect(sheet).toContainText("Approximate · IGDB, only 1 submission");
   await sheet.getByRole("button", { name: "Playing" }).click();
   await sheet.getByRole("textbox").fill("Start after the holidays");
   await page.keyboard.press("Escape");
@@ -129,7 +133,7 @@ test("import lengths from CSV and export a backup", async ({ page }) => {
   expect(backup.games.find((g: any) => g.appid === 4)).toMatchObject({ my: { main_extra: 7 }, myKind: "exact" });
 
   await page.keyboard.press("Escape");
-  await expect(card(page, "Mystery A").locator(".hrs")).toHaveText("7 h");
+  await expect(card(page, "Mystery A").locator(".hrs")).toHaveText("7h");
 });
 
 test("no horizontal scrolling at phone width", async ({ page }) => {

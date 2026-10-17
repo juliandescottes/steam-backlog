@@ -18,9 +18,10 @@ type Props = {
 function preview(p: ParsedLength | null, text: string): string {
   if (!text.trim()) return "";
   if (!p) return "Not a length yet";
-  if (p.kind === "single") return `→ ${formatHours(p.hours)}`;
+  if (p.kind === "single") return `→ ${formatHours(p.hours, false, true)}`;
   const { main, main_extra, comp } = p.lengths;
-  return `→ Main ${formatHours(main)} · Main + Extras ${formatHours(main_extra)} · Completionist ${formatHours(comp)}`;
+  const f = (h: number | null) => formatHours(h, false, true);
+  return `→ Main ${f(main)} · Main + Extras ${f(main_extra)} · Completionist ${f(comp)}`;
 }
 
 /** The hours input used on cards, in the detail panel and in fill-in mode (SPEC §4). */

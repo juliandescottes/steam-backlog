@@ -8,9 +8,11 @@ export const headerUrl = (appid: number) => `${ART}/${appid}/header.jpg`;
 export const isMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
 export const ALT = isMac ? "⌥" : "Alt+";
 
-export const playtime = (min: number) => (min < 60 ? `${min} min` : `${Math.round((min / 60) * 10) / 10} h`);
+export const playtime = (min: number) => (min < 60 ? `${min}min` : `${Math.round((min / 60) * 10) / 10}h`);
 export const date = (ms: number | null) => (ms ? new Date(ms).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }) : "–");
 export const thousands = (n: number) => Math.round(n).toLocaleString("en");
+/** "1 game", "342 games" */
+export const count = (n: number, word: string) => `${thousands(n)} ${word}${Math.round(n) === 1 ? "" : "s"}`;
 
 export function readFile(file: File): Promise<string> {
   return file.text();
