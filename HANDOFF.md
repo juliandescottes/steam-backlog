@@ -64,6 +64,11 @@ The detailed user-facing spec is in `SPEC.md` (written 2026-10-17). It supersede
 - Covers are the main interface. A few good fonts, restraint, no ads or social features.
 - Keep the prototype's visual direction; it's already a better baseline than existing tools.
 
+## Status (2026-10-17)
+
+- Milestone 0 (IGDB coverage) is done; results in `TECH.md` §8.
+- Milestone 1 (local app) is built on branch `m1-local-app`: Preact app with the prototype's look, statuses with undo, filters/sort/search, detail panel, fill-in mode for missing lengths, lengths import, backup export/restore, IndexedDB persistence. 47 unit tests, 9 Playwright tests. Not done yet: deploying to Cloudflare Pages (needs an account), and the 3,000-game performance check.
+
 ## Roadmap
 
 1. **Prototype + statuses.** Yesterday's page with statuses stored in IndexedDB, plus JSON export/import for backups. Static site.

@@ -154,7 +154,7 @@ POST /api/sync
 
 The result carries its source and an approximate flag for the badge and detail panel.
 
-**Fill-in input** (`shared/length-input.ts`, unit-tested): parses `12`, `12.5`, `12,5`, `12½`, `12h30`, `12:30`, `45m`, and pasted HowLongToBeat-style blocks (`Main Story … Main + Extras … Completionist …`, values with `½` or fractions, "Hours"/"Mins"). Rounds to 0.25 h. Band keys `1`–`7` map to typical values: 2, 4.5, 8, 15, 30, 60, 100 h.
+**Fill-in input** (`shared/length-input.ts`, unit-tested): parses `12`, `12.5`, `12,5`, `12½`, `12h30`, `12:30`, `45m`, and pasted HowLongToBeat-style blocks (`Main Story … Main + Extras … Completionist …`, values with `½` or fractions, "Hours"/"Mins"). Rounds to 0.25 h. Band shortcuts `Alt+1`–`Alt+7` map to typical values: 2, 4.5, 8, 15, 30, 60, 100 h.
 
 **Lengths import** (Settings): JSON or CSV of `appid` + hours (or `main` / `main_extra` / `completionist`), applied as `my_*` through the normal sync. A dev script in `tools/` converts `hltb_results.json` (respecting `WRONG` in `build.py`) into that format.
 

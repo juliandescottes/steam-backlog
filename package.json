@@ -1,0 +1,22 @@
+{
+  "name": "backlog",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "app",
+    "shared"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w app",
+    "build": "npm run build -w app",
+    "test": "vitest run",
+    "typecheck": "tsc -p shared && tsc -p app",
+    "library": "node tools/make_library.ts",
+    "e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  }
+}

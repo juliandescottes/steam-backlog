@@ -35,12 +35,13 @@ IGDB has no time for a large share of many libraries (38% of the prototype colle
 
 **Fill-in mode.** A focused queue, one game at a time:
 - Shows the cover, name, Steam playtime, a progress counter ("23 / 111"), and a focused hours input.
-- **Look up** (`o`) opens the HowLongToBeat search for that name in a new tab. Coming back to the tab puts focus back in the input.
+- Shortcuts use Alt (⌥ on Mac), because the input itself takes digits and letters (`12h30`, `45m`).
+- **Look up** (`Alt+O`) opens the HowLongToBeat search for that name in a new tab. Coming back to the tab puts focus back in the input.
 - Type the hours and press `Enter` to save and move to the next game. Accepted forms: `12`, `12.5`, `12,5`, `12½`, `12h30`, `12:30`, `45m`. Stored rounded to 0.25 h.
 - **Paste a times block.** Pasting the times copied from a game page ("Main Story 8 Hours Main + Extras 12½ Hours Completionist 20 Hours") fills Main, Main + Extras and Completionist at once.
-- **Rough guess.** Keys `1`–`7` pick a band (Under 3 h … 80 h and up). Stores the band's typical value, marked approximate (shown as "~6 h").
-- **No ending** (`n`): for sandbox, multiplayer and endless games (Gang Beasts, Wobbledogs). They move to the No ending band and leave the hours totals.
-- **Skip** (`s` or `Tab`): skipped games return at the end of the queue. `Esc` exits; progress is kept and each entry can be undone.
+- **Rough guess.** `Alt+1`–`Alt+7` pick a band (Under 3 h … 80 h and up). Stores the band's typical value, marked approximate (shown as "~6 h").
+- **No ending** (`Alt+N`): for sandbox, multiplayer and endless games (Gang Beasts, Wobbledogs). They move to the No ending band and leave the hours totals.
+- **Skip** (`Tab`): skipped games return at the end of the queue. `Esc` exits; progress is kept and each entry can be undone.
 - Order: games with Steam playtime first, then by name. Can also run on a selection (bulk select → "Fill in lengths").
 
 **Everywhere else**

@@ -1,0 +1,73 @@
+import { describe, expect, it } from "vitest";
+import { FileFormatError, makeExport, newGame, parseExport, parseLengths, parseLibrary } from "./files.ts";
+import { compare, matches, type Entry } from "./filter.ts";
+import { resolveLength } from "./lengths.ts";
+import { decodeEntities, normalizeName } from "./names.ts";
+
+describe("library file", () => {
+  it("parses games and decodes entities in names", () => {
+    const games = parseLibrary(JSON.stringify({
+      format: "backlog-library", version: 1,
+      games: [{ appid: 1, name: "Command &amp; Conquer", igdb: { main: 10, main_extra: 12.3, comp: null, count: 4 } }],
+    }));
+    expect(games[0]).toMatchObject({ appid: 1, name: "Command & Conquer", playtimeMin: 0, igdb: { main_extra: 12.25, count: 4 } });
+  });
+  it("rejects other JSON", () => {
+    expect(() => parseLibrary("{}")).toThrow(FileFormatError);
+    expect(() => parseLibrary("nope")).toThrow(FileFormatError);
+  });
+});
+
+describe("lengths file", () => {
+  it("parses JSON", () => {
+    const text = JSON.stringify({ format: "backlog-lengths", version: 1, lengths: [{ appid: 5, main: 1, main_extra: 2.1, completionist: null }, { appid: 6 }] });
+    expect(parseLengths(text)).toEqual([{ appid: 5, lengths: { main: 1, main_extra: 2, comp: null } }]);
+  });
+  it("parses CSV with an hours column", () => {
+    expect(parseLengths("appid,hours\n10,\"12,5\"\n11,\n")).toEqual([{ appid: 10, lengths: { main: null, main_extra: 12.5, comp: null } }]);
+  });
+  it("parses CSV with separate measures", () => {
+    expect(parseLengths("steam_appid,main,main_extra,completionist\r\n10,1,2,3")).toEqual([
+      { appid: 10, lengths: { main: 1, main_extra: 2, comp: 3 } },
+    ]);
+  });
+  it("needs an appid column", () => {
+    expect(() => parseLengths("name,hours\nx,1")).toThrow(FileFormatError);
+  });
+});
+
+describe("export", () => {
+  it("round-trips the user's fields", () => {
+    const g = { ...newGame({ appid: 7, name: "Seven" }, 1000), status: "finished" as const, finishedAt: 2000, note: "great",
+      my: { main: null, main_extra: 3, comp: null }, myKind: "exact" as const };
+    const back = parseExport(JSON.stringify(makeExport([g], { theme: "dark" })));
+    expect(back.games[0]).toEqual({ appid: 7, name: "Seven", status: "finished", statusAt: null, finishedAt: 2000, note: "great",
+      my: { main: null, main_extra: 3, comp: null }, myKind: "exact", playtimeMin: 0, addedAt: 1000 });
+    expect(back.settings).toEqual({ theme: "dark" });
+  });
+});
+
+describe("names", () => {
+  it("decodes entities", () => expect(decodeEntities("A &amp; B &#39;x&#x27; &bogus;")).toBe("A & B 'x' &bogus;"));
+  it("normalizes for search", () => expect(normalizeName("Pokémon™: Édition — GOTY")).toBe("pokemon edition goty"));
+});
+
+describe("filter and sort", () => {
+  const entry = (appid: number, name: string, hours: number | null, over = {}): Entry => {
+    const game = { ...newGame({ appid, name, igdb: hours == null ? null : { main: null, main_extra: hours, comp: null, count: 9 } }, appid), ...over };
+    return { game, len: resolveLength(game, "main_extra"), key: normalizeName(name) };
+  };
+  const all = [entry(1, "Beta", 10), entry(2, "Alpha", null), entry(3, "Gamma", 2, { status: "finished", playtimeMin: 90 }), entry(4, "Delta", 10)];
+
+  it("sorts by length with unknown last and names breaking ties", () => {
+    expect([...all].sort(compare("length")).map(e => e.game.name)).toEqual(["Gamma", "Beta", "Delta", "Alpha"]);
+  });
+  it("filters by status, search, played and missing length", () => {
+    const names = (f: Parameters<typeof matches>[1]) => all.filter(e => matches(e, f)).map(e => e.game.name);
+    expect(names({ statuses: ["backlog"] })).toEqual(["Beta", "Alpha", "Delta"]);
+    expect(names({ q: "ALP" })).toEqual(["Alpha"]);
+    expect(names({ played: "played" })).toEqual(["Gamma"]);
+    expect(names({ needsLength: true })).toEqual(["Alpha"]);
+    expect(names({ maxHours: 5 })).toEqual(["Gamma"]);
+  });
+});

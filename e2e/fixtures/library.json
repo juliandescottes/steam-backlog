@@ -1,0 +1,12 @@
+{
+  "format": "backlog-library",
+  "version": 1,
+  "games": [
+    { "appid": 1, "name": "Short One", "igdb": { "main": 1.5, "main_extra": 2, "comp": 3, "count": 5 } },
+    { "appid": 2, "name": "Mid Game", "igdb": { "main": 12, "main_extra": 15, "comp": 25, "count": 8 } },
+    { "appid": 3, "name": "Long Haul", "igdb": { "main": 60, "main_extra": 90, "comp": 150, "count": 1 } },
+    { "appid": 4, "name": "Mystery A" },
+    { "appid": 5, "name": "Mystery B", "playtimeMin": 120 },
+    { "appid": 6, "name": "Sandbox &amp; Friends" }
+  ]
+}

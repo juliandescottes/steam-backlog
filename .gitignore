@@ -1,2 +1,8 @@
 tools/igdb_results.json
 tools/steamspy_cache.json
+node_modules/
+dist/
+tools/out/
+*.tsbuildinfo
+test-results/
+playwright-report/

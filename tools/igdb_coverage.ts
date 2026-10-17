@@ -51,7 +51,7 @@ type Result = {
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 const hours = (s: unknown) => (typeof s === "number" && s > 0 ? Math.round((s / 3600) * 100) / 100 : null);
 const normalize = (s: string) =>
-  s.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[™®©]/g, "").replace(/\(\d{4}\)/g, "")
+  s.replace(/[™®©]/g, "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/\(\d{4}\)/g, "")
     .toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 const quote = (s: string) => `"${s.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
 
