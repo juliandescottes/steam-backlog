@@ -172,3 +172,45 @@ test("offers once to finish games played past 80% of their length", async ({ pag
   await expect(page.locator("h1")).toHaveText(/^6 games/);
   await expect(triage).toHaveCount(0); // asked once
 });
+
+test("arrow keys move between games across bands; ? lists the shortcuts", async ({ page }) => {
+  await openLibrary(page);
+  const focused = () => page.evaluate(() => document.activeElement?.closest(".game")?.querySelector(".name")?.textContent);
+  await page.keyboard.press("ArrowRight"); // lands on the first game on screen
+  expect(await focused()).toBe("Short One");
+  await page.keyboard.press("ArrowDown"); // next band, same column
+  expect(await focused()).toBe("Mid Game");
+  await page.keyboard.press("ArrowRight");
+  expect(await focused()).toBe("Long Haul");
+  await page.keyboard.press("ArrowUp");
+  expect(await focused()).toBe("Mid Game");
+
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#detail-title")).toHaveText("Mid Game");
+  await page.keyboard.press("Escape");
+  await expect.poll(focused).toBe("Mid Game");
+  await page.keyboard.press("f");
+  await expect(page.locator(".toast")).toContainText("Mid Game → Finished");
+
+  await page.keyboard.press("?");
+  await expect(page.getByRole("dialog", { name: "Shortcuts" })).toContainText("Move between games");
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog", { name: "Shortcuts" })).toHaveCount(0);
+});
+
+test("keyboard focus reaches games far down a long shelf", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 700 });
+  await page.route("**/*steamstatic.com/**", r => r.abort());
+  await page.goto("/");
+  const games = Array.from({ length: 300 }, (_, i) => ({ appid: 1000 + i, name: `Game ${String(i).padStart(3, "0")}`, igdb: { main: 5, main_extra: 6, comp: 9, count: 9 } }));
+  await page.setInputFiles("input[type=file]", { name: "l.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify({ format: "backlog-library", version: 1, games })) });
+  await expect(page.locator("h1")).toHaveText(/^300 games/);
+  await page.keyboard.press("ArrowRight");
+  for (let i = 0; i < 30; i++) await page.keyboard.press("ArrowDown");
+  const cols = await page.evaluate(() => getComputedStyle(document.querySelector(".shelf")!).gridTemplateColumns.split(" ").length);
+  const name = `Game ${String(Math.min(30 * cols, 299 - (299 % cols))).padStart(3, "0")}`;
+  await expect.poll(() => page.evaluate(() => document.activeElement?.closest(".game")?.querySelector(".name")?.textContent)).toBe(name);
+  const box = await page.locator(".game", { hasText: name }).boundingBox();
+  expect(box!.y).toBeGreaterThanOrEqual(0);
+  expect(box!.y + box!.height).toBeLessThanOrEqual(700);
+});

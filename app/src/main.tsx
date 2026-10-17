@@ -5,10 +5,11 @@ import { FillIn } from "./components/FillIn.tsx";
 import { Import } from "./components/Import.tsx";
 import { Library } from "./components/Library.tsx";
 import { Settings } from "./components/Settings.tsx";
+import { Shortcuts } from "./components/Shortcuts.tsx";
 import { Toast } from "./components/Toast.tsx";
 import { Welcome } from "./components/Welcome.tsx";
 import { installKeys } from "./keys.ts";
-import { fillInQueue, games, load, loaded, openId, settingsOpen } from "./store.ts";
+import { fillInQueue, games, load, loaded, openId, settingsOpen, shortcutsOpen } from "./store.ts";
 import "./styles.css";
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
       {openId.value != null && <Detail />}
       {settingsOpen.value && <Settings />}
       {fillInQueue.value && <FillIn />}
+      {shortcutsOpen.value && <Shortcuts />}
       <Toast />
     </>
   );

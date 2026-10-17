@@ -1,5 +1,5 @@
 import { batch, computed, effect, signal } from "@preact/signals";
-import { formatHours } from "@backlog/shared/bands";
+import { BANDS, bandOf, formatHours, type Band } from "@backlog/shared/bands";
 import { newGame, type ExportGame, type LengthsEntry, type LibraryGame } from "@backlog/shared/files";
 import { compare, matches, type Entry, type Filter, type SortKey } from "@backlog/shared/filter";
 import { resolveLength } from "@backlog/shared/lengths";
@@ -100,10 +100,33 @@ export const visible = computed(() => {
   return entries.value.filter(e => matches(e, f)).sort(compare(sortKey.value));
 });
 
+/** What the library shows: one shelf per length band, or a single one for other sorts. */
+export const shelves = computed<{ band: Band | null; entries: Entry[] }[]>(() => {
+  const list = visible.value;
+  if (sortKey.value !== "length") return list.length ? [{ band: null, entries: list }] : [];
+  return BANDS.map(band => ({ band, entries: list.filter(e => bandOf(e.len) === band) })).filter(s => s.entries.length);
+});
+
 export const openId = signal<number | null>(null);
+/** A card to focus: its shelf scrolls it into view, focuses it once mounted, then clears this. */
+export const focusTarget = signal<number | null>(null);
 export const editingId = signal<number | null>(null); // inline length editor on a card
 export const fillInQueue = signal<number[] | null>(null);
 export const settingsOpen = signal(false);
+export const shortcutsOpen = signal(false);
+
+// Closing the detail panel returns focus to its card
+let lastOpen: number | null = null;
+effect(() => {
+  const id = openId.value;
+  if (id == null && lastOpen != null) focusTarget.value = lastOpen;
+  lastOpen = id;
+});
+// A target that isn't shown (filtered out, finished) would otherwise grab focus when it comes back
+effect(() => {
+  const t = focusTarget.value;
+  if (t != null && !visible.value.some(e => e.game.appid === t)) focusTarget.value = null;
+});
 
 /** Open games without a length: ones with Steam playtime first, then by name. */
 export function startFillIn(only?: number[]) {

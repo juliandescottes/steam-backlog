@@ -1,8 +1,8 @@
-import { BANDS, UNKNOWN_BAND, bandOf } from "@backlog/shared/bands";
+import { UNKNOWN_BAND, type Band } from "@backlog/shared/bands";
 import { SORT_LABEL, type Entry, type SortKey } from "@backlog/shared/filter";
 import { STATUSES, STATUS_LABEL, type Status } from "@backlog/shared/types";
 import {
-  dismissTriage, finishPlayed, played, query, settings, settingsOpen, sortKey, startFillIn, statuses, totals, triageCandidates, triaged, visible,
+  dismissTriage, finishPlayed, played, query, settings, settingsOpen, shelves, sortKey, startFillIn, statuses, totals, triageCandidates, triaged, visible,
 } from "../store.ts";
 import { count, thousands } from "../util.ts";
 import { Shelf } from "./Shelf.tsx";
@@ -54,11 +54,7 @@ function Triage() {
   );
 }
 
-function groupByBand(list: Entry[]) {
-  return BANDS.map(b => ({ band: b, entries: list.filter(e => bandOf(e.len) === b) })).filter(g => g.entries.length);
-}
-
-function BandIndex({ groups }: { groups: ReturnType<typeof groupByBand> }) {
+function BandIndex({ groups }: { groups: { band: Band; entries: Entry[] }[] }) {
   return (
     <nav class="index" aria-label="Length bands">
       <div class="bar">
@@ -104,18 +100,19 @@ function Toolbar() {
 
 export function Library() {
   const list = visible.value;
+  const groups = shelves.value;
   const byLength = sortKey.value === "length";
-  const groups = byLength ? groupByBand(list) : [];
+  const bands = groups.filter((g): g is { band: Band; entries: Entry[] } => g.band != null);
 
   return (
     <div class="wrap">
       <Header />
       <Triage />
-      {byLength && groups.length > 0 && <BandIndex groups={groups} />}
+      {byLength && bands.length > 0 && <BandIndex groups={bands} />}
       <Toolbar />
       <main class="bands">
         {list.length === 0 && <p class="empty">No games match. Try other statuses or clear the search.</p>}
-        {byLength ? groups.map(({ band, entries }) => {
+        {byLength ? bands.map(({ band, entries }) => {
           const hours = entries.reduce((s, e) => s + (e.len.hours ?? 0), 0);
           return (
             <section key={band.id} class="band" id={band.id} style={{ "--c": `var(${band.color})` }}>
@@ -129,7 +126,7 @@ export function Library() {
               <Shelf list={entries} />
             </section>
           );
-        }) : list.length > 0 && <Shelf list={list} />}
+        }) : groups.map(g => <Shelf key="all" list={g.entries} />)}
       </main>
       <footer>Lengths from IGDB and from you. Box art from Steam. Your data stays in this browser; back it up from Settings.</footer>
     </div>

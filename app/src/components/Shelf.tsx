@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
 import type { Entry } from "@backlog/shared/filter";
-import { editingId } from "../store.ts";
+import { editingId, focusTarget } from "../store.ts";
 import { Card } from "./Card.tsx";
 
 const OVERSCAN = 1; // viewport heights rendered above and below the screen
@@ -41,6 +41,24 @@ export function Shelf({ list }: { list: Entry[] }) {
   };
 
   useLayoutEffect(() => update.current());
+
+  // Keyboard focus on a card of this shelf: scroll its row into view first if it isn't mounted
+  const target = focusTarget.value;
+  useLayoutEffect(() => {
+    if (target == null || !rows || !ref.current) return;
+    const i = list.findIndex(e => e.game.appid === target);
+    if (i < 0) return;
+    const cover = ref.current.querySelector<HTMLElement>(`[data-appid="${target}"] .cover`);
+    if (cover) {
+      cover.focus({ preventScroll: true });
+      cover.closest(".game")!.scrollIntoView({ block: "nearest" });
+      focusTarget.value = null;
+    } else {
+      const rowTop = ref.current.getBoundingClientRect().top + Math.floor(i / rows.cols) * rows.pitch;
+      window.scrollBy(0, rowTop - window.innerHeight / 3);
+      update.current();
+    }
+  }, [target, rows, list]);
 
   useEffect(() => {
     let frame = 0;

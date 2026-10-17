@@ -98,11 +98,12 @@ section.band { display: grid; gap: 14px; scroll-margin-top: 72px; }
 @media (max-width: 600px) {
   .shelf { --card-text: 60px; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 18px 10px; }
   .tools { position: static; }
+  .game { --tools-h: 16px; }
   .name { font-size: 13px; }
 }
 
 /* Cards */
-.game { position: relative; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.game { position: relative; display: grid; gap: 8px; align-content: start; min-width: 0; scroll-margin: var(--tools-h, 80px) 0 16px; }
 .game:has(.popover) { z-index: 10; }
 .cover-wrap { position: relative; }
 .cover { position: relative; display: block; width: 100%; aspect-ratio: 2 / 3; padding: 0; border: 0; border-radius: 4px; overflow: hidden;
@@ -196,6 +197,11 @@ textarea { width: 100%; padding: 10px 12px; border-radius: 6px; border: 1px soli
 .fill-top h2 { margin: 0; font: 800 28px/1 var(--display); text-transform: uppercase; }
 .fill-top .count { font: 700 13px/1 var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
 .fill-top .btn { margin-left: auto; }
+.shortcuts { width: min(560px, calc(100% - 32px)); }
+.shortcuts h3 { margin: 0 0 8px; font: 700 12px/1 var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.shortcuts dl { margin: 0; display: grid; gap: 6px; }
+.shortcuts dl div { display: grid; grid-template-columns: 150px 1fr; gap: 12px; align-items: baseline; }
+.shortcuts dd { margin: 0; }
 .fill-body { display: grid; grid-template-columns: 150px 1fr; gap: 22px; align-items: start; }
 .fill-cover { cursor: default; }
 .fill-main { display: grid; gap: 12px; min-width: 0; }
