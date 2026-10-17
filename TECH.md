@@ -190,9 +190,11 @@ The result carries its source and an approximate flag for the badge and detail p
 
 ## 12. Deployment
 
-- `wrangler` for the Worker, static assets and D1 migrations; `npm run deploy` builds and deploys. Preview deployments per branch (Workers Builds from GitHub), with their own D1 database, from milestone 3.
+- `wrangler` for the Worker, static assets and D1 migrations; `npm run deploy` builds and deploys. Preview deployments per branch (Workers Builds from GitHub, own D1 database): planned, not set up.
 - Dashboard-only settings on the `baquelogue.com` zone: Always Use HTTPS; Redirect Rule `https://www.*` → `https://${1}` (301, query kept) with a proxied `www` A record to `192.0.2.1`.
-- Secrets: `STEAM_API_KEY`, `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET`.
+- D1 `baquelogue` (`database_id` in `wrangler.jsonc`); `npx wrangler d1 migrations apply baquelogue --remote` before deploying a new migration. Local dev data lives in a file named after that id.
+- Secrets (`wrangler secret put`, never `secret bulk .dev.vars`, which has `DEV_LOGIN`): `STEAM_API_KEY`, `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET`.
+- Cron Triggers need a workers.dev subdomain on the account (created by opening Workers & Pages once), even with `workers_dev: false`.
 - Local development: `npm run dev:api` (local D1 migrations + `wrangler dev` on 8790) next to `npm run dev`; Vite proxies `/api`. `.dev.vars` sets `DEV_LOGIN=true`: `POST /api/auth/dev` signs in without Steam, and without `STEAM_API_KEY` the import returns a fixed five-game library. `--test-scheduled` lets you trigger a cron run: `POST /cdn-cgi/local/explorer/api/local/scheduled?worker=baquelogue` with `{"cron":"* * * * *"}` (`/__scheduled` is shadowed by the static assets). Worker tests run in Node against a local D1 through wrangler's `getPlatformProxy` (`@cloudflare/vitest-pool-workers` needs vitest 4).
 
 ## 13. Milestones
@@ -209,7 +211,8 @@ Each one ends with something usable.
 
 - **Unknown lengths** will be common for older and niche libraries (38% here). The fill-in flow has to be fast, and community lengths only help once there are users.
 - **Community abuse:** anyone can submit lengths. Medians, one entry per user, and the 3-entry threshold limit it for v1; add per-user rate limits if needed.
-- **Steam API limits:** 100,000 calls per day per key, far above what a personal project needs. `GetOwnedGames` from Cloudflare IPs is untested; check it in milestone 3.
+- **Steam API limits:** 100,000 calls per day per key, far above what a personal project needs. `GetOwnedGames` from Cloudflare works (checked 2026-10-17).
+- **Free plan CPU (10 ms):** import, full sync and cron runs measured 10–26 ms on a 761-game library without failing. If they start failing, Workers Paid or paged sync.
 - **Delisted apps** have no name in `GetOwnedGames` either; show "Steam app <id>" as the prototype does.
 - **Last-writer-wins** can drop a note edited on two devices at once. Accepted for v1.
 - Shared list pages show the owner's statuses. That's in the spec; mention it in the sharing UI.
