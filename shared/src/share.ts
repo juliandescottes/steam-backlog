@@ -20,6 +20,8 @@ export type Profile = {
   avatar: string | null;
   /** Null when the owner hides them. */
   stats: { finished: number; hoursCleared: number } | null;
+  /** Games to play (Backlog and Playing) when the owner shows their whole backlog, else null. */
+  backlog: { games: number; hours: number; covers: number[] } | null;
   lists: { shareId: string; title: string; description: string; kind: ListKind; games: number; hours: number; covers: number[] }[];
 };
 
@@ -36,3 +38,4 @@ export function suggestHandle(name: string): string {
 /** A list's address, for its owner and for viewers. */
 export const sharePath = (shareId: string) => `/l/${shareId}`;
 export const profilePath = (handle: string) => `/u/${handle}`;
+export const backlogPath = (handle: string) => `/u/${handle}/backlog`;

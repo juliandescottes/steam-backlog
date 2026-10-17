@@ -18,7 +18,7 @@ Lists (`shared/lists.ts`: fractional positions, share ids). Hand-picked or filte
 
 Sharing: links are `/l/<shareId>` (migration 0005; `/s/` redirects), the Share panel is Private / Anyone with the link + copy, viewers see the Steam name. A list has one address, `/l/<shareId>`: the owner's page if the list is in this browser, the shared page otherwise; `/l/<internal id>` and `/s/<shareId>` redirect. `GET /api/s/:shareId` with ETag/304, `/l/*` pages with Open Graph tags. Viewer page `Shared.tsx` is a lazy chunk, read-only, polls every 30 s while visible.
 
-Public profile: Settings → Public profile (off by default; username suggested from the Steam name; stats on/off), "Show on my public profile" in the Share panel (visibility `profile`). `/u/<handle>` page with the chosen lists (covers, size, hours); shared list pages link to it when it's on. `POST /api/profile` replaced `/api/handle`; `GET /api/u/:handle`; `/u/*` link previews.
+Public profile: Settings → Public profile (off by default; username suggested from the Steam name; stats on/off), "Show on my public profile" in the Share panel (visibility `profile`). `/u/<handle>` page with the chosen lists (covers, size, hours); shared list pages link to it when it's on. `POST /api/profile` replaced `/api/handle`; `GET /api/u/:handle`; `/u/*` link previews. Optional "Show my whole backlog" (not deployed yet): a Backlog card on the profile and `/u/<handle>/backlog`, the whole library read-only, starting on Backlog + Playing.
 
 Production check (2026-10-17, 761-game library): callback 594 ms, import 5.3 s wall / 26 ms CPU, sync 8–14 ms CPU, cron 3–4.5 s wall / 10–14 ms CPU. All over the free plan's 10 ms CPU but none failed; watch `wrangler tail` for "exceeded CPU" (fix: Workers Paid, or paged sync and smaller batches).
 
@@ -36,4 +36,5 @@ Production check (2026-10-17, 761-game library): callback 594 ms, import 5.3 s w
 - A private list's address opened by someone else says "List not found. It may be private now, or the link changed."; maybe say plainly that it's private (the API can't tell them apart on purpose).
 - Share panel: warn while the list hasn't synced yet, or the copied link says "List not found" for a few seconds.
 - Ops reach IndexedDB asynchronously (`void db.addOps`): closing or reloading the tab right after a change can lose it before it syncs. Maybe flush on `pagehide`, or await the write before scheduling.
+- The whole-backlog page sends every game (a few hundred KB for 1,000 games) and renders every card, without the windowed shelves; fine at ~1,000, slow at several thousand.
 - Restoring a backup with "replace" clears the outbox and sync cursor too (`db.clearAll`), even when signed in.

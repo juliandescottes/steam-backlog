@@ -3,7 +3,7 @@ import { bandOf, formatHours } from "@backlog/shared/bands";
 import { compare, matches, SORT_LABEL, type Entry, type SortKey } from "@backlog/shared/filter";
 import { resolveLength } from "@backlog/shared/lengths";
 import { normalizeName } from "@backlog/shared/names";
-import { profilePath, sharePath, type Profile, type SharedList } from "@backlog/shared/share";
+import { backlogPath, profilePath, sharePath, type Profile, type SharedList } from "@backlog/shared/share";
 import { STATUSES, STATUS_LABEL, type Status } from "@backlog/shared/types";
 import { navigate } from "../route.ts";
 import { settings } from "../store.ts";
@@ -89,12 +89,20 @@ export function ProfilePage({ handle }: { handle: string }) {
         </div>
       </header>
       <main class="profile-lists">
-        {p.lists.length === 0 && <p class="empty">No lists to show yet.</p>}
+        {p.backlog && (
+          <Go href={backlogPath(p.handle)} class="profile-list">
+            <MiniCovers covers={p.backlog.covers} />
+            <span class="profile-list-text">
+              <b>Backlog</b>
+              <span class="list-meta">{count(p.backlog.games, "game")} · {count(p.backlog.hours, "hour")} to clear</span>
+              <span class="hint">Everything {p.name} has left to play</span>
+            </span>
+          </Go>
+        )}
+        {p.lists.length === 0 && !p.backlog && <p class="empty">No lists to show yet.</p>}
         {p.lists.map(l => (
           <Go key={l.shareId} href={sharePath(l.shareId)} class="profile-list">
-            <span class="mini-covers">
-              {[0, 1, 2, 3].map(i => <span key={i}>{l.covers[i] != null && <img src={portraitUrl(l.covers[i])} alt="" loading="lazy" onError={e => e.currentTarget.remove()} />}</span>)}
-            </span>
+            <MiniCovers covers={l.covers} />
             <span class="profile-list-text">
               <b>{l.title}</b>
               <span class="list-meta">{count(l.games, "game")} · {count(l.hours, "hour")}{l.kind === "filter" ? " · auto" : ""}</span>
@@ -108,11 +116,14 @@ export function ProfilePage({ handle }: { handle: string }) {
   );
 }
 
-/** Someone's shared list, read-only (SPEC §7). Viewers can filter and sort within it. */
-export function SharedPage({ shareId }: { shareId: string }) {
-  const state = useRemote<SharedList>(`/api/s/${encodeURIComponent(shareId)}`, true);
+/**
+ * Someone's shared list, or (`whole`) their whole library from their profile; read-only (SPEC §7).
+ * Viewers can filter and sort; the whole library starts on games to play, like the owner's own view.
+ */
+export function SharedPage({ src, whole = false }: { src: string; whole?: boolean }) {
+  const state = useRemote<SharedList>(src, true);
   const data = state.kind === "ok" ? state.data : null;
-  const [statuses, setStatuses] = useState<Status[]>(STATUSES);
+  const [statuses, setStatuses] = useState<Status[]>(whole ? ["backlog", "playing"] : STATUSES);
   const [sort, setSort] = useState<SortKey | "list" | null>(null);
   const [q, setQ] = useState("");
   const measure = settings.value.measure;
@@ -123,15 +134,17 @@ export function SharedPage({ shareId }: { shareId: string }) {
   if (order !== "list") shown.sort(compare(order));
 
   useEffect(() => {
-    document.title = data ? `${data.list.title} · ${data.owner.name}` : "Backlog";
+    document.title = data ? (whole ? `${data.owner.name}'s backlog` : `${data.list.title} · ${data.owner.name}`) : "Backlog";
     return () => { document.title = "Backlog"; };
   }, [data?.list.title, data?.owner.name]);
 
-  if (state.kind !== "ok") return <NotThere state={state} what="List" />;
+  if (state.kind !== "ok") return <NotThere state={state} what={whole ? "Backlog" : "List"} />;
 
   const { owner, list } = data!;
-  const hours = all.reduce((s, e) => s + (e.len.hours ?? 0), 0);
-  const finished = all.filter(e => e.game.status === "finished").length;
+  // The whole library counts what's shown (by default, what's left to play); a list counts all of it
+  const counted = whole ? shown : all;
+  const hours = counted.reduce((s, e) => s + (e.len.hours ?? 0), 0);
+  const finished = counted.filter(e => e.game.status === "finished").length;
   const toggle = (s: Status) => setStatuses(cur => (cur.includes(s) ? cur.filter(x => x !== s) : STATUSES.filter(x => x === s || cur.includes(x))));
 
   return (
@@ -141,18 +154,18 @@ export function SharedPage({ shareId }: { shareId: string }) {
           {owner.handle
             ? <Go href={profilePath(owner.handle)} class="eyebrow owner">
                 {owner.avatar && <img src={owner.avatar} alt="" width={20} height={20} />}
-                {owner.name}'s list
+                {owner.name}'s {whole ? "games" : "list"}
               </Go>
             : <div class="eyebrow owner">
                 {owner.avatar && <img src={owner.avatar} alt="" width={20} height={20} />}
-                {owner.name}'s list
+                {owner.name}'s {whole ? "games" : "list"}
               </div>}
         </div>
         <h1>{list.title}</h1>
         {list.description && <p class="lede">{list.description}</p>}
         <p class="list-meta">
-          {count(all.length, "game")} · {count(hours, "hour")}{finished > 0 && ` · ${finished} finished`}
-          {list.kind === "filter" && <span> · updates with {owner.name}'s library</span>}
+          {count(counted.length, "game")} · {count(hours, "hour")}{finished > 0 && ` · ${finished} finished`}
+          {list.kind === "filter" && !whole && <span> · updates with {owner.name}'s library</span>}
         </p>
       </header>
       <div class="tools">
@@ -175,6 +188,14 @@ export function SharedPage({ shareId }: { shareId: string }) {
       </main>
       <Footer />
     </div>
+  );
+}
+
+function MiniCovers({ covers }: { covers: number[] }) {
+  return (
+    <span class="mini-covers">
+      {[0, 1, 2, 3].map(i => <span key={i}>{covers[i] != null && <img src={portraitUrl(covers[i])} alt="" loading="lazy" onError={e => e.currentTarget.remove()} />}</span>)}
+    </span>
   );
 }
 

@@ -4,7 +4,7 @@ import { body, HttpError, json, redirect } from "./http.ts";
 import { enrich } from "./igdb.ts";
 import { refreshLibrary } from "./library.ts";
 import { loginUrl, playerSummary, verifyCallback } from "./steam.ts";
-import { profile, setProfile, sharedList, sharePage, type ProfileSettings } from "./share.ts";
+import { profile, setProfile, sharedBacklog, sharedList, sharePage, type ProfileSettings } from "./share.ts";
 import { sync } from "./sync.ts";
 import type { SyncRequest } from "@backlog/shared/sync";
 
@@ -12,6 +12,7 @@ const me = (u: User) => ({
   id: u.id, steamId: u.steam_id, handle: u.handle, name: u.display_name, avatar: u.avatar_url, librarySyncedAt: u.library_synced_at,
   shareLengths: JSON.parse(u.settings_json).shareLengths !== false,
   profilePublic: u.profile_public === 1, showStats: JSON.parse(u.settings_json).showStats !== false,
+  showBacklog: JSON.parse(u.settings_json).showBacklog === true,
 });
 
 async function route(req: Request, env: Env, ctx: ExecutionContext, url: URL): Promise<Response> {
@@ -22,9 +23,9 @@ async function route(req: Request, env: Env, ctx: ExecutionContext, url: URL): P
     throw new HttpError(403, "missing_header");
   }
 
-  const shared = req.method === "GET" && url.pathname.match(/^\/api\/s\/([^/]+)$/);
+  const shared = req.method === "GET" && url.pathname.match(/^\/api\/(?:s\/([^/]+)|u\/([^/]+)\/backlog)$/);
   if (shared) {
-    const r = await sharedList(env, shared[1]);
+    const r = shared[1] ? await sharedList(env, shared[1]) : await sharedBacklog(env, decodeURIComponent(shared[2]));
     if (!r) throw new HttpError(404, "not_found");
     const headers = { etag: r.etag, "cache-control": "no-cache" };
     if (req.headers.get("if-none-match") === r.etag) return new Response(null, { status: 304, headers });

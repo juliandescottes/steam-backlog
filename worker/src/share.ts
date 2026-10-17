@@ -8,7 +8,7 @@ import type { Game } from "@backlog/shared/types";
 import { HttpError } from "./http.ts";
 import { GAME_COLUMNS, toGame, type Row } from "./sync.ts";
 
-export type ProfileSettings = { handle?: unknown; public?: unknown; showStats?: unknown };
+export type ProfileSettings = { handle?: unknown; public?: unknown; showStats?: unknown; showBacklog?: unknown };
 
 /**
  * Public profile settings: the handle (public username; another user's is refused), whether the profile
@@ -16,15 +16,16 @@ export type ProfileSettings = { handle?: unknown; public?: unknown; showStats?: 
  */
 export async function setProfile(env: Env, userId: string, s: ProfileSettings) {
   if (s.handle !== undefined && (typeof s.handle !== "string" || !HANDLE.test(s.handle))) throw new HttpError(400, "bad_handle");
-  if ((s.public !== undefined && typeof s.public !== "boolean") || (s.showStats !== undefined && typeof s.showStats !== "boolean")) {
-    throw new HttpError(400, "bad_request");
-  }
+  if ([s.public, s.showStats, s.showBacklog].some(v => v !== undefined && typeof v !== "boolean")) throw new HttpError(400, "bad_request");
+  const flag = (v: unknown) => (v === undefined ? null : String(v));
   try {
     const r = await env.DB.prepare(
       `UPDATE users SET handle = coalesce(?2, handle), profile_public = coalesce(?3, profile_public),
-         settings_json = CASE WHEN ?4 IS NULL THEN settings_json ELSE json_set(settings_json, '$.showStats', json(?4)) END
+         settings_json = CASE WHEN ?5 IS NULL THEN s.v ELSE json_set(s.v, '$.showBacklog', json(?5)) END
+       FROM (SELECT CASE WHEN ?4 IS NULL THEN settings_json ELSE json_set(settings_json, '$.showStats', json(?4)) END AS v
+             FROM users WHERE id = ?1) s
        WHERE id = ?1 AND (coalesce(?3, profile_public) = 0 OR coalesce(?2, handle) IS NOT NULL)`,
-    ).bind(userId, s.handle ?? null, s.public === undefined ? null : Number(s.public), s.showStats === undefined ? null : String(s.showStats)).run();
+    ).bind(userId, s.handle ?? null, s.public === undefined ? null : Number(s.public), flag(s.showStats), flag(s.showBacklog)).run();
     if (!r.meta.changes) throw new HttpError(400, "handle_required");
   } catch (e) {
     if (String(e).includes("UNIQUE")) throw new HttpError(409, "handle_taken");
@@ -66,8 +67,7 @@ export async function sharedList(env: Env, shareId: string): Promise<{ etag: str
     games = rows.map(r => toGame({ ...r, status: r.status ?? "backlog", note: r.note ?? "", playtime_min: r.playtime_min ?? 0, first_seen_at: r.first_seen_at ?? 0 }));
   } else {
     // Filter lists are computed here with the client's filter code; lengths by Main + Extras, the default measure
-    rows = (await env.DB.prepare(`SELECT ${GAME_COLUMNS}, g.updated_at FROM user_games ug JOIN games g USING (appid) WHERE ug.user_id = ?`)
-      .bind(l.user_id).all<Row & { updated_at: number }>()).results;
+    rows = await allGames(env, l.user_id);
     const filter: Filter = l.filter_json ? JSON.parse(l.filter_json) : {};
     games = rows.map(r => entry(toGame(r)))
       .filter(e => matches(e, filter)).sort(compare(l.sort ?? "length")).map(e => e.game);
@@ -104,12 +104,15 @@ export async function profile(env: Env, handle: string): Promise<Profile | null>
   const all = (rows.results as Row[]).map(r => entry(toGame(r)));
   const byAppid = new Map(all.map(e => [e.game.appid, e]));
   const finished = all.filter(e => e.game.status === "finished");
+  const open = all.filter(e => e.game.status === "backlog" || e.game.status === "playing").sort(compare("length"));
+  const settings = JSON.parse(u.settings_json);
   const hoursOf = (es: Entry[]) => Math.round(es.reduce((s, e) => s + (e.len.hours ?? 0), 0));
 
   type Row2 = { id: string; share_id: string; title: string; description: string; kind: ListKind; filter_json: string | null; sort: SortKey | null };
   return {
     handle, name: u.display_name, avatar: u.avatar_url,
-    stats: JSON.parse(u.settings_json).showStats === false ? null : { finished: finished.length, hoursCleared: hoursOf(finished) },
+    stats: settings.showStats === false ? null : { finished: finished.length, hoursCleared: hoursOf(finished) },
+    backlog: settings.showBacklog ? { games: open.length, hours: hoursOf(open), covers: open.slice(0, 4).map(e => e.game.appid) } : null,
     lists: (lists.results as Row2[]).map(l => {
       const appids = l.kind === "manual"
         ? (items.results as { list_id: string; appid: number }[]).filter(i => i.list_id === l.id).map(i => i.appid)
@@ -122,6 +125,28 @@ export async function profile(env: Env, handle: string): Promise<Profile | null>
 
 const escape = (s: string) => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
 
+/** All of a user's games, with each catalog row's last change. */
+async function allGames(env: Env, userId: string) {
+  return (await env.DB.prepare(`SELECT ${GAME_COLUMNS}, g.updated_at FROM user_games ug JOIN games g USING (appid) WHERE ug.user_id = ?`)
+    .bind(userId).all<Row & { updated_at: number }>()).results;
+}
+
+/** A user's whole library, read-only, when their profile shows it (/u/<handle>/backlog). Shortest first. */
+export async function sharedBacklog(env: Env, handle: string): Promise<{ etag: string; data: SharedList } | null> {
+  if (!HANDLE.test(handle)) return null;
+  const u = await env.DB.prepare(
+    `SELECT u.id, u.display_name, u.avatar_url, r.rev FROM users u JOIN user_rev r ON r.user_id = u.id
+     WHERE u.handle = ? AND u.profile_public = 1 AND u.settings_json ->> '$.showBacklog' = 1`,
+  ).bind(handle).first<{ id: string; display_name: string; avatar_url: string | null; rev: number }>();
+  if (!u) return null;
+  const rows = await allGames(env, u.id);
+  const games = rows.map(r => entry(toGame(r))).sort(compare("length")).map(e => forViewers(e.game));
+  return {
+    etag: `"${u.rev}-${rows.reduce((sum, r) => sum + r.updated_at, 0)}-${games.length}"`,
+    data: { owner: { name: u.display_name, avatar: u.avatar_url, handle }, list: { title: "Backlog", description: "", kind: "filter", sort: "length" }, games },
+  };
+}
+
 const plural = (n: number, w: string) => `${n} ${w}${n === 1 ? "" : "s"}`;
 
 /** Title, description and image for a list or profile page, or null when there's nothing public there. */
@@ -133,6 +158,14 @@ async function preview(env: Env, path: string): Promise<{ title: string; descrip
     const { list, owner, games } = share.data;
     const hours = Math.round(games.reduce((s, g) => s + (resolveLength(g, "main_extra").hours ?? 0), 0));
     return { title: `${list.title} · ${owner.name}`, description: list.description || `${plural(games.length, "game")} · ${hours} h`, image: games[0]?.appid ?? null };
+  }
+  const b = path.match(/^\/u\/([^/]+)\/backlog\/?$/);
+  if (b) {
+    const share = await sharedBacklog(env, b[1]);
+    if (!share) return null;
+    const open = share.data.games.filter(g => g.status === "backlog" || g.status === "playing");
+    const hours = Math.round(open.reduce((s, g) => s + (resolveLength(g, "main_extra").hours ?? 0), 0));
+    return { title: `${share.data.owner.name}'s backlog`, description: `${plural(open.length, "game")} · ${hours} h to clear`, image: open[0]?.appid ?? null };
   }
   const u = path.match(/^\/u\/([^/]+)\/?$/);
   const p = u ? await profile(env, u[1]) : null;

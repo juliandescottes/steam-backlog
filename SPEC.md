@@ -79,7 +79,7 @@ Lists appear in a sidebar (drawer on mobile). Opening one shows the same grid UI
 - Each list is **Private** by default. Toggle to **Shared (anyone with the link)** to get a link like `/u/<name>/l/<slug>`. Option to also show it on your public profile.
 - Shared lists are **live**: changes appear for viewers within seconds, no re-publish.
 - The viewer page is read-only, needs no sign-in, and shows the owner's name, list title and description, the cover grid with lengths and the owner's status chips, and the total hours. Viewers can filter/sort within the list.
-- **Public profile** `/u/<name>`: avatar, display name, optional summary stats (games finished, hours cleared), and the lists the owner chose to show. Off by default.
+- **Public profile** `/u/<name>`: avatar, display name, optional summary stats (games finished, hours cleared), and the lists the owner chose to show. Optionally the whole backlog too (`/u/<name>/backlog`, read-only, filterable). Off by default.
 - Owner controls per list: rename, change slug, make private again (link stops working immediately), delete (with undo).
 
 ## 8. Data ownership

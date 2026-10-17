@@ -57,8 +57,12 @@ function ProfileSettings({ me }: { me: Me }) {
         <input type="checkbox" checked={me.showStats} disabled={!me.profilePublic} onChange={e => void save({ showStats: e.currentTarget.checked })} />
         Show games finished and hours cleared
       </label>
+      <label class="check">
+        <input type="checkbox" checked={me.showBacklog} disabled={!me.profilePublic} onChange={e => void save({ showBacklog: e.currentTarget.checked })} />
+        Show my whole backlog
+      </label>
       <p class="hint">
-        Shows your Steam name and avatar, and the lists you pick in their Share panel. Changing the username breaks old profile links.
+        Shows your Steam name and avatar, and the lists you pick in their Share panel. The whole backlog shows every game with its length and status, never notes or playtime. Changing the username breaks old profile links.
         {me.profilePublic && me.handle && <> <a href={profilePath(me.handle)} onClick={e => { e.preventDefault(); settingsOpen.value = false; navigate(profilePath(me.handle!)); }}>View your profile →</a></>}
       </p>
     </>

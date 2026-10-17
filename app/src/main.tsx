@@ -28,7 +28,9 @@ function App() {
     return (
       <>
         <Suspense fallback={null}>
-          {r.page === "profile" ? <ProfilePage key={r.handle} handle={r.handle} /> : r.page === "list" && <SharedPage key={r.shareId} shareId={r.shareId} />}
+          {r.page === "profile" ? <ProfilePage key={r.handle} handle={r.handle} />
+            : r.page === "backlog" ? <SharedPage key={`${r.handle}/backlog`} src={`/api/u/${encodeURIComponent(r.handle)}/backlog`} whole />
+            : r.page === "list" && <SharedPage key={r.shareId} src={`/api/s/${encodeURIComponent(r.shareId)}`} />}
         </Suspense>
         <div class="dock"><Toast /></div>
       </>

@@ -195,7 +195,10 @@ export const currentList = computed(() => {
   return null;
 });
 /** A read-only page: someone's profile, or a shared list that isn't the user's. */
-export const viewing = computed(() => route.value.page === "profile" || (route.value.page === "list" && !currentList.value));
+export const viewing = computed(() => {
+  const p = route.value.page;
+  return p === "profile" || p === "backlog" || (p === "list" && !currentList.value);
+});
 
 // Old /l/<internal id> addresses move to the list's link
 effect(() => {

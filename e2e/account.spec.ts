@@ -294,11 +294,32 @@ test("public profile: off until turned on with a username, shows the lists picke
   await viewer.getByRole("link", { name: "Dev user's list" }).click(); // back to the profile
   await expect(viewer).toHaveURL(new RegExp(`/u/${handle}$`));
 
+  // The whole backlog, once shown
+  await expect(viewer.getByRole("link", { name: /^Backlog/ })).toHaveCount(0);
+  await page.getByRole("checkbox", { name: "Show my whole backlog" }).check();
+  await page.locator(".sheet .close").click();
+  await page.getByRole("link", { name: "← Backlog" }).click();
+  await card(page, "Portal 2").hover(); // finished: hidden at first on the backlog page, like the owner's own view
+  await card(page, "Portal 2").getByRole("button", { name: "Mark Finished" }).click();
+  await page.getByRole("button", { name: "Settings" }).click();
+  await expect(async () => {
+    await viewer.goto(`/u/${handle}`);
+    await viewer.getByRole("link", { name: /^Backlog/ }).click({ timeout: 1000 });
+    await expect(viewer.locator(".game")).toHaveCount(4, { timeout: 1000 });
+  }).toPass({ timeout: 10_000 });
+  // Shortest first; community lengths from parallel tests can move games, so only which ones
+  expect((await viewer.locator(".game .name").allTextContents()).sort()).toEqual(["Half-Life 2", "Portal", "Stardew Valley", "Terraria"]);
+  await expect(viewer.locator(".eyebrow")).toHaveText("Dev user's games");
+  await viewer.getByRole("button", { name: "Finished", exact: true }).click();
+  await expect(viewer.locator(".game .name")).toContainText(["Portal 2"]);
+
   await page.getByRole("checkbox", { name: "Public profile", exact: true }).uncheck();
   await expect(async () => {
     await viewer.reload();
-    await expect(viewer.locator("h1")).toHaveText("Profile not found", { timeout: 1000 });
+    await expect(viewer.locator("h1")).toHaveText("Backlog not found", { timeout: 1000 });
   }).toPass({ timeout: 10_000 });
+  await viewer.goto(`/u/${handle}`);
+  await expect(viewer.locator("h1")).toHaveText("Profile not found");
 });
 
 test("a browser that synced with older code, which skipped lists, gets them in full once", async ({ page }) => {
