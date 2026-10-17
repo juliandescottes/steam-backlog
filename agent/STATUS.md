@@ -20,5 +20,4 @@ Windowed shelves done (`app/src/components/Shelf.tsx`); perf check passes at 3,0
 - Covers are blank tiles while art loads.
 - Clicking an approximate badge does nothing (it catches hover for the tooltip); maybe open the detail panel.
 - "Uncertain lengths" smart view (M2).
-- `www.baquelogue.com`: Redirect Rule "Redirect from WWW to root" + proxied `www` DNS record, set in the Cloudflare dashboard (not in code).
 - M2 keyboard nav: cards off screen aren't mounted; scroll a card into its row before focusing it. A focused card scrolled far away unmounts and drops focus.

@@ -184,6 +184,7 @@ The result carries its source and an approximate flag for the badge and detail p
 ## 12. Deployment
 
 - `wrangler` for the Worker, static assets and D1 migrations; `npm run deploy` builds and deploys. Preview deployments per branch (Workers Builds from GitHub), with their own D1 database, from milestone 3.
+- Dashboard-only settings on the `baquelogue.com` zone: Always Use HTTPS; Redirect Rule `https://www.*` → `https://${1}` (301, query kept) with a proxied `www` A record to `192.0.2.1`.
 - Secrets: `STEAM_API_KEY`, `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET`.
 - Local development: `wrangler dev` for the Worker + local D1, Vite dev server proxying `/api`. A dev-only sign-in route that skips Steam.
 
