@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import { makeExport, parseExport, parseLengths, parseLibrary, type ExportFile } from "@backlog/shared/files";
 import type { Measure } from "@backlog/shared/types";
+import { account, refreshLibrary, signIn, signOut } from "../account.ts";
 import {
   deleteEverything, games, importLengths, mergeLibrary, restoreBackup, settings, settingsOpen, showToast, updateSettings, type Theme,
 } from "../store.ts";
@@ -55,6 +56,25 @@ export function Settings() {
         <h2 id="settings-title">Settings</h2>
 
         <section class="detail-section">
+          <h3>Account</h3>
+          {account.value
+            ? <>
+                <p class="account">
+                  {account.value.avatar && <img src={account.value.avatar} alt="" width={32} height={32} />}
+                  <span>Signed in as <b>{account.value.name}</b>. Changes sync to your other devices.</span>
+                </p>
+                <p class="row-actions">
+                  <button type="button" class="btn" onClick={() => void refreshLibrary()}>Refresh library</button>
+                  <button type="button" class="btn ghost" onClick={() => void signOut()}>Sign out</button>
+                </p>
+              </>
+            : <>
+                <p class="row-actions"><button type="button" class="btn primary" onClick={signIn}>Sign in with Steam</button></p>
+                <p class="hint">Imports your Steam library and syncs across devices. What you've done in this browser comes along.</p>
+              </>}
+        </section>
+
+        <section class="detail-section">
           <h3>Theme</h3>
           <Radio<Theme> name="Theme" value={s.theme} onChange={theme => updateSettings({ theme })}
             options={[["system", "System"], ["dark", "Dark"], ["light", "Light"]]} />
@@ -68,12 +88,11 @@ export function Settings() {
 
         <section class="detail-section">
           <h3>Library</h3>
-          <p class="hint">Steam import arrives with accounts. Until then, open a library file made by <code>npm run library</code>.</p>
           <p class="row-actions">
-            <FilePick label="Open library file" accept=".json,application/json" onFile={guard(text => {
+            {!account.value && <FilePick label="Open library file" accept=".json,application/json" onFile={guard(text => {
               const r = mergeLibrary(parseLibrary(text));
               showToast(`${count(r.added, "game")} added, ${r.updated} updated`);
-            })} />
+            })} />}
             <FilePick label="Import lengths" accept=".json,.csv,application/json,text/csv" onFile={guard(text => {
               const r = importLengths(parseLengths(text));
               if (r.unknownGames) showToast(`Imported ${r.applied} lengths (${r.unknownGames} for games not in your library)`, true);

@@ -1,13 +1,17 @@
 import { openDB, type IDBPDatabase } from "idb";
+import type { Op } from "@backlog/shared/sync";
 import type { Game } from "@backlog/shared/types";
 
 /** IndexedDB persistence. The store keeps everything in memory; this only saves and restores it. */
 let dbp: Promise<IDBPDatabase> | null = null;
 const db = () =>
-  (dbp ??= openDB("backlog", 1, {
-    upgrade(d) {
-      d.createObjectStore("games", { keyPath: "appid" });
-      d.createObjectStore("meta");
+  (dbp ??= openDB("backlog", 2, {
+    upgrade(d, old) {
+      if (old < 1) {
+        d.createObjectStore("games", { keyPath: "appid" });
+        d.createObjectStore("meta");
+      }
+      if (old < 2) d.createObjectStore("outbox", { keyPath: "id" });
     },
   }));
 
@@ -42,8 +46,29 @@ async function flush() {
   await Promise.all([...batch.map(g => tx.store.put(g)), tx.done]);
 }
 
+export async function replaceGames(games: Iterable<Game>): Promise<void> {
+  pending.clear();
+  const tx = (await db()).transaction("games", "readwrite");
+  await Promise.all([tx.store.clear(), ...[...games].map(g => tx.store.put(g)), tx.done]);
+}
+
+/** Ops not yet acknowledged by the server, oldest first. */
+export async function loadOutbox(): Promise<Op[]> {
+  return (await db()).getAll("outbox"); // ids sort by creation (see newOpId)
+}
+
+export async function addOps(ops: Op[]): Promise<void> {
+  const tx = (await db()).transaction("outbox", "readwrite");
+  await Promise.all([...ops.map(o => tx.store.put(o)), tx.done]);
+}
+
+export async function removeOps(ids: string[]): Promise<void> {
+  const tx = (await db()).transaction("outbox", "readwrite");
+  await Promise.all([...ids.map(id => tx.store.delete(id)), tx.done]);
+}
+
 export async function clearAll(): Promise<void> {
   pending.clear();
   const d = await db();
-  await Promise.all([d.clear("games"), d.clear("meta")]);
+  await Promise.all([d.clear("games"), d.clear("meta"), d.clear("outbox")]);
 }

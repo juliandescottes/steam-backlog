@@ -92,14 +92,19 @@ One endpoint, called after local changes (debounced 1 s), on focus, and every 5 
 
 ```
 POST /api/sync
-{ since: <last rev seen>, ops: [{ id, type, ...fields, at }] }
-→ { rev: <new cursor>, changes: { userGames: [...], views: [...], lists: [...], listItems: [...] } }
+{ since: <last rev seen>, catalogSince: <last catalogAt>, ops: [{ id, type: "game", appid, at, set: { status?, statusAt?, finishedAt?, note?, my?, myKind? } }] }
+→ { rev: <new cursor>, catalogAt, games: [<Game>...] }
 ```
 
-- The server applies ops in order in one D1 batch, giving each changed row the next `rev`, then returns every row of this user with `rev > since`, including the ones just written.
-- **Conflicts:** last writer wins per row, ordered by when the server receives them. This is one person on a few devices, so a field-level merge isn't worth it. Notes are the only field where a lost edit would hurt; keep them per row too and accept the risk.
+Types and op validation in `shared/src/sync.ts`, server in `worker/src/sync.ts`, client in `app/src/account.ts`. Views and lists join the response in milestones 2 and 4.
+
+- **Ops carry values, not actions** ("status = finished, finishedAt = …", not "finish"). Undo is just another op, and replaying one is harmless.
+- The server merges ops per game (later ones win per field), applies them in one D1 batch giving each changed row the next `rev`, then returns every game of this user with `rev > since` or a catalog change (IGDB, community) since `catalogSince`. `catalogAt` trails by a minute so a concurrent write is sent twice rather than missed.
+- **Conflicts:** last writer wins per field, ordered by when the server receives them. This is one person on a few devices. Notes are the only field where a lost edit would hurt; accept the risk.
+- **D1 limits** (100 bound parameters per query, 50 queries per request on the free plan): bulk writes pass their rows as one JSON parameter and expand them with `json_each`.
 - Op IDs make retries idempotent: the server remembers op IDs for a day.
-- The client removes ops from the outbox only after a successful response, then applies `changes` on top of any ops still pending.
+- The client removes ops from the outbox only after a successful response, then applies the returned games with any ops still pending on top.
+- **First sign-in on a device:** local statuses, notes and lengths become ops (they apply to games the Steam library has), then the account's library replaces the local one. Sign-out syncs, then clears the browser.
 
 ## 6. Auth (Steam OpenID 2.0)
 
@@ -186,7 +191,7 @@ The result carries its source and an approximate flag for the badge and detail p
 - `wrangler` for the Worker, static assets and D1 migrations; `npm run deploy` builds and deploys. Preview deployments per branch (Workers Builds from GitHub), with their own D1 database, from milestone 3.
 - Dashboard-only settings on the `baquelogue.com` zone: Always Use HTTPS; Redirect Rule `https://www.*` → `https://${1}` (301, query kept) with a proxied `www` A record to `192.0.2.1`.
 - Secrets: `STEAM_API_KEY`, `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET`.
-- Local development: `wrangler dev` for the Worker + local D1, Vite dev server proxying `/api`. A dev-only sign-in route that skips Steam.
+- Local development: `npm run dev:api` (local D1 migrations + `wrangler dev` on 8790) next to `npm run dev`; Vite proxies `/api`. `.dev.vars` sets `DEV_LOGIN=true`: `POST /api/auth/dev` signs in without Steam, and without `STEAM_API_KEY` the import returns a fixed five-game library. Worker tests run in Node against a local D1 through wrangler's `getPlatformProxy` (`@cloudflare/vitest-pool-workers` needs vitest 4).
 
 ## 13. Milestones
 

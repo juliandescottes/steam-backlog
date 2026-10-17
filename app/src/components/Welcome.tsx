@@ -1,11 +1,20 @@
 import { useState } from "preact/hooks";
 import { FileFormatError, parseExport, parseLibrary } from "@backlog/shared/files";
+import { signIn } from "../account.ts";
 import { mergeLibrary, restoreBackup } from "../store.ts";
 import { readFile } from "../util.ts";
 
-/** First run: open a library file (or a backup) until Steam import exists. */
+/** npm run dev:api only: signs in without Steam. */
+async function devSignIn() {
+  await fetch("/api/auth/dev", { method: "POST", headers: { "x-requested-with": "backlog", "content-type": "application/json" }, body: "{}" });
+  location.reload();
+}
+
+const signInFailed = new URLSearchParams(location.search).get("signin") === "failed";
+
+/** First run: sign in with Steam, or stay local with a library file (or a backup). */
 export function Welcome() {
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(signInFailed ? "Steam sign-in didn't go through. Try again?" : null);
   const [over, setOver] = useState(false);
 
   const open = async (file: File | undefined) => {
@@ -30,8 +39,15 @@ export function Welcome() {
       <header class="top">
         <div class="eyebrow">Backlog</div>
         <h1>What can you <em>finish</em> this weekend?</h1>
-        <p class="lede">Your games, shortest first. Statuses in one click, everything stays fast because it all lives in your browser.</p>
+        <p class="lede">Your Steam games, shortest first. Statuses in one click, and everything stays fast because your library lives in your browser.</p>
       </header>
+      <p class="row-actions">
+        <button type="button" class="btn primary steam" onClick={signIn}>Sign in with Steam</button>
+        <span class="hint">Imports your library. Steam only shares it when your profile's game details are public.</span>
+        {import.meta.env.DEV && <button type="button" class="btn ghost" onClick={devSignIn}>Dev sign-in</button>}
+      </p>
+      {error && <p class="error" role="alert">{error}</p>}
+      <h2 class="or">Or stay local</h2>
       <label class={`drop${over ? " over" : ""}`}
         onDragOver={e => { e.preventDefault(); setOver(true); }} onDragLeave={() => setOver(false)}
         onDrop={e => { e.preventDefault(); setOver(false); void open(e.dataTransfer?.files[0]); }}>
@@ -39,8 +55,7 @@ export function Welcome() {
         <b>Open a library file</b>
         <span>Drop it here or click to choose. A backup works too.</span>
       </label>
-      {error && <p class="error" role="alert">{error}</p>}
-      <p class="hint">Sign in with Steam comes later. For now, make a library file from the prototype data with <code>npm run library</code>; it writes <code>tools/out/library.json</code> and <code>tools/out/hltb_lengths.json</code>.</p>
+      <p class="hint">Without an account nothing leaves this browser. A library file comes from <code>npm run library</code> in the repo.</p>
     </div>
   );
 }

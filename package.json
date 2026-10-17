@@ -4,19 +4,22 @@
   "type": "module",
   "workspaces": [
     "app",
-    "shared"
+    "shared",
+    "worker"
   ],
   "scripts": {
     "dev": "npm run dev -w app",
     "build": "npm run build -w app",
     "test": "vitest run",
-    "typecheck": "tsc -p shared && tsc -p app",
+    "typecheck": "tsc -p shared && tsc -p app && tsc -p worker && tsc -p worker/tsconfig.test.json",
     "library": "node tools/make_library.ts",
     "e2e": "playwright test",
-    "deploy": "npm run build && wrangler deploy"
+    "deploy": "npm run build && wrangler deploy",
+    "dev:api": "wrangler d1 migrations apply baquelogue --local && wrangler dev --port 8790 --inspector-port 9239 --local-upstream localhost:5190"
   },
   "devDependencies": {
     "@playwright/test": "^1.64.1",
+    "@types/node": "^26.6.5",
     "typescript": "^7.0.2",
     "vitest": "^5.0.5",
     "wrangler": "^4.151.1"

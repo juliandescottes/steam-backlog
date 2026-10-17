@@ -4,6 +4,7 @@ import { newGame, type ExportGame, type LengthsEntry, type LibraryGame } from "@
 import { compare, matches, type Entry, type Filter, type SortKey } from "@backlog/shared/filter";
 import { resolveLength } from "@backlog/shared/lengths";
 import { normalizeName } from "@backlog/shared/names";
+import { userFields, type GameFields, type Op } from "@backlog/shared/sync";
 import { STATUS_LABEL, type Game, type LenKind, type Lengths, type Measure, type Status } from "@backlog/shared/types";
 import * as db from "./db.ts";
 
@@ -123,18 +124,29 @@ type Command = { label: string; patches: Patch[] };
 const undoStack: Command[] = [];
 const UNDO_LIMIT = 100;
 
+export type UserChange = { appid: number; set: Partial<GameFields> };
+let onUserChanges: ((changes: UserChange[]) => void) | null = null;
+/** Called with every change to the user's own fields; account.ts turns them into sync ops. */
+export function listenUserChanges(fn: typeof onUserChanges) {
+  onUserChanges = fn;
+}
+
 function apply(patches: Patch[], side: "before" | "after") {
   const next = new Map(games.value);
   const changed: Game[] = [];
+  const userChanges: UserChange[] = [];
   for (const p of patches) {
     const g = next.get(p.appid);
     if (!g) continue;
     const n = { ...g, ...p[side] };
     next.set(p.appid, n);
     changed.push(n);
+    const set = userFields(p[side]);
+    if (set) userChanges.push({ appid: p.appid, set });
   }
   games.value = next;
   db.saveGames(changed);
+  if (userChanges.length) onUserChanges?.(userChanges);
 }
 
 /** Build patches for `appids`; `change` returns the new fields, or null to leave a game alone. */
@@ -240,14 +252,39 @@ export async function restoreBackup(list: ExportGame[], mode: "merge" | "replace
   if (mode === "replace") await db.clearAll();
   const now = Date.now();
   const next = new Map(mode === "replace" ? [] : games.value);
+  const userChanges: UserChange[] = [];
   for (const e of list) {
     const base = next.get(e.appid) ?? newGame({ appid: e.appid, name: e.name, playtimeMin: e.playtimeMin, addedAt: e.addedAt }, now);
-    next.set(e.appid, { ...base, status: e.status, statusAt: e.statusAt, finishedAt: e.finishedAt, note: e.note, my: e.my, myKind: e.myKind });
+    const set = { status: e.status, statusAt: e.statusAt, finishedAt: e.finishedAt, note: e.note, my: e.my, myKind: e.myKind };
+    next.set(e.appid, { ...base, ...set });
+    userChanges.push({ appid: e.appid, set });
   }
   undoStack.length = 0;
   games.value = next;
   db.saveGames(next.values());
+  onUserChanges?.(userChanges);
   if (s) updateSettings({ ...(s.theme ? { theme: s.theme } : {}), ...(s.measure ? { measure: s.measure } : {}) });
+}
+
+/**
+ * Games from the server replace local ones; ops still in the outbox are applied on top so local
+ * changes the server hasn't seen yet don't flicker back. `replace` drops games the server didn't send.
+ */
+export function applyServerGames(list: Game[], pending: Op[], replace = false) {
+  const next = new Map(replace ? [] : games.value);
+  const changed: Game[] = [];
+  for (const g of list) {
+    const local = games.value.get(g.appid);
+    next.set(g.appid, { ...g, portrait: g.portrait ?? local?.portrait ?? null });
+  }
+  for (const op of pending) {
+    const g = next.get(op.appid);
+    if (g) next.set(op.appid, { ...g, ...op.set });
+  }
+  for (const g of list) changed.push(next.get(g.appid)!);
+  if (replace) void db.replaceGames(next.values());
+  else db.saveGames(changed);
+  games.value = next;
 }
 
 export async function deleteEverything() {

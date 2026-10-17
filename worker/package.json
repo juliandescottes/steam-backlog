@@ -1,0 +1,8 @@
+{
+  "name": "@backlog/worker",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@backlog/shared": "*"
+  }
+}

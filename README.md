@@ -8,7 +8,7 @@ Needs Node 23.6+ (the scripts in `tools/` run TypeScript directly).
 
 ```
 npm install
-npm run dev          # app at http://localhost:5173
+npm run dev          # app at http://localhost:5190
 npm test             # unit tests (shared/)
 npm run e2e          # browser tests (Playwright, uses the installed Chrome)
 npm run typecheck

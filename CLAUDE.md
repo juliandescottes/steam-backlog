@@ -7,9 +7,10 @@ Read first: `agent/STATUS.md` (where we are), then as needed `SPEC.md` (product)
 ## Commands
 
 ```
-npm run dev        # app, http://localhost:5173
-npm test           # vitest, shared/
-npm run e2e        # playwright, installed Chrome
+npm run dev        # app, http://localhost:5190
+npm run dev:api    # Worker + local D1 on 8790 (Vite proxies /api); dev sign-in, fake Steam library
+npm test           # vitest, shared/ and worker/
+npm run e2e        # playwright, installed Chrome; starts both servers
 npm run typecheck
 npm run build
 npm run library    # tools/out/library.json + hltb_lengths.json from prototype data
@@ -19,7 +20,8 @@ npm run deploy     # build + wrangler deploy to baquelogue.com (ask first)
 ## Layout
 
 - `app/`: Preact + Vite + @preact/signals. State in `src/store.ts`, IndexedDB in `src/db.ts`.
-- `shared/`: code the future Worker reuses (lengths, bands, input parsing, filters, file formats). Unit-tested.
+- `shared/`: code the client and Worker share (lengths, bands, input parsing, filters, file formats, sync protocol). Unit-tested.
+- `worker/`: Cloudflare Worker: API in `src/`, D1 schema in `migrations/`. Account and sync client in `app/src/account.ts`.
 - `e2e/`: Playwright. Blocks Steam's CDN; fixtures in `e2e/fixtures/`.
 - `tools/`: prototype scripts, data, IGDB coverage check.
 

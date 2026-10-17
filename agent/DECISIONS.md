@@ -18,3 +18,6 @@ Newest last. Don't reverse these without asking.
 - **Approximate lengths:** no "~" on covers; dotted band edge plus a tooltip with the reason. Normal cursor.
 - **Windowed shelves:** bands mount only rows near the screen; cards have a fixed height. Perf budget checked at 4x CPU slowdown (`e2e/perf.spec.ts`).
 - **Hosting:** one Worker with static assets (not Pages) at `baquelogue.com`; API joins it in M3. No `workers.dev` URL: local data is per origin.
+- **Milestone 3 before 2**, so others can use the live app.
+- **Sync ops carry field values**, not actions; last writer wins per field.
+- **First sign-in merges local data** into the account (owned games only); sign-out clears the browser.
