@@ -1,5 +1,6 @@
 import { mergeOps, validOp, type GameFields, type SyncRequest, type SyncResponse } from "@backlog/shared/sync";
 import type { Game, LenKind, Status } from "@backlog/shared/types";
+import { recompute, writeRows } from "./community.ts";
 import { HttpError } from "./http.ts";
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -67,7 +68,9 @@ export async function sync(env: Env, userId: string, req: SyncRequest, now = Dat
         env.DB.prepare("INSERT OR IGNORE INTO applied_ops (user_id, op_id, at) SELECT ?1, value, ?3 FROM json_each(?2)")
           .bind(userId, JSON.stringify(fresh.map(o => o.id)), now),
         env.DB.prepare("DELETE FROM applied_ops WHERE user_id = ? AND at < ?").bind(userId, now - DAY),
+        ...writeRows(env, userId, patches.map(p => p.appid), now),
       ]);
+      await recompute(env, patches.map(p => p.appid), now);
     }
   }
 

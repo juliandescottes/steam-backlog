@@ -6,9 +6,10 @@ export default defineConfig({
   use: { baseURL: "http://localhost:5180", channel: "chrome" },
   webServer: [
     { command: "API_PORT=8788 npx vite --port 5180 --strictPort", cwd: "app", url: "http://localhost:5180", reuseExistingServer: true },
-    // Its own Worker and D1, without a Steam key: dev sign-in and the fixed dev library (worker/src/library.ts)
+    // Its own Worker and D1, offline: no Steam or Twitch keys, dev sign-in and the fixed dev library (worker/src/library.ts)
     {
-      command: "npx wrangler d1 migrations apply baquelogue --local --persist-to .wrangler/e2e && npx wrangler dev --port 8788 --inspector-port 9238 --persist-to .wrangler/e2e --var STEAM_API_KEY:",
+      // A fresh database each run: community lengths from one run would reorder the next
+      command: "rm -rf .wrangler/e2e && npx wrangler d1 migrations apply baquelogue --local --persist-to .wrangler/e2e && npx wrangler dev --port 8788 --inspector-port 9238 --persist-to .wrangler/e2e --var STEAM_API_KEY: --var TWITCH_CLIENT_ID: --var TWITCH_CLIENT_SECRET:",
       url: "http://localhost:8788/api/me",
       reuseExistingServer: true,
     },

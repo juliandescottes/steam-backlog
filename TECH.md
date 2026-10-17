@@ -140,15 +140,17 @@ Types and op validation in `shared/src/sync.ts`, server in `worker/src/sync.ts`,
 `parent_game` gave one bad result (a standalone expansion got its base game's 54 h instead of 15 h), so the app follows `version_parent` only. Decision: IGDB is the base, and the rest comes from users through a fast fill-in flow (SPEC §4) and community lengths.
 
 **IGDB enrichment**
-- Auth with Twitch client credentials (client ID + secret as Worker secrets; cache the token in D1 until it expires).
+- Auth with Twitch client credentials (client ID + secret as Worker secrets; the token is cached in D1's `cache` table until a day before it expires).
 - Map Steam appids to IGDB games through `external_games` (`external_game_source = 1`, `uid = appid`), up to 500 per query. Fall back to an exact normalized name search.
 - Read `game_time_to_beats`: `hastily` → Main, `normally` → Main + Extras, `completely` → Completionist (seconds → hours), and `count`. When the game has no entry, use its `version_parent`'s.
-- A **Cron Trigger** every 5 minutes processes the queue (appids with `igdb_checked_at` null, or older than 30 days, or 7 days while unknown), staying under IGDB's 4 requests/s.
+- A **Cron Trigger** every minute processes one batch of the queue (appids with `igdb_checked_at` null, or older than 30 days, or 7 days while unknown): 100 games, at most 40 name searches, so a run stays under the free plan's 50 outbound requests and IGDB's 4 requests/s. A library import with new games runs one batch right away (`waitUntil`). Code in `worker/src/igdb.ts`.
+- Measured on a 761-game library (2026-10-17): 752 matched, 483 with Main or Main + Extras, 289 with 3+ submissions; 8 runs of 2–6 s.
 - Decode HTML entities in Steam names at import (`&amp;` appears in `GetOwnedGames` names).
 
 **Community lengths**
 - `community_lengths` gets one row per user and game and kind: `typed` when a user enters an exact length, `finished_playtime` when they mark a game Finished with playtime over 30 min, `endless` for No ending. Approximate guesses aren't recorded. Users who turn off sharing write no rows; turning it off deletes theirs.
-- On each write, the Worker recomputes the game's `comm_main_extra` (median of `typed` and `finished_playtime`) and `comm_count`, `comm_endless_count`. A trimmed median (drop the top and bottom 10% from 10 entries) limits idle-time outliers.
+- `community_lengths` mirrors the user's games: the sync batch that changes a game rewrites its rows (`worker/src/community.ts`). Imported lengths (`myKind: "imported"`) aren't shared, and `/api/settings` `{ shareLengths }` deletes or rewrites all of a user's rows.
+- Then the Worker recomputes the game's `comm_main_extra`, `comm_count`, `comm_endless_count`. Each user counts once (typed Main + Extras, else finished playtime; No ending instead of either). The median limits idle-time outliers.
 
 **Which length is shown** (computed in `shared/lengths.ts`, used by client and Worker):
 1. The user's own length (`my_*`, including approximate and endless).
@@ -191,7 +193,7 @@ The result carries its source and an approximate flag for the badge and detail p
 - `wrangler` for the Worker, static assets and D1 migrations; `npm run deploy` builds and deploys. Preview deployments per branch (Workers Builds from GitHub), with their own D1 database, from milestone 3.
 - Dashboard-only settings on the `baquelogue.com` zone: Always Use HTTPS; Redirect Rule `https://www.*` → `https://${1}` (301, query kept) with a proxied `www` A record to `192.0.2.1`.
 - Secrets: `STEAM_API_KEY`, `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET`.
-- Local development: `npm run dev:api` (local D1 migrations + `wrangler dev` on 8790) next to `npm run dev`; Vite proxies `/api`. `.dev.vars` sets `DEV_LOGIN=true`: `POST /api/auth/dev` signs in without Steam, and without `STEAM_API_KEY` the import returns a fixed five-game library. Worker tests run in Node against a local D1 through wrangler's `getPlatformProxy` (`@cloudflare/vitest-pool-workers` needs vitest 4).
+- Local development: `npm run dev:api` (local D1 migrations + `wrangler dev` on 8790) next to `npm run dev`; Vite proxies `/api`. `.dev.vars` sets `DEV_LOGIN=true`: `POST /api/auth/dev` signs in without Steam, and without `STEAM_API_KEY` the import returns a fixed five-game library. `--test-scheduled` lets you trigger a cron run: `POST /cdn-cgi/local/explorer/api/local/scheduled?worker=baquelogue` with `{"cron":"* * * * *"}` (`/__scheduled` is shadowed by the static assets). Worker tests run in Node against a local D1 through wrangler's `getPlatformProxy` (`@cloudflare/vitest-pool-workers` needs vitest 4).
 
 ## 13. Milestones
 

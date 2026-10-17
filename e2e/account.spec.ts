@@ -21,15 +21,16 @@ test("sign in, import the Steam library, and see a change on another device", as
   await signIn(page, id);
   await expect(page.locator(".game .name")).toHaveText(DEV_GAMES);
 
-  await card(page, "Portal").hover();
-  await card(page, "Portal").getByRole("button", { name: "Mark Finished" }).click();
-  await expect(card(page, "Portal")).toHaveCount(0);
+  // Never played, so finishing it adds no community length that would reorder parallel tests
+  await card(page, "Stardew Valley").hover();
+  await card(page, "Stardew Valley").getByRole("button", { name: "Mark Finished" }).click();
+  await expect(card(page, "Stardew Valley")).toHaveCount(0);
 
   const other = await browser.newPage();
   await expect(async () => {
     await signIn(other, id);
     await other.getByRole("button", { name: "Finished", exact: true }).click();
-    await expect(card(other, "Portal").locator(".status-chip")).toHaveText("Finished", { timeout: 1000 });
+    await expect(card(other, "Stardew Valley").locator(".status-chip")).toHaveText("Finished", { timeout: 1000 });
   }).toPass({ timeout: 10_000 }); // the first device syncs within a couple of seconds
   await other.close();
 });

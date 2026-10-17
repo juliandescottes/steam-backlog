@@ -16,7 +16,11 @@ Milestone 3 before 2 (decided 2026-10-17), branch `m3-accounts-sync`.
 
 Done: Worker + D1 schema, sessions, Steam OpenID, dev sign-in, library import, `/api/sync`, client outbox and sync, sign-in / import / sign-out UI. Tested locally (unit + e2e) with the dev library only.
 
-Next: real Steam check (needs `STEAM_API_KEY`), IGDB cron, community lengths, triage prompt, collections import, account deletion, then remote D1 + secrets + deploy.
+Real Steam import checked (761 games). IGDB cron done and checked on that library (507 of 761 get a length).
+
+Community lengths done: rows mirror the user's games on each sync, median per game, Settings toggle. Imported lengths get `myKind: "imported"` and aren't shared.
+
+Next: triage prompt, collections import, account deletion, then remote D1 + secrets + deploy.
 
 ## Backlog
 

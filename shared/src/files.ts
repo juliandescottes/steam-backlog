@@ -129,7 +129,7 @@ export function makeExport(games: Game[], settings: Record<string, unknown>, now
   };
 }
 
-const KINDS: LenKind[] = ["exact", "approx", "endless"];
+const KINDS: LenKind[] = ["exact", "approx", "endless", "imported"];
 
 export function parseExport(text: string): ExportFile {
   const d = json(text);

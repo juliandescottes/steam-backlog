@@ -5,7 +5,7 @@ import { applyServerGames, deleteEverything, games, listenUserChanges, showToast
 
 /** Account, Steam import and background sync (TECH.md §5, §7). Without an account the app stays local-only. */
 
-export type Me = { id: string; steamId: string; handle: string | null; name: string; avatar: string | null; librarySyncedAt: number | null };
+export type Me = { id: string; steamId: string; handle: string | null; name: string; avatar: string | null; librarySyncedAt: number | null; shareLengths: boolean };
 type Cursor = { since: number; catalogSince: number };
 
 export const account = signal<Me | null>(null);
@@ -99,6 +99,19 @@ export async function refreshLibrary(quiet = false) {
     if (!quiet) showToast(r.added ? `${r.added} new game${r.added === 1 ? "" : "s"} from Steam` : "Library is up to date");
   } catch (e) {
     if (!quiet) showToast(e instanceof ApiError && e.code === "profile_private" ? "Steam says your game details are private" : "Couldn't reach Steam. Try again later.");
+  }
+}
+
+export async function setShareLengths(shareLengths: boolean) {
+  const before = account.value;
+  if (!before) return;
+  account.value = { ...before, shareLengths };
+  try {
+    await api("POST", "/settings", { shareLengths });
+    await db.setMeta("account", account.value);
+  } catch {
+    account.value = before;
+    showToast("Couldn't save. Try again when online.");
   }
 }
 

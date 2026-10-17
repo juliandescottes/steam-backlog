@@ -1,5 +1,7 @@
+import { setSharing } from "./community.ts";
 import { clearCookie, createSession, currentUser, endSession, requireUser, upsertUser, type User } from "./auth.ts";
 import { body, HttpError, json, redirect } from "./http.ts";
+import { enrich } from "./igdb.ts";
 import { refreshLibrary } from "./library.ts";
 import { loginUrl, playerSummary, verifyCallback } from "./steam.ts";
 import { sync } from "./sync.ts";
@@ -7,9 +9,10 @@ import type { SyncRequest } from "@backlog/shared/sync";
 
 const me = (u: User) => ({
   id: u.id, steamId: u.steam_id, handle: u.handle, name: u.display_name, avatar: u.avatar_url, librarySyncedAt: u.library_synced_at,
+  shareLengths: JSON.parse(u.settings_json).shareLengths !== false,
 });
 
-async function route(req: Request, env: Env, url: URL): Promise<Response> {
+async function route(req: Request, env: Env, ctx: ExecutionContext, url: URL): Promise<Response> {
   const at = `${req.method} ${url.pathname}`;
 
   // Forms can't set this header, so it blocks cross-site form posts on top of SameSite cookies
@@ -41,12 +44,22 @@ async function route(req: Request, env: Env, url: URL): Promise<Response> {
 
     case "POST /api/library/refresh": {
       const { user } = await requireUser(req, env);
-      return json(await refreshLibrary(env, user.id, user.steam_id));
+      const r = await refreshLibrary(env, user.id, user.steam_id);
+      if (r.added) ctx.waitUntil(enrich(env)); // new games get lengths without waiting for the cron
+      return json(r);
     }
 
     case "POST /api/sync": {
       const { user } = await requireUser(req, env);
       return json(await sync(env, user.id, await body<SyncRequest>(req)));
+    }
+
+    case "POST /api/settings": {
+      const { user } = await requireUser(req, env);
+      const { shareLengths } = await body<{ shareLengths?: unknown }>(req);
+      if (typeof shareLengths !== "boolean") throw new HttpError(400, "bad_request");
+      await setSharing(env, user.id, shareLengths);
+      return json({ shareLengths });
     }
 
     case "GET /api/me": {
@@ -59,15 +72,19 @@ async function route(req: Request, env: Env, url: URL): Promise<Response> {
 }
 
 export default {
-  async fetch(req, env) {
+  async fetch(req, env, ctx) {
     const url = new URL(req.url);
     if (!url.pathname.startsWith("/api/")) return env.ASSETS.fetch(req);
     try {
-      return await route(req, env, url);
+      return await route(req, env, ctx, url);
     } catch (e) {
       if (e instanceof HttpError) return json({ error: e.code }, { status: e.status });
       console.error(e);
       return json({ error: "internal" }, { status: 500 });
     }
+  },
+
+  async scheduled(_controller, env) {
+    await enrich(env);
   },
 } satisfies ExportedHandler<Env>;

@@ -11,6 +11,7 @@ export type User = {
   display_name: string;
   avatar_url: string | null;
   library_synced_at: number | null;
+  settings_json: string;
 };
 
 const sessionCookie = (value: string, maxAgeSec: number) =>
@@ -35,7 +36,7 @@ export async function currentUser(req: Request, env: Env, now = Date.now()): Pro
   if (!token) return null;
   const id = await sha256(token);
   const row = await env.DB.prepare(
-    `SELECT u.id, u.steam_id, u.handle, u.display_name, u.avatar_url, u.library_synced_at, s.expires_at
+    `SELECT u.id, u.steam_id, u.handle, u.display_name, u.avatar_url, u.library_synced_at, u.settings_json, s.expires_at
      FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.id = ? AND s.expires_at > ?`,
   ).bind(id, now).first<User & { expires_at: number }>();
   if (!row) return null;

@@ -133,7 +133,7 @@ test("import lengths from CSV and export a backup", async ({ page }) => {
   const [download] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Export backup" }).click()]);
   const backup = JSON.parse(readFileSync(await download.path(), "utf8"));
   expect(backup.format).toBe("backlog-export");
-  expect(backup.games.find((g: any) => g.appid === 4)).toMatchObject({ my: { main_extra: 7 }, myKind: "exact" });
+  expect(backup.games.find((g: any) => g.appid === 4)).toMatchObject({ my: { main_extra: 7 }, myKind: "imported" });
 
   await page.keyboard.press("Escape");
   await expect(card(page, "Mystery A").locator(".hrs")).toHaveText("7h");

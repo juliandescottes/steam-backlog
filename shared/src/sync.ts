@@ -22,7 +22,7 @@ export type Op = { id: string; type: "game"; appid: number; at: number; set: Par
 export type SyncRequest = { since: number; catalogSince: number; ops: Op[] };
 export type SyncResponse = { rev: number; catalogAt: number; games: Game[] };
 
-const KINDS: LenKind[] = ["exact", "approx", "endless"];
+const KINDS: LenKind[] = ["exact", "approx", "endless", "imported"];
 const time = (v: unknown) => v === null || (typeof v === "number" && Number.isFinite(v) && v >= 0);
 const hours = (v: unknown) => v === null || (typeof v === "number" && Number.isFinite(v) && v > 0 && v < 100_000);
 

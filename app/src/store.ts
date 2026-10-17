@@ -205,7 +205,7 @@ export function lengthsFor(hours: number): Lengths {
 export function importLengths(list: LengthsEntry[]): { applied: number; unknownGames: number } {
   const known = list.filter(l => games.value.has(l.appid));
   const lengths = new Map(known.map(l => [l.appid, l.lengths]));
-  run(`Imported ${known.length} lengths`, patches([...lengths.keys()], g => ({ my: lengths.get(g.appid)!, myKind: "exact" })));
+  run(`Imported ${known.length} lengths`, patches([...lengths.keys()], g => ({ my: lengths.get(g.appid)!, myKind: "imported" })));
   return { applied: known.length, unknownGames: list.length - known.length };
 }
 

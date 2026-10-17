@@ -7,8 +7,11 @@ export type Measure = "main" | "main_extra";
 
 export type Lengths = { main: number | null; main_extra: number | null; comp: number | null };
 
-/** How a length the user entered should be read: an exact time, a rough band guess, or a game with no ending. */
-export type LenKind = "exact" | "approx" | "endless";
+/**
+ * How a length the user entered should be read: an exact time, a rough band guess, a game with no ending,
+ * or exact times from a lengths file (not shared with the community).
+ */
+export type LenKind = "exact" | "approx" | "endless" | "imported";
 
 /** One game as the client holds it: catalog fields plus the user's own fields. */
 export type Game = {

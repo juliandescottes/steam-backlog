@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import { makeExport, parseExport, parseLengths, parseLibrary, type ExportFile } from "@backlog/shared/files";
 import type { Measure } from "@backlog/shared/types";
-import { account, refreshLibrary, signIn, signOut } from "../account.ts";
+import { account, refreshLibrary, setShareLengths, signIn, signOut } from "../account.ts";
 import {
   deleteEverything, games, importLengths, mergeLibrary, restoreBackup, settings, settingsOpen, showToast, updateSettings, type Theme,
 } from "../store.ts";
@@ -67,6 +67,11 @@ export function Settings() {
                   <button type="button" class="btn" onClick={() => void refreshLibrary()}>Refresh library</button>
                   <button type="button" class="btn ghost" onClick={() => void signOut()}>Sign out</button>
                 </p>
+                <label class="check">
+                  <input type="checkbox" checked={account.value.shareLengths} onChange={e => void setShareLengths(e.currentTarget.checked)} />
+                  Share my lengths with the community
+                </label>
+                <p class="hint">Lengths you type and the Steam playtime of games you finish, anonymously. Rough guesses and imported lengths stay private.</p>
               </>
             : <>
                 <p class="row-actions"><button type="button" class="btn primary" onClick={signIn}>Sign in with Steam</button></p>
