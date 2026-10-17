@@ -2,6 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 
 const COUNT = Number(process.env.PERF_GAMES ?? 3000);
 const BUDGET_MS = 100;
+const CPU_SLOWDOWN = Number(process.env.CPU_SLOWDOWN ?? 4); // a mid-range phone, roughly
 
 /** A library shaped like the prototype's: ~38% without a length, a quarter with playtime. */
 function library() {
@@ -30,12 +31,14 @@ function timed(page: Page, action: string): Promise<number> {
   }, action);
 }
 
-test(`${COUNT.toLocaleString("en")} games: search, filter and status changes render within 100 ms`, async ({ page }) => {
+test(`${COUNT.toLocaleString("en")} games, ${CPU_SLOWDOWN}x slower CPU: search, filter and status changes render within 100 ms`, async ({ page }) => {
   await page.route("**/*steamstatic.com/**", r => r.abort());
   await page.goto("/");
   await page.setInputFiles("input[type=file]", { name: "library.json", mimeType: "application/json", buffer: Buffer.from(library()) });
   await expect(page.locator("h1")).toContainText(`${COUNT.toLocaleString("en")} games`);
   await page.waitForTimeout(1000); // let art fallbacks and the IndexedDB write settle
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("Emulation.setCPUThrottlingRate", { rate: CPU_SLOWDOWN });
 
   const results: Record<string, number> = {};
   const total = await page.locator(".game").count();
