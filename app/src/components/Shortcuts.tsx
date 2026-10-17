@@ -22,6 +22,10 @@ const GROUPS: [string, [keys: string[], what: string][]][] = [
     [["B"], "Backlog"], [["P"], "Playing"], [["F"], "Finished"], [["D"], "Dropped"],
     [[MOD, "Z"], "Undo"],
   ]],
+  ["Lists", [
+    [["A"], "Add the focused game or the selection to a list"],
+    [["Alt", "← →"], "Move the focused game in a list"],
+  ]],
   ["Typing a length", [
     [["Enter"], "Save, next game"],
     [["Alt", "1–7"], "Rough guess by band"],

@@ -5,8 +5,11 @@
  * - backlog-export: a backup of the user's own data
  */
 import { roundHours } from "./bands.ts";
+import type { List, ListItem } from "./lists.ts";
 import { decodeEntities } from "./names.ts";
+import { validOp } from "./sync.ts";
 import { STATUSES, type Game, type LenKind, type Lengths, type Status } from "./types.ts";
+import type { View } from "./views.ts";
 
 export type LibraryGame = {
   appid: number;
@@ -28,6 +31,9 @@ export type ExportFile = {
   exportedAt: string;
   settings?: Record<string, unknown>;
   games: ExportGame[];
+  views?: View[];
+  lists?: List[];
+  listItems?: ListItem[];
 };
 
 export class FileFormatError extends Error {}
@@ -119,9 +125,11 @@ function splitCsv(line: string): string[] {
   return out;
 }
 
-export function makeExport(games: Game[], settings: Record<string, unknown>, now = new Date()): ExportFile {
+type Mine = { views?: View[]; lists?: List[]; listItems?: ListItem[] };
+
+export function makeExport(games: Game[], settings: Record<string, unknown>, mine: Mine = {}, now = new Date()): ExportFile {
   return {
-    format: "backlog-export", version: 1, exportedAt: now.toISOString(), settings,
+    format: "backlog-export", version: 1, exportedAt: now.toISOString(), settings, ...mine,
     games: games.map(g => ({
       appid: g.appid, name: g.name, status: g.status, statusAt: g.statusAt, finishedAt: g.finishedAt,
       note: g.note, my: g.my, myKind: g.myKind, playtimeMin: g.playtimeMin, addedAt: g.addedAt,
@@ -147,5 +155,18 @@ export function parseExport(text: string): ExportFile {
     playtimeMin: num(g.playtimeMin) ?? 0,
     addedAt: num(g.addedAt) ?? Date.now(),
   }));
-  return { ...d, games };
+  // Views, lists and items are checked like sync ops, plus the fields a new one needs
+  const arr = (v: unknown): any[] => (Array.isArray(v) ? v.filter(x => x && typeof x === "object") : []);
+  const views: View[] = arr(d.views).filter(({ id, ...set }) =>
+    set.name && set.filter && set.sort && typeof set.position === "string" && validOp({ id: "x", type: "view", viewId: id, at: 0, set }))
+    .map(({ id, name, filter, sort, position }) => ({ id, name, filter, sort, position }));
+  const lists: List[] = arr(d.lists).filter(({ id, ...set }) =>
+    set.title && set.kind && set.slug && set.position && validOp({ id: "x", type: "list", listId: id, at: 0, set }))
+    .map(({ id, title, description = "", kind, filter = null, sort = null, slug, visibility = "private", position }) =>
+      ({ id, title, description, kind, filter, sort, slug, visibility, position }));
+  const ids = new Set(lists.map(l => l.id));
+  const listItems: ListItem[] = arr(d.listItems).filter(i =>
+    ids.has(i.listId) && i.position && validOp({ id: "x", type: "item", listId: i.listId, appid: i.appid, at: 0, set: { position: i.position } }))
+    .map(({ listId, appid, position }) => ({ listId, appid, position }));
+  return { ...d, games, views, lists, listItems };
 }

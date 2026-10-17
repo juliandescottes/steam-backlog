@@ -110,13 +110,13 @@ export function Settings() {
           {backup && (
             <div class="callout">
               <p>Backup from {new Date(backup.exportedAt).toLocaleString()}: {count(backup.games.length, "game")},{" "}
-                {backup.games.filter(g => g.status !== "backlog").length} with a status, {backup.games.filter(g => g.myKind).length} with your own length.</p>
+                {backup.games.filter(g => g.status !== "backlog").length} with a status, {backup.games.filter(g => g.myKind).length} with your own length{backup.lists?.length ? `, ${count(backup.lists.length, "list")}` : ""}.</p>
               <p class="row-actions">
                 <button type="button" class="btn primary" onClick={async () => {
-                  await restoreBackup(backup.games, "merge", backup.settings as any); setBackup(null); showToast("Backup merged");
+                  await restoreBackup(backup, "merge"); setBackup(null); showToast("Backup merged");
                 }}>Merge into this library</button>
                 <button type="button" class="btn" onClick={async () => {
-                  await restoreBackup(backup.games, "replace", backup.settings as any); setBackup(null); showToast("Library replaced from backup");
+                  await restoreBackup(backup, "replace"); setBackup(null); showToast("Library replaced from backup");
                 }}>Replace this library</button>
                 <button type="button" class="btn ghost" onClick={() => setBackup(null)}>Cancel</button>
               </p>

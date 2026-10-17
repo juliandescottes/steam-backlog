@@ -1,12 +1,13 @@
 import { openDB, type IDBPDatabase } from "idb";
 import type { Op } from "@backlog/shared/sync";
+import type { List, ListItem } from "@backlog/shared/lists";
 import type { Game } from "@backlog/shared/types";
 import type { View } from "@backlog/shared/views";
 
 /** IndexedDB persistence. The store keeps everything in memory; this only saves and restores it. */
 let dbp: Promise<IDBPDatabase> | null = null;
 const db = () =>
-  (dbp ??= openDB("backlog", 3, {
+  (dbp ??= openDB("backlog", 4, {
     upgrade(d, old) {
       if (old < 1) {
         d.createObjectStore("games", { keyPath: "appid" });
@@ -14,6 +15,10 @@ const db = () =>
       }
       if (old < 2) d.createObjectStore("outbox", { keyPath: "id" });
       if (old < 3) d.createObjectStore("views", { keyPath: "id" });
+      if (old < 4) {
+        d.createObjectStore("lists", { keyPath: "id" });
+        d.createObjectStore("listItems", { keyPath: ["listId", "appid"] });
+      }
     },
   }));
 
@@ -36,6 +41,24 @@ export async function replaceViews(views: View[]): Promise<void> {
 
 export async function deleteView(id: string): Promise<void> {
   await (await db()).delete("views", id);
+}
+
+export async function loadLists(): Promise<{ lists: List[]; items: ListItem[] }> {
+  const d = await db();
+  const [lists, items] = await Promise.all([d.getAll("lists"), d.getAll("listItems")]);
+  return { lists, items };
+}
+
+/** Writes lists and items; `removed` items are deleted. With `replace`, everything else goes. */
+export async function saveLists(lists: List[], items: ListItem[], removed: ListItem[] = [], deletedLists: string[] = [], replace = false) {
+  const tx = (await db()).transaction(["lists", "listItems"], "readwrite");
+  const [ls, is] = [tx.objectStore("lists"), tx.objectStore("listItems")];
+  if (replace) await Promise.all([ls.clear(), is.clear()]);
+  await Promise.all([
+    ...lists.map(l => ls.put(l)), ...deletedLists.map(id => ls.delete(id)),
+    ...items.map(i => is.put(i)), ...removed.map(i => is.delete([i.listId, i.appid])),
+    tx.done,
+  ]);
 }
 
 export async function getMeta<T>(key: string): Promise<T | undefined> {
@@ -89,5 +112,5 @@ export async function removeOps(ids: string[]): Promise<void> {
 export async function clearAll(): Promise<void> {
   pending.clear();
   const d = await db();
-  await Promise.all([d.clear("games"), d.clear("meta"), d.clear("outbox"), d.clear("views")]);
+  await Promise.all([d.clear("games"), d.clear("meta"), d.clear("outbox"), d.clear("views"), d.clear("lists"), d.clear("listItems")]);
 }

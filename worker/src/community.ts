@@ -86,8 +86,7 @@ export async function deleteAccount(env: Env, userId: string, now = Date.now()) 
     .results.map(r => r.appid);
   // Foreign keys cascade, but deleting each table explicitly doesn't depend on them being enforced
   await env.DB.batch([
-    env.DB.prepare("DELETE FROM list_items WHERE list_id IN (SELECT id FROM lists WHERE user_id = ?)").bind(userId),
-    ...["lists", "views", "community_lengths", "user_games", "applied_ops", "sessions", "user_rev"].map(t =>
+    ...["list_items", "lists", "views", "community_lengths", "user_games", "applied_ops", "sessions", "user_rev"].map(t =>
       env.DB.prepare(`DELETE FROM ${t} WHERE user_id = ?`).bind(userId)),
     env.DB.prepare("DELETE FROM users WHERE id = ?").bind(userId),
   ]);

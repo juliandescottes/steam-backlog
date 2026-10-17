@@ -150,3 +150,47 @@ test("views sync between devices, deletes included", async ({ page, browser }) =
   }).toPass({ timeout: 10_000 });
   await other.close();
 });
+
+test("lists and their order sync between devices, and come along on first sign-in", async ({ page, browser }) => {
+  // Made before signing in
+  await page.route("**/*steamstatic.com/**", r => r.abort());
+  await page.goto("/");
+  await page.setInputFiles("input[type=file]", "e2e/fixtures/library.json");
+  await page.getByRole("button", { name: "Lists" }).click();
+  await page.getByLabel("New list").fill("Weekend");
+  await page.getByRole("button", { name: "Create" }).click();
+  await expect(page.locator("h1")).toHaveText("Weekend");
+
+  const id = steamId();
+  await signIn(page, id);
+  await expect(page.locator(".bands .game .name")).toHaveText(DEV_GAMES);
+  for (const name of ["Portal", "Terraria"]) {
+    await card(page, name).hover();
+    await card(page, name).getByRole("button", { name: `Add ${name} to a list` }).click();
+    await page.getByRole("dialog", { name: "Add to list" }).getByRole("option", { name: /Weekend/ }).click();
+  }
+
+  const other = await browser.newPage();
+  await expect(async () => {
+    await signIn(other, id);
+    await other.getByRole("button", { name: "Lists" }).click();
+    await other.getByRole("dialog", { name: "Lists" }).getByRole("link", { name: /Weekend/ }).click({ timeout: 1000 });
+    await expect(other.locator(".bands .game .name")).toHaveText(["Portal", "Terraria"], { timeout: 1000 });
+  }).toPass({ timeout: 10_000 });
+  await card(other, "Terraria").dragTo(card(other, "Portal"), { targetPosition: { x: 5, y: 60 } });
+  await expect(other.locator(".bands .game .name")).toHaveText(["Terraria", "Portal"]);
+
+  await page.getByRole("button", { name: "Lists" }).click();
+  await page.getByRole("dialog", { name: "Lists" }).getByRole("link", { name: /Weekend/ }).click();
+  await expect(async () => {
+    await page.reload();
+    await expect(page.locator(".bands .game .name")).toHaveText(["Terraria", "Portal"], { timeout: 1000 });
+  }).toPass({ timeout: 10_000 });
+
+  await page.getByRole("button", { name: "Delete list" }).click();
+  await expect(async () => {
+    await other.reload();
+    await expect(other.locator("h1")).toHaveText("List not found", { timeout: 1000 });
+  }).toPass({ timeout: 10_000 });
+  await other.close();
+});

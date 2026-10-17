@@ -3,7 +3,8 @@ import { formatHours } from "@backlog/shared/bands";
 import { SOURCE_LABEL } from "@backlog/shared/lengths";
 import { STATUSES, STATUS_LABEL } from "@backlog/shared/types";
 import { approxReason } from "../lengthText.ts";
-import { byId, openId, setMyLength, setStatus, settings, updateQuietly } from "../store.ts";
+import { listPath, navigate } from "../route.ts";
+import { byId, listsOf, openId, pickerFor, removeFromList, setMyLength, setStatus, settings, updateQuietly } from "../store.ts";
 import { date, hltbSearchUrl, playtime, steamUrl } from "../util.ts";
 import { Art } from "./Art.tsx";
 import { LengthEditor } from "./LengthEditor.tsx";
@@ -73,6 +74,19 @@ export function Detail() {
             <div><dt>Added</dt><dd>{date(g.addedAt)}</dd></div>
             {g.finishedAt && <div><dt>Finished</dt><dd>{date(g.finishedAt)}</dd></div>}
           </dl>
+        </section>
+
+        <section class="detail-section">
+          <h3>Lists</h3>
+          <div class="chips">
+            {listsOf(g.appid).map(l => (
+              <span key={l.id} class="chip list-chip">
+                <a href={listPath(l.id)} onClick={ev => { ev.preventDefault(); openId.value = null; navigate(listPath(l.id)); }}>{l.title}</a>
+                <button type="button" aria-label={`Remove from ${l.title}`} onClick={() => removeFromList(l.id, [g.appid])}>✕</button>
+              </span>
+            ))}
+            <button type="button" class="chip" onClick={() => (pickerFor.value = [g.appid])}>+ Add to list</button>
+          </div>
         </section>
 
         <section class="detail-section">

@@ -1,8 +1,8 @@
 import { move, type Direction } from "@backlog/shared/grid";
 import type { Status } from "@backlog/shared/types";
 import {
-  clearSelection, editingId, fillInQueue, focusTarget, games, openId, paletteOpen, selectAll, selection, setStatus, settingsOpen, shelves,
-  shortcutsOpen, toggleSelected, undo,
+  canReorder, clearSelection, currentList, editingId, fillInQueue, focusTarget, games, listsOpen, moveInList, openId, paletteOpen, pickerFor,
+  selectAll, selection, setStatus, settingsOpen, shelves, shortcutsOpen, toggleSelected, undo, visible,
 } from "./store.ts";
 import { inTextField } from "./util.ts";
 
@@ -50,17 +50,31 @@ export function installKeys() {
     if (mod && !e.shiftKey && !e.altKey && e.key.toLowerCase() === "k") { e.preventDefault(); paletteOpen.value = !paletteOpen.value; return; }
     if (e.key === "Escape") {
       if (paletteOpen.value) paletteOpen.value = false;
+      else if (pickerFor.value) pickerFor.value = null;
       else if (shortcutsOpen.value) shortcutsOpen.value = false;
       else if (editingId.value != null) editingId.value = null;
       else if (openId.value != null) openId.value = null;
       else if (settingsOpen.value) settingsOpen.value = false;
+      else if (listsOpen.value) listsOpen.value = false;
       else if (selection.value.size) clearSelection();
       return;
     }
     if (inTextField(e)) return;
     if (mod && !e.shiftKey && e.key.toLowerCase() === "z") { e.preventDefault(); undo(); return; }
-    const inPanel = openId.value != null || settingsOpen.value || shortcutsOpen.value || paletteOpen.value;
+    const inPanel = openId.value != null || settingsOpen.value || shortcutsOpen.value || paletteOpen.value || listsOpen.value || !!pickerFor.value;
     if (mod && !e.shiftKey && e.key.toLowerCase() === "a" && !inPanel) { e.preventDefault(); selectAll(); return; }
+    // Alt+←/→ moves the focused game within a hand-picked list
+    if (e.altKey && !mod && (e.key === "ArrowLeft" || e.key === "ArrowRight") && canReorder.value && !inPanel) {
+      const id = focusedGame();
+      const order = visible.value.map(x => x.game.appid);
+      const i = id == null ? -1 : order.indexOf(id);
+      const target = order[i + (e.key === "ArrowLeft" ? -1 : 1)];
+      if (i < 0 || target == null) return;
+      e.preventDefault();
+      moveInList(currentList.value!.id, id!, target, e.key === "ArrowLeft" ? "before" : "after");
+      focusTarget.value = id;
+      return;
+    }
     if (mod || e.altKey) return;
 
     if (e.key === "?") { e.preventDefault(); shortcutsOpen.value = !shortcutsOpen.value; return; }
@@ -73,6 +87,12 @@ export function installKeys() {
     if (e.key === "/") { e.preventDefault(); document.getElementById("search")?.focus(); return; }
     const id = focusedGame();
     if (e.key.toLowerCase() === "x" && id != null && openId.value == null) { e.preventDefault(); toggleSelected(id, e.shiftKey); return; }
+    if (e.key.toLowerCase() === "a" && !inPanel) {
+      const ids = selection.value.size ? [...selection.value] : id != null ? [id] : [];
+      if (ids.length) { e.preventDefault(); pickerFor.value = ids; if (selection.value.size) clearSelection(); }
+      return;
+    }
+    if (e.key.toLowerCase() === "a" && openId.value != null && id != null && !pickerFor.value) { e.preventDefault(); pickerFor.value = [id]; return; }
     const status = STATUS_KEYS[e.key.toLowerCase()];
     if (!status) return;
     // With a selection, status keys apply to all of it (one undo)

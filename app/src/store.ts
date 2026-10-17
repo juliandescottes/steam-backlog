@@ -1,13 +1,15 @@
 import { batch, computed, effect, signal } from "@preact/signals";
 import { BANDS, bandOf, formatHours, type Band } from "@backlog/shared/bands";
-import { makeExport, newGame, type ExportGame, type LengthsEntry, type LibraryGame } from "@backlog/shared/files";
+import { makeExport, newGame, type ExportFile, type LengthsEntry, type LibraryGame } from "@backlog/shared/files";
 import { compare, matches, type Entry, type Filter, type SortKey } from "@backlog/shared/filter";
 import { resolveLength } from "@backlog/shared/lengths";
+import { after, between, slugify, uniqueSlug, type List, type ListItem, type ListKind } from "@backlog/shared/lists";
 import { normalizeName } from "@backlog/shared/names";
-import { userFields, type GameFields, type Op, type SyncView, type ViewFields } from "@backlog/shared/sync";
+import { userFields, type GameFields, type ItemFields, type ListFields, type Op, type SyncItem, type SyncList, type SyncView, type ViewFields } from "@backlog/shared/sync";
 import { STATUSES, STATUS_LABEL, type Game, type LenKind, type Lengths, type Measure, type Status } from "@backlog/shared/types";
 import { builtInViews, canonical, sameView, type View } from "@backlog/shared/views";
 import * as db from "./db.ts";
+import { navigate, route } from "./route.ts";
 import { download } from "./util.ts";
 
 export type Theme = "system" | "dark" | "light";
@@ -23,12 +25,14 @@ export const loaded = signal(false);
 export const triaged = signal(false);
 
 export async function load() {
-  const [all, s, t, v] = await Promise.all([
-    db.loadGames(), db.getMeta<Settings>("settings"), db.getMeta<boolean>("triaged"), db.loadViews(),
+  const [all, s, t, v, l] = await Promise.all([
+    db.loadGames(), db.getMeta<Settings>("settings"), db.getMeta<boolean>("triaged"), db.loadViews(), db.loadLists(),
   ]);
   batch(() => {
     games.value = new Map(all.map(g => [g.appid, g]));
     userViews.value = v;
+    lists.value = l.lists;
+    listItems.value = groupItems(l.items);
     settings.value = { ...DEFAULT_SETTINGS, ...s };
     triaged.value = t ?? false;
     loaded.value = true;
@@ -107,9 +111,18 @@ export const extra = signal<Filter>({});
 export const currentFilter = computed(() => canonical({ statuses: statuses.value, played: played.value, ...extra.value }));
 
 export const visible = computed(() => {
+  const l = currentList.value;
+  if (l) {
+    const f: Filter = { statuses: listStatuses.value, q: query.value };
+    const shown = listEntries(l).filter(e => matches(e, f));
+    return listSort.value === "list" ? shown : shown.sort(compare(listSort.value));
+  }
   const f: Filter = { ...currentFilter.value, q: query.value };
   return entries.value.filter(e => matches(e, f)).sort(compare(sortKey.value));
 });
+
+/** The sort in use: the library's, or the open list's. */
+export const sorting = computed<ListSort>(() => (currentList.value ? listSort.value : sortKey.value));
 
 // ---- Smart views ----
 
@@ -167,6 +180,217 @@ export function applyServerViews(list: SyncView[], pending: Op[], replace = fals
   void db.replaceViews(userViews.value);
 }
 
+// ---- Lists ----
+
+export const lists = signal<List[]>([]);
+/** Games of each hand-picked list: appid → position. */
+export const listItems = signal<ReadonlyMap<string, ReadonlyMap<number, string>>>(new Map());
+export const sortedLists = computed(() => [...lists.value].sort((a, b) => (a.position < b.position ? -1 : 1)));
+/** The list whose page is shown, or null on the library (and for a list that doesn't exist). */
+export const currentList = computed(() => {
+  const r = route.value;
+  return r.page === "list" ? lists.value.find(l => l.id === r.id) ?? null : null;
+});
+
+/** "list" is a hand-picked list's own order. */
+export type ListSort = SortKey | "list";
+/** A list page's filter, separate from the library's: lists start with every status shown. */
+export const listStatuses = signal<Status[]>(STATUSES);
+export const listSort = signal<ListSort>("list");
+let shownList: string | null = null;
+effect(() => {
+  const l = currentList.value;
+  if ((l?.id ?? null) === shownList) return;
+  shownList = l?.id ?? null;
+  batch(() => {
+    query.value = "";
+    if (!l) return;
+    listStatuses.value = STATUSES;
+    listSort.value = l.kind === "manual" ? "list" : l.sort ?? "length";
+  });
+});
+
+function groupItems(items: ListItem[]) {
+  const out = new Map<string, Map<number, string>>();
+  for (const i of items) {
+    let m = out.get(i.listId);
+    if (!m) out.set(i.listId, (m = new Map()));
+    m.set(i.appid, i.position);
+  }
+  return out;
+}
+
+/** Appids of a hand-picked list in its order. */
+export function listOrder(id: string): number[] {
+  return [...(listItems.value.get(id) ?? [])].sort((a, b) => (a[1] < b[1] ? -1 : 1)).map(([appid]) => appid);
+}
+
+/** Games of a list in its order (hand-picked), or the games its filter matches, by its sort. */
+export function listEntries(l: List): Entry[] {
+  if (l.kind === "filter") return entries.value.filter(e => matches(e, l.filter ?? {})).sort(compare(l.sort ?? "length"));
+  const ids = byId.value;
+  return listOrder(l.id).map(id => ids.get(id)).filter((e): e is Entry => !!e);
+}
+
+/** Lists a game is in, for the detail panel. */
+export const listsOf = (appid: number) => sortedLists.value.filter(l => l.kind === "manual" && listItems.value.get(l.id)?.has(appid));
+
+const listFields = ({ id: _id, ...rest }: List): ListFields => ({ ...rest, deleted: false });
+
+function putList(l: List, set: Partial<ListFields> = listFields(l)) {
+  lists.value = [...lists.value.filter(x => x.id !== l.id), l];
+  void db.saveLists([l], []);
+  onUserChanges?.([{ listId: l.id, set }]);
+}
+
+/** Sets positions of games in a list; a null position takes the game out. */
+function putItems(listId: string, changes: [appid: number, position: string | null][]) {
+  if (!changes.length) return;
+  const all = new Map(listItems.value);
+  const cur = new Map(all.get(listId));
+  const put: ListItem[] = [], removed: ListItem[] = [];
+  for (const [appid, position] of changes) {
+    if (position == null) { cur.delete(appid); removed.push({ listId, appid, position: "" }); }
+    else { cur.set(appid, position); put.push({ listId, appid, position }); }
+  }
+  all.set(listId, cur);
+  listItems.value = all;
+  void db.saveLists([], put, removed);
+  onUserChanges?.(changes.map(([appid, position]) => ({ listId, appid, set: position == null ? { deleted: true } : { position, deleted: false } })));
+}
+
+function dropList(id: string) {
+  const all = new Map(listItems.value);
+  const items = [...(all.get(id) ?? [])].map(([appid, position]) => ({ listId: id, appid, position }));
+  all.delete(id);
+  batch(() => {
+    lists.value = lists.value.filter(x => x.id !== id);
+    listItems.value = all;
+  });
+  void db.saveLists([], [], items, [id]);
+  onUserChanges?.([{ listId: id, set: { deleted: true } }]);
+  if (currentList.peek() === null && route.peek().page === "list") navigate("/", true);
+}
+
+/** A new list: hand-picked (with `appids` in it), or one that keeps the games of the library's current filter. */
+export function createList(title: string, kind: ListKind = "manual", appids: number[] = []): List {
+  const l: List = {
+    id: crypto.randomUUID(), title, description: "", kind,
+    filter: kind === "filter" ? currentFilter.value : null, sort: kind === "filter" ? sortKey.value : null,
+    slug: uniqueSlug(slugify(title), lists.value.map(x => x.slug)), visibility: "private",
+    position: between(sortedLists.value.at(-1)?.position ?? null, null),
+  };
+  putList(l);
+  const keys = after(null, appids.length);
+  putItems(l.id, appids.map((id, i) => [id, keys[i]]));
+  pushUndo({ label: appids.length ? `${subject(appids)} → ${title}` : `List "${title}" created`, patches: [], revert: () => dropList(l.id) });
+  return l;
+}
+
+/** Adds games at the end of a list; ones already in it stay where they are. */
+export function addToList(listId: string, appids: number[]) {
+  const l = lists.value.find(x => x.id === listId);
+  const cur = listItems.value.get(listId);
+  const add = [...new Set(appids)].filter(id => !cur?.has(id));
+  if (!l) return;
+  if (!add.length) return showToast(`Already in ${l.title}`);
+  const keys = after(listOrder(listId).map(id => cur!.get(id)!).at(-1) ?? null, add.length);
+  putItems(listId, add.map((id, i) => [id, keys[i]]));
+  pushUndo({ label: `${subject(add)} → ${l.title}`, patches: [], revert: () => putItems(listId, add.map(id => [id, null])) });
+}
+
+export function removeFromList(listId: string, appids: number[]) {
+  const l = lists.value.find(x => x.id === listId);
+  const cur = listItems.value.get(listId);
+  const gone = appids.filter(id => cur?.has(id)).map((id): [number, string] => [id, cur!.get(id)!]);
+  if (!l || !gone.length) return;
+  putItems(listId, gone.map(([id]) => [id, null]));
+  pushUndo({ label: `${subject(gone.map(g => g[0]))} removed from ${l.title}`, patches: [], revert: () => putItems(listId, gone) });
+}
+
+/** Adds the games, or takes them out when they're all in already: what picking a list in the picker does. */
+export function toggleInList(listId: string, appids: number[]) {
+  const cur = listItems.value.get(listId);
+  if (appids.every(id => cur?.has(id))) removeFromList(listId, appids);
+  else addToList(listId, appids);
+}
+
+/** Whether the shown list can be reordered: a hand-picked one, in its own order. */
+export const canReorder = computed(() => currentList.value?.kind === "manual" && listSort.value === "list");
+
+/** Moves a game of a hand-picked list just before or after another one. */
+export function moveInList(listId: string, appid: number, target: number, side: "before" | "after") {
+  const cur = listItems.value.get(listId);
+  const old = cur?.get(appid);
+  if (!cur || old == null || target === appid) return;
+  const full = listOrder(listId);
+  const order = full.filter(id => id !== appid);
+  const t = order.indexOf(target);
+  if (t < 0) return;
+  const i = side === "before" ? t : t + 1;
+  if (i === full.indexOf(appid)) return; // already there
+  const position = between(i > 0 ? cur.get(order[i - 1])! : null, i < order.length ? cur.get(order[i])! : null);
+  putItems(listId, [[appid, position]]);
+  pushUndo({ label: `${nameOf(appid)} moved`, patches: [], revert: () => putItems(listId, [[appid, old]]) });
+}
+
+/** Renames or describes a list. A private list's link follows its title. */
+export function updateList(id: string, change: Partial<Pick<List, "title" | "description">>) {
+  const l = lists.value.find(x => x.id === id);
+  if (!l) return;
+  const next = { ...l, ...change };
+  if (change.title && l.visibility === "private") next.slug = uniqueSlug(slugify(change.title), lists.value.filter(x => x.id !== id).map(x => x.slug));
+  const fields = (x: List): Partial<ListFields> => ({ title: x.title, description: x.description, slug: x.slug });
+  putList(next, fields(next));
+  pushUndo({ label: change.title ? `Renamed to ${change.title}` : "Description saved", patches: [], revert: () => putList(l, fields(l)) });
+}
+
+export function deleteList(id: string) {
+  const l = lists.value.find(x => x.id === id);
+  if (!l) return;
+  const items = listOrder(id).map((appid): [number, string] => [appid, listItems.value.get(id)!.get(appid)!]);
+  dropList(id);
+  pushUndo({ label: `List "${l.title}" deleted`, patches: [], revert: () => { putList(l); putItems(id, items); } });
+}
+
+/** Local lists as changes, for the first sign-in on this device. */
+export const localListChanges = (): UserChange[] => lists.value.flatMap(l => [
+  { listId: l.id, set: listFields(l) },
+  ...[...(listItems.value.get(l.id) ?? [])].map(([appid, position]) => ({ listId: l.id, appid, set: { position, deleted: false } })),
+]);
+
+/** Lists and items from the server, with list ops still in the outbox applied on top. `replace` drops what the server didn't send. */
+export function applyServerLists(ls: SyncList[], its: SyncItem[], pending: Op[], replace = false) {
+  if (!ls.length && !its.length && !replace) return;
+  const next = new Map(replace ? [] : lists.value.map(l => [l.id, l]));
+  const items = new Map([...(replace ? [] : listItems.value)].map(([id, m]) => [id, new Map(m)]));
+  const itemsOf = (id: string) => items.get(id) ?? items.set(id, new Map()).get(id)!;
+  for (const { deleted, ...l } of ls) deleted ? next.delete(l.id) : next.set(l.id, l);
+  for (const { deleted, listId, appid, position } of its) deleted ? items.get(listId)?.delete(appid) : itemsOf(listId).set(appid, position);
+  for (const op of pending) {
+    if (op.type === "list") {
+      const { deleted, ...set } = op.set;
+      const cur = next.get(op.listId);
+      if (deleted) next.delete(op.listId);
+      else if (cur || (set.title && set.kind && set.slug && set.position)) next.set(op.listId, { ...cur!, ...set, id: op.listId });
+    } else if (op.type === "item") {
+      if (op.set.deleted) items.get(op.listId)?.delete(op.appid);
+      else if (op.set.position) itemsOf(op.listId).set(op.appid, op.set.position);
+    }
+  }
+  for (const id of items.keys()) if (!next.has(id)) items.delete(id);
+  batch(() => {
+    lists.value = [...next.values()];
+    listItems.value = items;
+  });
+  const flat = [...items].flatMap(([listId, m]) => [...m].map(([appid, position]) => ({ listId, appid, position })));
+  void db.saveLists(lists.value, flat, [], [], true);
+}
+
+export const listsOpen = signal(false);
+/** Games the "Add to list" picker is open for. */
+export const pickerFor = signal<number[] | null>(null);
+
 /** The Now playing shelf: every Playing game whatever the view, most recently started first. */
 export const nowPlaying = computed(() =>
   entries.value.filter(e => e.game.status === "playing").sort((a, b) => (b.game.statusAt ?? 0) - (a.game.statusAt ?? 0)));
@@ -174,7 +398,7 @@ export const nowPlaying = computed(() =>
 /** What the library shows: one shelf per length band, or a single one for other sorts. */
 export const shelves = computed<{ band: Band | null; entries: Entry[] }[]>(() => {
   const list = visible.value;
-  if (sortKey.value !== "length") return list.length ? [{ band: null, entries: list }] : [];
+  if (sorting.value !== "length") return list.length ? [{ band: null, entries: list }] : [];
   return BANDS.map(band => ({ band, entries: list.filter(e => bandOf(e.len) === band) })).filter(s => s.entries.length);
 });
 
@@ -253,8 +477,12 @@ type Command = { label: string; patches: Patch[]; revert?: () => void };
 const undoStack: Command[] = [];
 const UNDO_LIMIT = 100;
 
-/** A change the account should sync: fields of a game, or of a view. */
-export type UserChange = { appid: number; set: Partial<GameFields> } | { viewId: string; set: Partial<ViewFields> };
+/** A change the account should sync: fields of a game, a view, a list, or a game in a list. */
+export type UserChange =
+  | { appid: number; set: Partial<GameFields> }
+  | { viewId: string; set: Partial<ViewFields> }
+  | { listId: string; set: Partial<ListFields> }
+  | { listId: string; appid: number; set: Partial<ItemFields> };
 let onUserChanges: ((changes: UserChange[]) => void) | null = null;
 /** Called with every change to the user's own fields; account.ts turns them into sync ops. */
 export function listenUserChanges(fn: typeof onUserChanges) {
@@ -396,7 +624,8 @@ export function mergeLibrary(list: LibraryGame[]): { added: number; updated: num
 }
 
 /** Restore a backup. "merge" overwrites the user's fields for games in the file; "replace" starts over from it. */
-export async function restoreBackup(list: ExportGame[], mode: "merge" | "replace", s?: Partial<Settings>) {
+export async function restoreBackup(file: ExportFile, mode: "merge" | "replace") {
+  const { games: list, settings: s } = file as ExportFile & { settings?: Partial<Settings> };
   if (mode === "replace") await db.clearAll();
   const now = Date.now();
   const next = new Map(mode === "replace" ? [] : games.value);
@@ -407,9 +636,35 @@ export async function restoreBackup(list: ExportGame[], mode: "merge" | "replace
     next.set(e.appid, { ...base, ...set });
     userChanges.push({ appid: e.appid, set });
   }
+  // Views and lists from the file replace ones with the same id; with "replace", the others go
+  const keep = <T extends { id: string }>(cur: T[], from: T[]) => [...(mode === "replace" ? [] : cur.filter(x => !from.some(f => f.id === x.id))), ...from];
+  const fileViews = file.views ?? [], fileLists = file.lists ?? [];
+  const nextViews = keep(userViews.value, fileViews), nextLists = keep(lists.value, fileLists);
+  const fileItems = groupItems(file.listItems ?? []);
+  const nextItems = new Map(mode === "replace" ? [] : listItems.value);
+  for (const l of fileLists) {
+    for (const appid of nextItems.get(l.id)?.keys() ?? []) {
+      if (!fileItems.get(l.id)?.has(appid)) userChanges.push({ listId: l.id, appid, set: { deleted: true } });
+    }
+    nextItems.set(l.id, fileItems.get(l.id) ?? new Map());
+  }
+  for (const id of nextItems.keys()) if (!nextLists.some(l => l.id === id)) nextItems.delete(id);
+  for (const v of fileViews) userChanges.push({ viewId: v.id, set: viewFields(v) });
+  for (const l of fileLists) {
+    userChanges.push({ listId: l.id, set: listFields(l) });
+    for (const [appid, position] of nextItems.get(l.id)!) userChanges.push({ listId: l.id, appid, set: { position, deleted: false } });
+  }
+
   undoStack.length = 0;
-  games.value = next;
+  batch(() => {
+    games.value = next;
+    userViews.value = nextViews;
+    lists.value = nextLists;
+    listItems.value = nextItems;
+  });
   db.saveGames(next.values());
+  void db.replaceViews(nextViews);
+  void db.saveLists(nextLists, [...nextItems].flatMap(([listId, m]) => [...m].map(([appid, position]) => ({ listId, appid, position }))), [], [], true);
   onUserChanges?.(userChanges);
   if (s) updateSettings({ ...(s.theme ? { theme: s.theme } : {}), ...(s.measure ? { measure: s.measure } : {}) });
 }
@@ -437,7 +692,8 @@ export function applyServerGames(list: Game[], pending: Op[], replace = false) {
 
 export function exportBackup() {
   const stamp = new Date().toISOString().slice(0, 10);
-  download(`backlog-${stamp}.json`, makeExport([...games.value.values()], settings.value));
+  const items = [...listItems.value].flatMap(([listId, m]) => [...m].map(([appid, position]) => ({ listId, appid, position })));
+  download(`backlog-${stamp}.json`, makeExport([...games.value.values()], settings.value, { views: userViews.value, lists: lists.value, listItems: items }));
 }
 
 export async function deleteEverything() {
@@ -450,6 +706,10 @@ export async function deleteEverything() {
     triaged.value = false;
     selection.value = new Set();
     userViews.value = [];
+    lists.value = [];
+    listItems.value = new Map();
+    pickerFor.value = null;
+    listsOpen.value = false;
     openId.value = null;
     settingsOpen.value = false;
   });

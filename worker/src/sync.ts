@@ -1,4 +1,6 @@
-import { mergeOps, mergeViewOps, validOp, type GameFields, type SyncRequest, type SyncResponse, type SyncView } from "@backlog/shared/sync";
+import {
+  mergeItemOps, mergeListOps, mergeOps, mergeViewOps, validOp, type GameFields, type SyncItem, type SyncList, type SyncRequest, type SyncResponse, type SyncView,
+} from "@backlog/shared/sync";
 import type { Game, LenKind, Status } from "@backlog/shared/types";
 import { recompute, writeRows } from "./community.ts";
 import { HttpError } from "./http.ts";
@@ -45,6 +47,23 @@ const toView = (r: ViewRow): SyncView => ({
   id: r.id, name: r.name, filter: JSON.parse(r.filter_json), sort: r.sort, position: r.position, deleted: r.deleted === 1,
 });
 
+const LIST_SETTABLE: [column: string, path: string][] = [
+  ["title", "title"], ["description", "description"], ["kind", "kind"], ["filter_json", "filter"], ["sort", "sort"],
+  ["slug", "slug"], ["visibility", "visibility"], ["position", "position"], ["deleted", "deleted"],
+];
+const ITEM_SETTABLE: [column: string, path: string][] = [["position", "position"], ["deleted", "deleted"]];
+
+type ListRow = {
+  id: string; title: string; description: string; kind: SyncList["kind"]; filter_json: string | null; sort: SyncList["sort"];
+  slug: string; visibility: SyncList["visibility"]; position: string; deleted: number;
+};
+const toList = (r: ListRow): SyncList => ({
+  id: r.id, title: r.title, description: r.description, kind: r.kind, filter: r.filter_json == null ? null : JSON.parse(r.filter_json),
+  sort: r.sort, slug: r.slug, visibility: r.visibility, position: r.position, deleted: r.deleted === 1,
+});
+type ItemRow = { list_id: string; appid: number; position: string; deleted: number };
+const toItem = (r: ItemRow): SyncItem => ({ listId: r.list_id, appid: r.appid, position: r.position, deleted: r.deleted === 1 });
+
 function flatten(appid: number, s: Partial<GameFields>) {
   const { my, ...rest } = s;
   return { appid, ...rest, ...("my" in s ? { myMain: my?.main ?? null, myMainExtra: my?.main_extra ?? null, myComp: my?.comp ?? null } : {}) };
@@ -66,11 +85,14 @@ export async function sync(env: Env, userId: string, req: SyncRequest, now = Dat
     const fresh = ops.filter(o => !seen.has(o.id));
     const patches = [...mergeOps(fresh)].map(([appid, set]) => flatten(appid, set));
     const viewPatches = [...mergeViewOps(fresh)].map(([id, set]) => ({ id, ...set }));
+    const listPatches = [...mergeListOps(fresh)].map(([id, set]) => ({ id, ...set }));
+    const itemPatches = mergeItemOps(fresh).map(({ listId, appid, set }) => ({ listId, appid, ...set }));
     // A field missing from the op keeps its value; JSON null sets NULL
     const keep = (cols: [string, string][]) => cols.map(([col, path]) =>
       `${col} = CASE WHEN json_type(j.value, '$.${path}') IS NULL THEN ${col} ELSE j.value ->> '${path}' END`).join(", ");
-    // Every changed row gets the next rev: games first, then views
-    const n = patches.length + viewPatches.length;
+    // Every changed row gets the next rev: games, then views, lists and items
+    const n = patches.length + viewPatches.length + listPatches.length + itemPatches.length;
+    const [atViews, atLists, atItems] = [patches.length, patches.length + viewPatches.length, n - itemPatches.length];
     const nextRev = (offset: number) => `(SELECT rev FROM user_rev WHERE user_id = ?1) - ${n} + ${offset} + j.key + 1`;
     if (fresh.length) {
       await env.DB.batch([
@@ -81,16 +103,39 @@ export async function sync(env: Env, userId: string, req: SyncRequest, now = Dat
         ).bind(userId, JSON.stringify(patches)),
         // Views: update the user's own, then create new ones (an id taken by another user is ignored)
         env.DB.prepare(
-          `UPDATE views SET ${keep(VIEW_SETTABLE)}, rev = ${nextRev(patches.length)}
+          `UPDATE views SET ${keep(VIEW_SETTABLE)}, rev = ${nextRev(atViews)}
            FROM json_each(?2) j WHERE views.user_id = ?1 AND views.id = j.value ->> 'id'`,
         ).bind(userId, JSON.stringify(viewPatches)),
         env.DB.prepare(
           `INSERT OR IGNORE INTO views (id, user_id, name, filter_json, sort, position, rev, deleted)
            SELECT j.value ->> 'id', ?1, coalesce(j.value ->> 'name', ''), coalesce(j.value ->> 'filter', '{}'),
-             coalesce(j.value ->> 'sort', 'length'), coalesce(j.value ->> 'position', ''), ${nextRev(patches.length)},
+             coalesce(j.value ->> 'sort', 'length'), coalesce(j.value ->> 'position', ''), ${nextRev(atViews)},
              coalesce(j.value ->> 'deleted', 0)
            FROM json_each(?2) j WHERE NOT EXISTS (SELECT 1 FROM views v WHERE v.id = j.value ->> 'id')`,
         ).bind(userId, JSON.stringify(viewPatches)),
+        // Lists the same way; items only go into the user's own lists
+        env.DB.prepare(
+          `UPDATE lists SET ${keep(LIST_SETTABLE)}, rev = ${nextRev(atLists)}
+           FROM json_each(?2) j WHERE lists.user_id = ?1 AND lists.id = j.value ->> 'id'`,
+        ).bind(userId, JSON.stringify(listPatches)),
+        env.DB.prepare(
+          `INSERT OR IGNORE INTO lists (id, user_id, title, description, kind, filter_json, sort, slug, visibility, position, rev, deleted)
+           SELECT j.value ->> 'id', ?1, coalesce(j.value ->> 'title', 'List'), coalesce(j.value ->> 'description', ''),
+             coalesce(j.value ->> 'kind', 'manual'), j.value ->> 'filter', j.value ->> 'sort', coalesce(j.value ->> 'slug', 'list'),
+             coalesce(j.value ->> 'visibility', 'private'), coalesce(j.value ->> 'position', 'i'), ${nextRev(atLists)},
+             coalesce(j.value ->> 'deleted', 0)
+           FROM json_each(?2) j WHERE NOT EXISTS (SELECT 1 FROM lists l WHERE l.id = j.value ->> 'id')`,
+        ).bind(userId, JSON.stringify(listPatches)),
+        env.DB.prepare(
+          `UPDATE list_items SET ${keep(ITEM_SETTABLE)}, rev = ${nextRev(atItems)}
+           FROM json_each(?2) j WHERE list_items.user_id = ?1 AND list_items.list_id = j.value ->> 'listId' AND list_items.appid = j.value ->> 'appid'`,
+        ).bind(userId, JSON.stringify(itemPatches)),
+        env.DB.prepare(
+          `INSERT OR IGNORE INTO list_items (list_id, appid, user_id, position, rev, deleted)
+           SELECT j.value ->> 'listId', j.value ->> 'appid', ?1, coalesce(j.value ->> 'position', 'i'), ${nextRev(atItems)},
+             coalesce(j.value ->> 'deleted', 0)
+           FROM json_each(?2) j WHERE EXISTS (SELECT 1 FROM lists l WHERE l.id = j.value ->> 'listId' AND l.user_id = ?1)`,
+        ).bind(userId, JSON.stringify(itemPatches)),
         env.DB.prepare("INSERT OR IGNORE INTO applied_ops (user_id, op_id, at) SELECT ?1, value, ?3 FROM json_each(?2)")
           .bind(userId, JSON.stringify(fresh.map(o => o.id)), now),
         env.DB.prepare("DELETE FROM applied_ops WHERE user_id = ? AND at < ?").bind(userId, now - DAY),
@@ -100,7 +145,7 @@ export async function sync(env: Env, userId: string, req: SyncRequest, now = Dat
     }
   }
 
-  const [rev, rows, viewRows] = await env.DB.batch<any>([
+  const [rev, rows, viewRows, listRows, itemRows] = await env.DB.batch<any>([
     env.DB.prepare("SELECT rev FROM user_rev WHERE user_id = ?").bind(userId),
     env.DB.prepare(
       `SELECT g.appid, g.name, g.has_portrait_art, g.igdb_main, g.igdb_main_extra, g.igdb_comp, g.igdb_count,
@@ -111,8 +156,13 @@ export async function sync(env: Env, userId: string, req: SyncRequest, now = Dat
        WHERE ug.user_id = ? AND (ug.rev > ? OR g.updated_at > ?)`,
     ).bind(userId, since, catalogSince),
     env.DB.prepare("SELECT id, name, filter_json, sort, position, deleted FROM views WHERE user_id = ? AND rev > ?").bind(userId, since),
+    env.DB.prepare(
+      "SELECT id, title, description, kind, filter_json, sort, slug, visibility, position, deleted FROM lists WHERE user_id = ? AND rev > ?",
+    ).bind(userId, since),
+    env.DB.prepare("SELECT list_id, appid, position, deleted FROM list_items WHERE user_id = ? AND rev > ?").bind(userId, since),
   ]);
   // The catalog cursor trails by a minute: a row another request writes during this one is sent again, not missed
   return { rev: (rev.results[0] as { rev: number }).rev, catalogAt: now - 60_000, games: (rows.results as Row[]).map(toGame),
-    views: (viewRows.results as ViewRow[]).map(toView) };
+    views: (viewRows.results as ViewRow[]).map(toView), lists: (listRows.results as ListRow[]).map(toList),
+    items: (itemRows.results as ItemRow[]).map(toItem) };
 }

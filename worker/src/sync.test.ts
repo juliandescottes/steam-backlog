@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, beforeEach, expect, test, vi } from "vitest";
-import type { GameOp, Op, SyncResponse, ViewOp } from "@backlog/shared/sync";
+import type { GameOp, ItemOp, ListOp, Op, SyncResponse, ViewOp } from "@backlog/shared/sync";
 import { testWorker } from "./testing.ts";
 
 let w: Awaited<ReturnType<typeof testWorker>>;
@@ -9,6 +9,9 @@ afterAll(() => w.dispose());
 let n = 0;
 const op = (appid: number, set: GameOp["set"], id = `op-${++n}`): Op => ({ id, type: "game", appid, at: 1_000, set });
 const viewOp = (viewId: string, set: ViewOp["set"]): Op => ({ id: `op-${++n}`, type: "view", viewId, at: 1_000, set });
+const listOp = (listId: string, set: ListOp["set"]): Op => ({ id: `op-${++n}`, type: "list", listId, at: 1_000, set });
+const itemOp = (listId: string, appid: number, set: ItemOp["set"]): Op => ({ id: `op-${++n}`, type: "item", listId, appid, at: 1_000, set });
+const NEW_LIST = { title: "Up next", description: "", kind: "manual", filter: null, sort: null, slug: "up-next", visibility: "private", position: "i", deleted: false } as const;
 // Catalog rows written in the last minute come back on every sync; "later" skips that overlap
 const LATER = Date.now() + 120_000;
 const sync = async (since: number, ops: Op[] = [], catalogSince = since ? LATER : 0) =>
@@ -129,4 +132,43 @@ test("another user can't touch a view by guessing its id; bad view ops are dropp
   expect(r.views).toEqual([]);
   const row = await w.env.DB.prepare("SELECT name FROM views WHERE id = 'shared-id'").first("name");
   expect(row).toBe("Mine");
+});
+
+test("lists and their games: create, reorder, remove, delete, in one rev sequence", async () => {
+  const { rev } = await sync(0);
+  const created = await sync(rev, [listOp("l1", NEW_LIST), itemOp("l1", 1, { position: "i", deleted: false }), itemOp("l1", 2, { position: "r", deleted: false })]);
+  expect(created.lists).toEqual([{ id: "l1", ...NEW_LIST }]);
+  expect(created.items).toEqual(expect.arrayContaining([
+    { listId: "l1", appid: 1, position: "i", deleted: false }, { listId: "l1", appid: 2, position: "r", deleted: false },
+  ]));
+  expect(created.rev).toBe(rev + 3);
+
+  const moved = await sync(created.rev, [itemOp("l1", 2, { position: "a" }), itemOp("l1", 1, { deleted: true }), listOp("l1", { title: "Soon" })]);
+  expect(moved.lists).toEqual([expect.objectContaining({ title: "Soon", slug: "up-next" })]);
+  expect(moved.items).toEqual(expect.arrayContaining([
+    { listId: "l1", appid: 2, position: "a", deleted: false }, { listId: "l1", appid: 1, position: "i", deleted: true },
+  ]));
+
+  const filter = await sync(moved.rev, [listOp("l2", { ...NEW_LIST, kind: "filter", filter: { maxHours: 5 }, sort: "length", slug: "short" })]);
+  expect(filter.lists[0]).toMatchObject({ id: "l2", kind: "filter", filter: { maxHours: 5 }, sort: "length" });
+  const deleted = await sync(filter.rev, [listOp("l1", { deleted: true })]);
+  expect(deleted.lists).toEqual([expect.objectContaining({ id: "l1", deleted: true })]);
+});
+
+test("another user can't touch a list or add games to it; bad list ops are dropped", async () => {
+  await sync(0, [listOp("their-list", NEW_LIST), itemOp("their-list", 1, { position: "i", deleted: false })]);
+  await w.call("POST", "/api/auth/dev", { steamId: `76561198${String(++n).padStart(9, "0")}` });
+  const r = await sync(0, [
+    listOp("their-list", { title: "Stolen" }),
+    itemOp("their-list", 2, { position: "j", deleted: false }),
+    itemOp("their-list", 1, { deleted: true }),
+    listOp("bad", { ...NEW_LIST, visibility: "public" as never }),
+    listOp("bad-slug", { ...NEW_LIST, slug: "a/b" }),
+    itemOp("bad-pos", 1, { position: "I" }),
+  ]);
+  expect(r.lists).toEqual([]);
+  expect(r.items).toEqual([]);
+  expect(await w.env.DB.prepare("SELECT title FROM lists WHERE id = 'their-list'").first("title")).toBe("Up next");
+  const items = await w.env.DB.prepare("SELECT appid, deleted FROM list_items WHERE list_id = 'their-list'").all();
+  expect(items.results).toEqual([{ appid: 1, deleted: 0 }]);
 });

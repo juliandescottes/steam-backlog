@@ -30,9 +30,15 @@ function rowsFor(el: HTMLElement, count: number, prev: Rows | null): Rows {
 const same = (a: Rows | null, b: Rows) =>
   !!a && a.cols === b.cols && a.pitch === b.pitch && a.start === b.start && a.end === b.end;
 
-export function Shelf({ list }: { list: Entry[] }) {
+type Reorder = (appid: number, target: number, side: "before" | "after") => void;
+type Drop = { appid: number; side: "before" | "after" };
+
+/** With `reorder`, cards can be dragged to a new place (a hand-picked list in its own order). */
+export function Shelf({ list, reorder }: { list: Entry[]; reorder?: Reorder }) {
   const ref = useRef<HTMLDivElement>(null);
   const [rows, setRows] = useState<Rows | null>(null);
+  const dragged = useRef<number | null>(null);
+  const [drop, setDrop] = useState<Drop | null>(null);
   const update = useRef(() => {});
   update.current = () => {
     if (!ref.current) return;
@@ -74,6 +80,32 @@ export function Shelf({ list }: { list: Entry[] }) {
     };
   }, []);
 
+  const cardOf = (e: Event) => (e.target as HTMLElement).closest?.<HTMLElement>("[data-appid]");
+  const drag = reorder && {
+    onDragStart: (e: DragEvent) => {
+      const card = cardOf(e);
+      if (!card) return;
+      dragged.current = Number(card.dataset.appid);
+      e.dataTransfer!.effectAllowed = "move";
+      e.dataTransfer!.setData("text/plain", card.dataset.appid!);
+    },
+    onDragOver: (e: DragEvent) => {
+      const card = cardOf(e);
+      if (dragged.current == null || !card) return;
+      e.preventDefault();
+      const r = card.getBoundingClientRect();
+      const next: Drop = { appid: Number(card.dataset.appid), side: e.clientX > r.left + r.width / 2 ? "after" : "before" };
+      if (next.appid !== drop?.appid || next.side !== drop.side) setDrop(next);
+    },
+    onDrop: (e: DragEvent) => {
+      e.preventDefault();
+      if (dragged.current != null && drop) reorder(dragged.current, drop.appid, drop.side);
+      dragged.current = null;
+      setDrop(null);
+    },
+    onDragEnd: () => { dragged.current = null; setDrop(null); },
+  };
+
   const editing = editingId.value;
   const selected = selection.value;
   const r = rows ?? { cols: 1, pitch: 0, gap: 0, start: 0, end: 0 };
@@ -81,9 +113,12 @@ export function Shelf({ list }: { list: Entry[] }) {
   const spacer = (key: string, n: number) => n > 0 && <div key={key} class="shelf-spacer" style={{ height: `${n * r.pitch - r.gap}px` }} />;
 
   return (
-    <div class="shelf" ref={ref}>
+    <div class="shelf" ref={ref} {...drag}>
       {spacer("above", r.start)}
-      {list.slice(r.start * r.cols, r.end * r.cols).map(e => <Card key={e.game.appid} e={e} editing={editing === e.game.appid} selected={selected.has(e.game.appid)} />)}
+      {list.slice(r.start * r.cols, r.end * r.cols).map(e => (
+        <Card key={e.game.appid} e={e} editing={editing === e.game.appid} selected={selected.has(e.game.appid)}
+          draggable={!!reorder} drop={drop?.appid === e.game.appid ? drop.side : null} />
+      ))}
       {spacer("below", total - r.end)}
     </div>
   );

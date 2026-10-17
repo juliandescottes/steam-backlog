@@ -27,7 +27,7 @@ export function Welcome() {
       if (!(e instanceof FileFormatError)) throw e;
       try {
         const b = parseExport(text);
-        await restoreBackup(b.games, "replace", b.settings as any);
+        await restoreBackup(b, "replace");
       } catch {
         setError("That file isn't a library file or a backup.");
       }

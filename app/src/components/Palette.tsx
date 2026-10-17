@@ -5,9 +5,10 @@ import { normalizeName } from "@backlog/shared/names";
 import { rank } from "@backlog/shared/rank";
 import { STATUSES, STATUS_LABEL } from "@backlog/shared/types";
 import { account, refreshLibrary, signIn } from "../account.ts";
+import { listPath, navigate } from "../route.ts";
 import {
-  applyView, clearSelection, entries, exportBackup, openId, paletteOpen, selectAll, selection, setStatus, settingsOpen, shortcutsOpen,
-  sortKey, startFillIn, statuses, undo, updateSettings, views, type Theme,
+  applyView, clearSelection, currentList, entries, exportBackup, listsOpen, openId, paletteOpen, pickerFor, selectAll, selection, setStatus,
+  settingsOpen, shortcutsOpen, sortedLists, sortKey, startFillIn, statuses, undo, updateSettings, views, type Theme,
 } from "../store.ts";
 import { isMac } from "../util.ts";
 
@@ -24,6 +25,7 @@ function actions(): Item[] {
   if (sel.length) {
     for (const s of STATUSES) out.push({ label: `Mark selection ${STATUS_LABEL[s]}`, run: () => { setStatus(sel, s); clearSelection(); } });
     out.push({ label: "Fill in lengths for the selection", run: () => { startFillIn(sel); clearSelection(); } });
+    out.push({ label: "Add selection to list…", keys: "A", run: () => { pickerFor.value = sel; clearSelection(); } });
     out.push({ label: "Clear selection", keys: "Esc", run: clearSelection });
   }
   out.push(
@@ -31,7 +33,10 @@ function actions(): Item[] {
     { label: "Select all shown", keys: `${MOD}A`, run: selectAll },
     { label: "Undo", keys: `${MOD}Z`, run: undo },
   );
-  for (const v of views.value) out.push({ label: `View: ${v.name}`, run: () => applyView(v) });
+  for (const v of views.value) out.push({ label: `View: ${v.name}`, run: () => { navigate("/"); applyView(v); } });
+  for (const l of sortedLists.value) out.push({ label: `List: ${l.title}`, run: () => navigate(listPath(l.id)) });
+  if (currentList.value) out.push({ label: "Back to backlog", run: () => navigate("/") });
+  out.push({ label: "Lists", run: () => (listsOpen.value = true) });
   out.push({ label: "Show all statuses", run: () => (statuses.value = STATUSES) });
   for (const [k, label] of Object.entries(SORT_LABEL)) out.push({ label: `Sort by ${label.toLowerCase()}`, run: () => (sortKey.value = k as SortKey) });
   if (account.value) out.push({ label: "Refresh library", run: () => void refreshLibrary() });

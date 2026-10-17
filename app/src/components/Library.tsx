@@ -1,11 +1,15 @@
 import { UNKNOWN_BAND, type Band } from "@backlog/shared/bands";
 import { SORT_LABEL, type Entry, type SortKey } from "@backlog/shared/filter";
 import { STATUSES, STATUS_LABEL, type Status } from "@backlog/shared/types";
+import type { Signal } from "@preact/signals";
+import { route } from "../route.ts";
 import {
-  dismissTriage, editingId, finishPlayed, nowPlaying, played, query, selection, settings, settingsOpen, shelves, sortKey, startFillIn, statuses, totals, triageCandidates, triaged, visible,
+  canReorder, currentList, dismissTriage, editingId, finishPlayed, listItems, listSort, listStatuses, listsOpen, moveInList, nowPlaying, played, query,
+  selection, settings, settingsOpen, shelves, sortKey, sorting, startFillIn, statuses, totals, triageCandidates, triaged, visible, type ListSort,
 } from "../store.ts";
 import { count, thousands } from "../util.ts";
 import { Card } from "./Card.tsx";
+import { ListHeader, MissingList } from "./Lists.tsx";
 import { Shelf } from "./Shelf.tsx";
 import { ConditionPills, ViewTabs } from "./Views.tsx";
 
@@ -21,7 +25,10 @@ function Header() {
     <header class="top">
       <div class="eyebrow-row">
         <div class="eyebrow">Backlog</div>
-        <button type="button" class="btn ghost" onClick={() => (settingsOpen.value = true)}>Settings</button>
+        <div class="row-actions">
+          <button type="button" class="btn ghost" onClick={() => (listsOpen.value = true)}>Lists</button>
+          <button type="button" class="btn ghost" onClick={() => (settingsOpen.value = true)}>Settings</button>
+        </div>
       </div>
       <h1>{count(t.left, "game")}, <em>{count(t.leftHours, "hour")}</em> to clear</h1>
       <p class="lede">
@@ -93,49 +100,64 @@ function BandIndex({ groups }: { groups: { band: Band; entries: Entry[] }[] }) {
   );
 }
 
+/** Search, statuses and sort; on a list page they apply to the list, with its own order as a sort. */
 function Toolbar() {
+  const onList = currentList.value;
+  const st: Signal<Status[]> = onList ? listStatuses : statuses;
   const toggle = (s: Status) => {
-    const cur = statuses.value;
-    statuses.value = cur.includes(s) ? cur.filter(x => x !== s) : STATUSES.filter(x => x === s || cur.includes(x));
+    const cur = st.value;
+    st.value = cur.includes(s) ? cur.filter(x => x !== s) : STATUSES.filter(x => x === s || cur.includes(x));
   };
+  const sort = onList ? listSort : (sortKey as Signal<ListSort>);
   return (
     <div class="tools">
       <input type="search" id="search" placeholder="Search  ( / )" aria-label="Search games by name"
         value={query.value} onInput={e => (query.value = e.currentTarget.value)} />
       <div class="chips" role="group" aria-label="Statuses shown">
         {STATUSES.map(s => (
-          <button type="button" key={s} class="chip" aria-pressed={statuses.value.includes(s)} onClick={() => toggle(s)}>{STATUS_LABEL[s]}</button>
+          <button type="button" key={s} class="chip" aria-pressed={st.value.includes(s)} onClick={() => toggle(s)}>{STATUS_LABEL[s]}</button>
         ))}
       </div>
-      <select aria-label="Played" value={played.value} onChange={e => (played.value = e.currentTarget.value as typeof played.value)}>
-        <option value="any">Played or not</option>
-        <option value="played">Played</option>
-        <option value="never">Never launched</option>
-      </select>
-      <select aria-label="Sort" value={sortKey.value} onChange={e => (sortKey.value = e.currentTarget.value as SortKey)}>
+      {!onList && (
+        <select aria-label="Played" value={played.value} onChange={e => (played.value = e.currentTarget.value as typeof played.value)}>
+          <option value="any">Played or not</option>
+          <option value="played">Played</option>
+          <option value="never">Never launched</option>
+        </select>
+      )}
+      <select aria-label="Sort" value={sort.value} onChange={e => (sort.value = e.currentTarget.value as SortKey)}>
+        {onList?.kind === "manual" && <option value="list">Sort: List order</option>}
         {Object.entries(SORT_LABEL).map(([k, label]) => <option key={k} value={k}>Sort: {label}</option>)}
       </select>
-      <ConditionPills />
+      {!onList && <ConditionPills />}
     </div>
   );
 }
 
 export function Library() {
+  const openList = currentList.value;
+  if (!openList && route.value.page === "list") return <MissingList />;
   const list = visible.value;
   const groups = shelves.value;
-  const byLength = sortKey.value === "length";
+  const byLength = sorting.value === "length";
   const bands = groups.filter((g): g is { band: Band; entries: Entry[] } => g.band != null);
+  const reorder = canReorder.value && openList
+    ? (appid: number, target: number, side: "before" | "after") => moveInList(openList.id, appid, target, side) : undefined;
 
   return (
     <div class="wrap">
-      <Header />
-      <Triage />
-      <NowPlaying />
-      <ViewTabs />
+      {openList ? <ListHeader key={openList.id} list={openList} /> : <>
+        <Header />
+        <Triage />
+        <NowPlaying />
+        <ViewTabs />
+      </>}
       {byLength && bands.length > 0 && <BandIndex groups={bands} />}
       <Toolbar />
       <main class={`bands${selection.value.size ? " selecting" : ""}`}>
-        {list.length === 0 && <p class="empty">No games match. Try other statuses or clear the search.</p>}
+        {list.length === 0 && (openList?.kind === "manual" && !listItems.value.get(openList.id)?.size
+          ? <p class="empty">No games in this list yet. Add some from your backlog with the + on a cover, or select several and use “Add to list”.</p>
+          : <p class="empty">No games match. Try other statuses or clear the search.</p>)}
         {byLength ? bands.map(({ band, entries }) => {
           const hours = entries.reduce((s, e) => s + (e.len.hours ?? 0), 0);
           return (
@@ -147,10 +169,10 @@ export function Library() {
                   <button type="button" class="btn primary" onClick={() => startFillIn(entries.map(e => e.game.appid))}>Fill in lengths</button>
                 )}
               </div>
-              <Shelf list={entries} />
+              <Shelf list={entries} reorder={reorder} />
             </section>
           );
-        }) : groups.map(g => <Shelf key="all" list={g.entries} />)}
+        }) : groups.map(g => <Shelf key="all" list={g.entries} reorder={reorder} />)}
       </main>
       <footer>Lengths from IGDB and from you. Box art from Steam. Your data stays in this browser; back it up from Settings.</footer>
     </div>

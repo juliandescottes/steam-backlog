@@ -63,7 +63,8 @@ list_items   (list_id, appid, position /*fractional index*/, rev, deleted,
 user_rev     (user_id PK, rev)   -- last rev handed out
 ```
 
-- IDs for views and lists are generated on the client (ULIDs), so they can be created offline.
+- IDs for views and lists are generated on the client (UUIDs), so they can be created offline.
+- Migration 0004 recreated `lists` (no `UNIQUE(user_id, slug)`: two offline devices can pick the same slug; uniqueness is checked when sharing) and `list_items` (with `user_id`, for sync by rev).
 - `deleted` keeps soft deletes for sync and undo; purge them after 30 days.
 - Manual list order uses fractional index strings, so reordering one game writes one row.
 - **Purchase date:** Steam's API doesn't expose it. Use `first_seen_at` (the first import that saw the game) and label the sort "Date added". For the first import, take the date from `rtime_last_played` if older, otherwise the import date.
@@ -78,7 +79,7 @@ user_rev     (user_id PK, rev)   -- last rev handed out
 
 **Rendering.** Cover grid with fixed-height cards (2:3 cover, fixed text block) and `loading="lazy"` images. Each band mounts only the rows within a screen of the viewport, with spacers for the rest: mounting all cards took ~450 ms at 3,000 games on an M1 Pro (profiled 2026-10-17), and `content-visibility` didn't help. Portrait art (`library_600x900.jpg`) with `header.jpg` fallback via `onerror`, as in the prototype; record the fallback in the catalog (`has_portrait_art`) so later loads skip the failing request.
 
-**Routing.** A small hand-written router (no dependency): `/` library, `/v/:viewId`, `/l/:listId`, `/settings`, `/u/:handle`, `/u/:handle/l/:slug`. The share routes are their own lazily loaded chunk, so viewers download little.
+**Routing.** A small hand-written router (`app/src/route.ts`, no dependency): `/` library, `/l/:listId`; later `/u/:handle`, `/u/:handle/l/:slug`. The share routes are their own lazily loaded chunk, so viewers download little.
 
 **Keyboard and palette.** A global key handler maps keys to commands, skipping text inputs. Grid focus moves by computing columns from the grid's measured width. The palette searches over games, views, lists and actions, with simple ranking (prefix > word start > substring).
 
@@ -96,7 +97,7 @@ POST /api/sync
 → { rev: <new cursor>, catalogAt, games: [<Game>...] }
 ```
 
-Types and op validation in `shared/src/sync.ts`, server in `worker/src/sync.ts`, client in `app/src/account.ts`. Views and lists join the response in milestones 2 and 4.
+Types and op validation in `shared/src/sync.ts`, server in `worker/src/sync.ts`, client in `app/src/account.ts`. Ops of type `game`, `view`, `list` and `item` (a game's place in a list, `deleted` to take it out); the response carries changed games, views, lists and items.
 
 - **Ops carry values, not actions** ("status = finished, finishedAt = …", not "finish"). Undo is just another op, and replaying one is harmless.
 - Ops are `game` (by appid) or `view` (by view id: name, filter, sort, position, `deleted`). Views are created on first op and only their owner's ops update them.
@@ -178,7 +179,7 @@ The result carries its source and an approximate flag for the badge and detail p
 
 ## 10. Export / import and account deletion
 
-- Export format `{ format: "backlog-export", version: 1, exportedAt, games: [...user fields], views, lists, listItems }`, defined in `shared/export.ts`. Built on the client from local state.
+- Export format `{ format: "backlog-export", version: 1, exportedAt, games: [...user fields], views, lists, listItems }`, defined in `shared/files.ts`; views, lists and items are validated like sync ops. Built on the client from local state.
 - Import validates the version, shows counts, then applies everything as ops through the normal sync (merge or replace).
 - `DELETE /api/account` deletes all the user's rows and sessions, then the client clears IndexedDB.
 

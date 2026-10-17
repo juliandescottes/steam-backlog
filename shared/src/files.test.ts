@@ -44,6 +44,22 @@ describe("export", () => {
     expect(back.games[0]).toEqual({ appid: 7, name: "Seven", status: "finished", statusAt: null, finishedAt: 2000, note: "great",
       my: { main: null, main_extra: 3, comp: null }, myKind: "exact", playtimeMin: 0, addedAt: 1000 });
     expect(back.settings).toEqual({ theme: "dark" });
+    expect(back.lists).toEqual([]);
+  });
+
+  it("round-trips views, lists and their games, dropping invalid ones", () => {
+    const view = { id: "v", name: "Short", filter: { maxHours: 5 }, sort: "length" as const, position: "a" };
+    const list = { id: "l", title: "Up next", description: "", kind: "manual" as const, filter: null, sort: null, slug: "up-next", visibility: "private" as const, position: "i" };
+    const file = makeExport([], {}, { views: [view], lists: [list], listItems: [{ listId: "l", appid: 7, position: "i" }] });
+    const back = parseExport(JSON.stringify({
+      ...file,
+      views: [...file.views!, { ...view, id: "v2", sort: "nope" }],
+      lists: [...file.lists!, { ...list, id: "l2", visibility: "public" }, { id: "l3", title: "No kind" }],
+      listItems: [...file.listItems!, { listId: "l2", appid: 7, position: "i" }, { listId: "l", appid: -1, position: "j" }],
+    }));
+    expect(back.views).toEqual([view]);
+    expect(back.lists).toEqual([list]);
+    expect(back.listItems).toEqual([{ listId: "l", appid: 7, position: "i" }]);
   });
 });
 
