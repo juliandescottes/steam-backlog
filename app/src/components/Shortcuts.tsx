@@ -9,6 +9,7 @@ const GROUPS: [string, [keys: string[], what: string][]][] = [
     [["←", "→", "↑", "↓"], "Move between games"],
     [["Enter"], "Open details"],
     [["/"], "Search"],
+    [[MOD, "K"], "Jump to a game, run an action"],
     [["Esc"], "Close"],
   ]],
   ["Selection", [

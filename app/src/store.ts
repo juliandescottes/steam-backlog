@@ -1,12 +1,13 @@
 import { batch, computed, effect, signal } from "@preact/signals";
 import { BANDS, bandOf, formatHours, type Band } from "@backlog/shared/bands";
-import { newGame, type ExportGame, type LengthsEntry, type LibraryGame } from "@backlog/shared/files";
+import { makeExport, newGame, type ExportGame, type LengthsEntry, type LibraryGame } from "@backlog/shared/files";
 import { compare, matches, type Entry, type Filter, type SortKey } from "@backlog/shared/filter";
 import { resolveLength } from "@backlog/shared/lengths";
 import { normalizeName } from "@backlog/shared/names";
 import { userFields, type GameFields, type Op } from "@backlog/shared/sync";
 import { STATUS_LABEL, type Game, type LenKind, type Lengths, type Measure, type Status } from "@backlog/shared/types";
 import * as db from "./db.ts";
+import { download } from "./util.ts";
 
 export type Theme = "system" | "dark" | "light";
 export type Settings = { theme: Theme; measure: Measure };
@@ -140,6 +141,7 @@ export const editingId = signal<number | null>(null); // inline length editor on
 export const fillInQueue = signal<number[] | null>(null);
 export const settingsOpen = signal(false);
 export const shortcutsOpen = signal(false);
+export const paletteOpen = signal(false);
 
 // Closing the detail panel returns focus to its card
 let lastOpen: number | null = null;
@@ -354,6 +356,11 @@ export function applyServerGames(list: Game[], pending: Op[], replace = false) {
   if (replace) void db.replaceGames(next.values());
   else db.saveGames(changed);
   games.value = next;
+}
+
+export function exportBackup() {
+  const stamp = new Date().toISOString().slice(0, 10);
+  download(`backlog-${stamp}.json`, makeExport([...games.value.values()], settings.value));
 }
 
 export async function deleteEverything() {

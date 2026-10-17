@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "preact/hooks";
-import { makeExport, parseExport, parseLengths, parseLibrary, type ExportFile } from "@backlog/shared/files";
+import { parseExport, parseLengths, parseLibrary, type ExportFile } from "@backlog/shared/files";
 import type { Measure } from "@backlog/shared/types";
 import { account, deleteAccount, refreshLibrary, setShareLengths, signIn, signOut } from "../account.ts";
 import {
-  deleteEverything, games, importLengths, mergeLibrary, restoreBackup, settings, settingsOpen, showToast, updateSettings, type Theme,
+  deleteEverything, exportBackup, games, importLengths, mergeLibrary, restoreBackup, settings, settingsOpen, showToast, updateSettings, type Theme,
 } from "../store.ts";
-import { count, download, readFile } from "../util.ts";
+import { count, readFile } from "../util.ts";
 
 function FilePick({ label, accept, onFile }: { label: string; accept: string; onFile: (text: string) => void }) {
   const input = useRef<HTMLInputElement>(null);
@@ -42,11 +42,6 @@ export function Settings() {
   const guard = (fn: (text: string) => void) => (text: string) => {
     setError(null);
     try { fn(text); } catch (e: any) { setError(e.message); }
-  };
-
-  const exportNow = () => {
-    const stamp = new Date().toISOString().slice(0, 10);
-    download(`backlog-${stamp}.json`, makeExport([...games.value.values()], s));
   };
 
   return (
@@ -109,7 +104,7 @@ export function Settings() {
         <section class="detail-section">
           <h3>Backup</h3>
           <p class="row-actions">
-            <button type="button" class="btn" onClick={exportNow}>Export backup</button>
+            <button type="button" class="btn" onClick={exportBackup}>Export backup</button>
             <FilePick label="Restore backup" accept=".json,application/json" onFile={guard(text => setBackup(parseExport(text)))} />
           </p>
           {backup && (
@@ -138,7 +133,7 @@ export function Settings() {
                 ? <div class="callout">
                     <p>This deletes your account and everything synced to it: statuses, notes, your lengths and what you shared with the community. Your Steam account isn't affected. Export a backup first to keep your data.</p>
                     <p class="row-actions">
-                      <button type="button" class="btn" onClick={exportNow}>Export backup</button>
+                      <button type="button" class="btn" onClick={exportBackup}>Export backup</button>
                       <button type="button" class="btn danger" onClick={() => void deleteAccount()}>Delete my account</button>
                       <button type="button" class="btn ghost" onClick={() => setConfirmDelete(false)}>Keep it</button>
                     </p>

@@ -1,7 +1,7 @@
 import { move, type Direction } from "@backlog/shared/grid";
 import type { Status } from "@backlog/shared/types";
 import {
-  clearSelection, editingId, fillInQueue, focusTarget, games, openId, selectAll, selection, setStatus, settingsOpen, shelves,
+  clearSelection, editingId, fillInQueue, focusTarget, games, openId, paletteOpen, selectAll, selection, setStatus, settingsOpen, shelves,
   shortcutsOpen, toggleSelected, undo,
 } from "./store.ts";
 import { inTextField } from "./util.ts";
@@ -47,8 +47,10 @@ export function installKeys() {
     if (fillInQueue.value) return; // fill-in mode handles its own keys
     const mod = e.metaKey || e.ctrlKey;
 
+    if (mod && !e.shiftKey && !e.altKey && e.key.toLowerCase() === "k") { e.preventDefault(); paletteOpen.value = !paletteOpen.value; return; }
     if (e.key === "Escape") {
-      if (shortcutsOpen.value) shortcutsOpen.value = false;
+      if (paletteOpen.value) paletteOpen.value = false;
+      else if (shortcutsOpen.value) shortcutsOpen.value = false;
       else if (editingId.value != null) editingId.value = null;
       else if (openId.value != null) openId.value = null;
       else if (settingsOpen.value) settingsOpen.value = false;
@@ -57,7 +59,7 @@ export function installKeys() {
     }
     if (inTextField(e)) return;
     if (mod && !e.shiftKey && e.key.toLowerCase() === "z") { e.preventDefault(); undo(); return; }
-    const inPanel = openId.value != null || settingsOpen.value || shortcutsOpen.value;
+    const inPanel = openId.value != null || settingsOpen.value || shortcutsOpen.value || paletteOpen.value;
     if (mod && !e.shiftKey && e.key.toLowerCase() === "a" && !inPanel) { e.preventDefault(); selectAll(); return; }
     if (mod || e.altKey) return;
 

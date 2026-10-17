@@ -252,3 +252,39 @@ test("bulk select from the keyboard", async ({ page }) => {
   await bar.getByRole("button", { name: "Playing" }).click();
   await expect(page.locator(".toast")).toContainText("3 games → Playing");
 });
+
+test("command palette: jump to a game, run actions", async ({ page }) => {
+  await openLibrary(page);
+  const mod = process.platform === "darwin" ? "Meta" : "Control";
+  const palette = page.getByRole("dialog", { name: "Command palette" });
+
+  await page.keyboard.press(`${mod}+k`);
+  await page.keyboard.type("mid");
+  await expect(palette.getByRole("option").first()).toContainText("Mid Game");
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#detail-title")).toHaveText("Mid Game");
+  await page.keyboard.press("Escape");
+
+  await page.keyboard.press(`${mod}+k`);
+  await page.keyboard.type("sort by name");
+  await page.keyboard.press("Enter");
+  await expect(palette).toHaveCount(0);
+  await expect(page.getByRole("combobox", { name: "Sort" })).toHaveValue("name");
+
+  await page.keyboard.press(`${mod}+a`);
+  await page.keyboard.press(`${mod}+k`);
+  await page.keyboard.type("selection fin");
+  await expect(palette.getByRole("option", { selected: true })).toHaveText("Mark selection Finished");
+  await page.keyboard.press("Enter");
+  await expect(page.locator(".toast")).toContainText("6 games → Finished");
+
+  await page.keyboard.press(`${mod}+k`);
+  await page.keyboard.type("export");
+  const [download] = await Promise.all([page.waitForEvent("download"), page.keyboard.press("Enter")]);
+  expect(download.suggestedFilename()).toMatch(/^backlog-/);
+  await page.keyboard.press(`${mod}+k`);
+  await page.keyboard.type("zzzz");
+  await expect(palette).toContainText("Nothing matches");
+  await page.keyboard.press("Escape");
+  await expect(palette).toHaveCount(0);
+});
