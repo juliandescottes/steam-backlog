@@ -40,15 +40,19 @@ A single `package.json` with npm workspaces. Shared code is imported from source
 
 ```sql
 -- Global catalog, shared by all users
-games        (appid PK, name, has_portrait_art, len_main, len_main_extra, len_comp,
-              len_source, len_source_id, len_checked_at, updated_at)
+games        (appid PK, name, has_portrait_art, igdb_id,
+              igdb_main, igdb_main_extra, igdb_comp, igdb_count, igdb_checked_at,
+              comm_main_extra, comm_count, comm_endless_count, updated_at)
+community_lengths (user_id, appid, kind /*typed|finished_playtime|endless*/,
+              main, main_extra, comp, created_at, PK(user_id, appid, kind))
 
 users        (id PK, steam_id UNIQUE, handle UNIQUE NULL, display_name, avatar_url,
               profile_public, settings_json, library_synced_at, created_at)
 sessions     (id PK, user_id, expires_at)
 
 -- Per-user state; rev = per-user change counter, used by sync
-user_games   (user_id, appid, status, status_at, finished_at, note, manual_len,
+user_games   (user_id, appid, status, status_at, finished_at, note,
+              my_main, my_main_extra, my_comp, my_len_kind /*exact|approx|endless*/,
               playtime_min, last_played_at, first_seen_at, rev, PK(user_id, appid))
 views        (id PK, user_id, name, filter_json, sort, position, rev, deleted)
 lists        (id PK, user_id, slug, title, description, kind /*manual|filter*/,
@@ -116,16 +120,43 @@ POST /api/sync
 
 **Steam collections import** runs entirely in the browser: the user picks `cloud-storage-namespace-1.json`, the client parses the `user-collections.*` entries (port of the parsing in `tools/hltb_sort.py`), and creates one manual list per static collection. Dynamic collections (`filterSpec`) are listed but skipped in v1. The file never leaves the browser.
 
-## 8. Game lengths (IGDB)
+## 8. Game lengths
 
+**Coverage check (milestone 0, done 2026-10-17).** `tools/igdb_coverage.ts` on the 342-game prototype collection:
+
+| Source | Has Main + Extras | Same band as HLTB |
+|---|---|---|
+| IGDB (341/342 games found by Steam app ID or name) | 205 (60%) | 68% |
+| IGDB, 3+ submissions | 119 (35%) | 77% |
+| IGDB + `version_parent` / `parent_game` fallback | 213 (62%) | 68% |
+| SteamSpy median playtime | 0: SteamSpy no longer publishes playtime | — |
+| HLTB, for reference | 316 (92%) | — |
+
+`parent_game` gave one bad result (a standalone expansion got its base game's 54 h instead of 15 h), so the app follows `version_parent` only. Decision: IGDB is the base, and the rest comes from users through a fast fill-in flow (SPEC §4) and community lengths.
+
+**IGDB enrichment**
 - Auth with Twitch client credentials (client ID + secret as Worker secrets; cache the token in D1 until it expires).
-- Map Steam appids to IGDB games through `external_games` (Steam category, `uid = appid`), up to 500 per query.
-- Read `game_time_to_beats` for those games: `hastily` → Main, `normally` → Main + Extras, `completely` → Completionist (seconds → hours).
-- A **Cron Trigger** every 5 minutes processes the enrichment queue (appids with `len_checked_at` null or older than 30 days), staying under IGDB's 4 requests/s.
-- The client gets new lengths through the normal sync, since the server includes catalog rows updated after the client's last catalog cursor.
-- Games with no data stay in the Unknown band; users can enter a manual length (`user_games.manual_len`), which always wins.
+- Map Steam appids to IGDB games through `external_games` (`external_game_source = 1`, `uid = appid`), up to 500 per query. Fall back to an exact normalized name search.
+- Read `game_time_to_beats`: `hastily` → Main, `normally` → Main + Extras, `completely` → Completionist (seconds → hours), and `count`. When the game has no entry, use its `version_parent`'s.
+- A **Cron Trigger** every 5 minutes processes the queue (appids with `igdb_checked_at` null, or older than 30 days, or 7 days while unknown), staying under IGDB's 4 requests/s.
+- Decode HTML entities in Steam names at import (`&amp;` appears in `GetOwnedGames` names).
 
-**First milestone task: coverage check.** IGDB's time-to-beat data is crowd-sourced and may be sparse. Before building on it, write `tools/igdb_coverage.ts`: for the 342 games in `tools/hltb_results.json`, fetch IGDB lengths and report how many have a value and how far they differ from HLTB. If coverage is poor, the fallback is to seed the catalog from community data or rely more on manual entry; decide then.
+**Community lengths**
+- `community_lengths` gets one row per user and game and kind: `typed` when a user enters an exact length, `finished_playtime` when they mark a game Finished with playtime over 30 min, `endless` for No ending. Approximate guesses aren't recorded. Users who turn off sharing write no rows; turning it off deletes theirs.
+- On each write, the Worker recomputes the game's `comm_main_extra` (median of `typed` and `finished_playtime`) and `comm_count`, `comm_endless_count`. A trimmed median (drop the top and bottom 10% from 10 entries) limits idle-time outliers.
+
+**Which length is shown** (computed in `shared/lengths.ts`, used by client and Worker):
+1. The user's own length (`my_*`, including approximate and endless).
+2. Community, when `comm_count ≥ 3` and it has more entries than IGDB's `count`; No ending when `comm_endless_count ≥ 3` and outnumbers the length entries.
+3. IGDB, marked approximate when `count < 3`.
+4. Community with 1–2 entries, marked approximate.
+5. Unknown.
+
+The result carries its source and an approximate flag for the badge and detail panel.
+
+**Fill-in input** (`shared/length-input.ts`, unit-tested): parses `12`, `12.5`, `12,5`, `12½`, `12h30`, `12:30`, `45m`, and pasted HowLongToBeat-style blocks (`Main Story … Main + Extras … Completionist …`, values with `½` or fractions, "Hours"/"Mins"). Rounds to 0.25 h. Band keys `1`–`7` map to typical values: 2, 4.5, 8, 15, 30, 60, 100 h.
+
+**Lengths import** (Settings): JSON or CSV of `appid` + hours (or `main` / `main_extra` / `completionist`), applied as `my_*` through the normal sync. A dev script in `tools/` converts `hltb_results.json` (respecting `WRONG` in `build.py`) into that format.
 
 ## 9. Lists and sharing
 
@@ -145,7 +176,7 @@ POST /api/sync
 
 ## 11. Testing
 
-- **Vitest** for `shared/` (filter engine, bands, rounding, export round-trip) and the client store (commands, undo, outbox merge).
+- **Vitest** for `shared/` (filter engine, bands, rounding, length resolution and input parsing, export round-trip) and the client store (commands, undo, outbox merge).
 - **Worker tests** with `@cloudflare/vitest-pool-workers` against a local D1: sync semantics (idempotency, conflicts, `rev` ordering), share visibility, no notes leaking. Steam and IGDB calls stubbed.
 - **Playwright** for the main flows: status change + undo, bulk select, create and share a list, view it signed out.
 - A perf check in Playwright: load a 3,000-game fixture and assert filtering and a status change render within 100 ms.
@@ -160,15 +191,16 @@ POST /api/sync
 
 Each one ends with something usable.
 
-0. **Spike: IGDB coverage** (§8). Decides the length source.
-1. **Local app + statuses.** Workspace setup, Preact app with the prototype's look: bands, cover grid, detail panel, statuses with undo, filters/sort/search, export/import. No backend yet: a dev script converts `tools/hltb_results.json` + the CSV into an export file to load the prototype library. Deployed on Pages.
+0. **Spike: IGDB coverage** (§8). Done: IGDB plus user-entered lengths.
+1. **Local app + statuses.** Workspace setup, Preact app with the prototype's look: bands, cover grid, detail panel, statuses with undo, filters/sort/search, export/import, the fill-in flow for missing lengths and lengths import. No backend yet: a dev script converts `tools/hltb_results.json` + the CSV into an export file to load the prototype library. Deployed on Pages.
 2. **Speed layer.** Keyboard navigation, bulk select, command palette, smart views, Now playing shelf, header progress.
-3. **Accounts, import, sync.** Worker + D1, Steam sign-in, library refresh, sync endpoint and outbox, IGDB enrichment cron, triage prompt, manual lengths, collection import, account deletion.
+3. **Accounts, import, sync.** Worker + D1, Steam sign-in, library refresh, sync endpoint and outbox, IGDB enrichment cron, community lengths, triage prompt, collection import, account deletion.
 4. **Lists and sharing.** Manual and filter lists, handles, share pages with polling and link previews, public profile, copy to my backlog.
 
 ## 14. Risks and open points
 
-- **IGDB coverage** may be too thin; milestone 0 settles it.
+- **Unknown lengths** will be common for older and niche libraries (38% here). The fill-in flow has to be fast, and community lengths only help once there are users.
+- **Community abuse:** anyone can submit lengths. Trimmed medians and the 3-entry threshold limit it for v1; add per-user rate limits if needed.
 - **Steam API limits:** 100,000 calls per day per key, far above what a personal project needs. `GetOwnedGames` from Cloudflare IPs is untested; check it in milestone 3.
 - **Delisted apps** have no name in `GetOwnedGames` either; show "Steam app <id>" as the prototype does.
 - **Last-writer-wins** can drop a note edited on two devices at once. Accepted for v1.

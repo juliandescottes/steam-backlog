@@ -47,7 +47,7 @@ The detailed user-facing spec is in `SPEC.md` (written 2026-10-17). It supersede
 
 **Low-friction list management**
 - **Statuses first.** Moving a game between states is most of the work. Decided: Backlog (default), Playing, Finished, Dropped.
-- **Lists for curating and sharing:** hand-picked or filter-based, private by default, shareable by link (see `SPEC.md` §6).
+- **Lists for curating and sharing:** hand-picked or filter-based, private by default, shareable by link (see `SPEC.md` §7).
 - One click or one key on a cover: `p` playing, `f` finished, `d` dropped.
 - **Bulk actions:** shift-click a range of covers, then press a key. Needed for the first import.
 - Search-as-you-type over everything, plus a command palette (Ctrl+K).
@@ -78,8 +78,7 @@ The detailed user-facing spec is in `SPEC.md` (written 2026-10-17). It supersede
 
 ## Open questions
 
-- IGDB time-to-beat coverage vs HLTB for this library.
 - Whether viewers of a shared list see the owner's per-game notes (proposal: no).
 - Backend choice: Cloudflare Workers + D1 vs Supabase.
 
-Resolved 2026-10-17: four statuses (no On hold or Wishlist in v1); games without times go in an Unknown band with manual entry; Steam only for v1.
+Resolved 2026-10-17: four statuses (no On hold or Wishlist in v1); Steam only for v1; lengths come from IGDB, which covers about 62% of the prototype collection, plus a fast fill-in flow and community lengths for the rest (`SPEC.md` §4, `TECH.md` §8).
