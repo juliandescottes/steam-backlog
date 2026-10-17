@@ -13,7 +13,6 @@ What people see and do in the app. Decisions so far: four statuses, live curated
 2. After Steam sign-in, the app imports the library automatically (needs a public Steam profile; if it's private, show a short guide to making the game details public, then a Retry button).
 3. Import screen shows progress ("Fetching 1,204 games… matching lengths…") and lands on the grid as soon as the first data arrives; lengths fill in progressively.
 4. **Initial triage.** Games with playtime start as *Backlog* but get a "Played Xh" marker; a one-time prompt offers "Mark the N games you've played over 80% of their length as Finished?" (one click, undoable).
-5. Optional: **Import Steam collections** by uploading `cloud-storage-namespace-1.json` (with instructions on where to find it). Each collection becomes a list (see §7).
 
 Re-sync: a "Refresh library" action picks up newly bought games (they arrive as Backlog). It also runs automatically on sign-in at most once a day.
 
@@ -80,7 +79,6 @@ Lists appear in a sidebar (drawer on mobile). Opening one shows the same grid UI
 - Each list is **Private** by default. Toggle to **Shared (anyone with the link)** to get a link like `/u/<name>/l/<slug>`. Option to also show it on your public profile.
 - Shared lists are **live**: changes appear for viewers within seconds, no re-publish.
 - The viewer page is read-only, needs no sign-in, and shows the owner's name, list title and description, the cover grid with lengths and the owner's status chips, and the total hours. Viewers can filter/sort within the list.
-- Signed-in viewers get an extra action: **Copy to my backlog** (marks which games they already own).
 - **Public profile** `/u/<name>`: avatar, display name, optional summary stats (games finished, hours cleared), and the lists the owner chose to show. Off by default.
 - Owner controls per list: rename, change slug, make private again (link stops working immediately), delete (with undo).
 
@@ -96,7 +94,7 @@ Theme (system / dark / light) · default length measure (Main / Main+Extras, def
 Desktop and mobile web (phone width ~400 px is a first-class layout). Works offline for your own library after first load; changes sync when back online. Shared list pages need a connection.
 
 ## 11. Out of scope for v1
-Non-Steam games and manual game entry, wishlist, On hold status, ratings/reviews, social feeds/follows/comments, editable collaborative lists, native apps.
+Non-Steam games and manual game entry, wishlist, On hold status, ratings/reviews, social feeds/follows/comments, editable collaborative lists, native apps, copying someone else's list, Steam collections import.
 
 ## Open questions
 

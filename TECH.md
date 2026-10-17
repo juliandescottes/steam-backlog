@@ -125,7 +125,7 @@ Types and op validation in `shared/src/sync.ts`, server in `worker/src/sync.ts`,
 - Runs automatically after sign-in when `library_synced_at` is older than 24 h.
 - **Triage prompt** (spec §2.4): computed on the client once lengths arrive: games with `playtime ≥ 0.8 × length`.
 
-**Steam collections import** runs entirely in the browser: the user picks `cloud-storage-namespace-1.json`, the client parses the `user-collections.*` entries (port of the parsing in `tools/hltb_sort.py`), and creates one manual list per static collection. Dynamic collections (`filterSpec`) are listed but skipped in v1. The file never leaves the browser.
+**Steam collections import** was planned (parse `cloud-storage-namespace-1.json` in the browser, one list per static collection) and dropped on 2026-10-17.
 
 ## 8. Game lengths
 
@@ -174,7 +174,6 @@ The result carries its source and an approximate flag for the badge and detail p
 - Share links are `/l/<shareId>` (decided 2026-10-17; briefly `/s/`, still redirected: a handle and a slug were too many steps; the handle is only for the public profile). `GET /api/s/:shareId` (`worker/src/share.ts`) returns list metadata, the owner's display name and avatar, and the games as client `Game`s with notes, playtime and dates blanked. `private`, deleted and missing lists all return 404. Filter lists are computed on the server by Main + Extras (the owner's measure is a local setting).
 - **Live updates:** the response carries an `ETag` from the owner's `rev`, the sum of the games' catalog `updated_at` and the game count. The viewer page re-fetches with `If-None-Match` when it regains focus and every 30 s while visible, so unchanged lists cost a 304.
 - **Link previews:** `/l/*` and `/s/*` run the Worker first (`run_worker_first`); it serves `index.html` with the `<title>` replaced (plain string replace, so tests run in Node), injecting `og:title`, `og:description` ("12 games · 48 h") and an `og:image` (the first cover), so links look good in chats.
-- **Copy to my backlog** (signed-in viewers): creates a manual list in the viewer's account with the same games, and marks which ones they don't own.
 - `GET /api/u/:handle` returns the public profile (name, avatar, stats unless `settings_json.showStats` is false) and the lists marked `profile` with their size, hours and first covers, or 404 when the profile is off. `POST /api/profile { handle?, public?, showStats? }` sets them; turning it on needs a handle. Shared lists carry the owner's handle only when the profile is on.
 
 ## 10. Export / import and account deletion
@@ -207,7 +206,7 @@ Each one ends with something usable.
 1. **Local app + statuses.** Workspace setup, Preact app with the prototype's look: bands, cover grid, detail panel, statuses with undo, filters/sort/search, export/import, the fill-in flow for missing lengths and lengths import. No backend yet: a dev script converts `tools/hltb_results.json` + the CSV into an export file to load the prototype library. Deployed to `baquelogue.com`.
 2. **Speed layer.** Keyboard navigation, bulk select, command palette, smart views, Now playing shelf, header progress.
 3. **Accounts, import, sync.** Worker + D1, Steam sign-in, library refresh, sync endpoint and outbox, IGDB enrichment cron, community lengths, triage prompt, account deletion.
-4. **Lists and sharing.** Manual and filter lists, handles, share pages with polling and link previews, public profile, copy to my backlog. Optional: Steam collections import (lists to land in).
+4. **Lists and sharing.** Manual and filter lists, handles, share pages with polling and link previews, public profile. (Copy to my backlog and Steam collections import were dropped.)
 
 ## 14. Risks and open points
 

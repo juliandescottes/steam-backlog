@@ -22,3 +22,4 @@ Newest last. Don't reverse these without asking.
 - **Sync ops carry field values**, not actions; last writer wins per field.
 - **First sign-in merges local data** into the account (owned games only); sign-out clears the browser.
 - **Share links are `/l/<random id>`**, one click to share; viewers see the Steam name. It is also the owner's list page address (owner view when the list is in the browser). The handle (`/u/<handle>`) is only for the public profile. A handle plus a slug per list was too many steps.
+- **Dropped from v1:** "Copy to my backlog" on shared lists, and Steam collections import. Not important enough (a patch of the copy feature was built and not committed).
