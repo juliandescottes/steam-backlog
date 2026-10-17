@@ -1,6 +1,9 @@
 import { signal } from "@preact/signals";
 
-/** The page shown: the library, one of the user's lists at /l/<id>, or a shared list at /s/<shareId> (TECH.md §4). */
+/**
+ * The page shown: the library, or a list at /s/<shareId>, which is the owner's list page when the list is in
+ * this browser and the read-only shared page otherwise. /l/<id> is the old address of a list page (TECH.md §4).
+ */
 export type Route = { page: "library" } | { page: "list"; id: string } | { page: "shared"; shareId: string };
 
 function parse(path: string): Route {
@@ -19,6 +22,6 @@ export function navigate(path: string, replace = false) {
   window.scrollTo(0, 0);
 }
 
-export const listPath = (id: string) => `/l/${encodeURIComponent(id)}`;
+export const listPath = (l: { shareId: string }) => `/s/${l.shareId}`;
 
 window.addEventListener("popstate", () => (route.value = parse(location.pathname)));

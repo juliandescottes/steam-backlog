@@ -6,7 +6,7 @@ import { sharePath } from "@backlog/shared/share";
 import { account, signIn } from "../account.ts";
 import { listPath, navigate, route } from "../route.ts";
 import {
-  createList, deleteList, listEntries, listItems, listsOpen, pickerFor, setListVisibility, settingsOpen, showToast, sortedLists,
+  createList, currentList, deleteList, listEntries, listItems, listsOpen, pickerFor, setListVisibility, settingsOpen, showToast, sortedLists,
   toggleInList, updateList,
 } from "../store.ts";
 import { count } from "../util.ts";
@@ -41,7 +41,7 @@ export function ListsDrawer() {
     if (!name.trim()) return;
     const l = createList(name.trim(), onLibrary && fromView ? "filter" : "manual");
     close();
-    navigate(listPath(l.id));
+    navigate(listPath(l));
   };
 
   return (
@@ -54,7 +54,7 @@ export function ListsDrawer() {
             <li><Link href="/" onNavigate={close} aria-current={onLibrary ? "page" : undefined}>Backlog <span>all games</span></Link></li>
             {sortedLists.value.map(l => (
               <li key={l.id}>
-                <Link href={listPath(l.id)} onNavigate={close} aria-current={r.page === "list" && r.id === l.id ? "page" : undefined}>
+                <Link href={listPath(l)} onNavigate={close} aria-current={currentList.value?.id === l.id ? "page" : undefined}>
                   {l.title} <span>{l.kind === "filter" ? "auto · " : ""}{size(l)}</span>
                 </Link>
               </li>

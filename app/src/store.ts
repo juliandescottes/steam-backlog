@@ -9,7 +9,7 @@ import { userFields, type GameFields, type ItemFields, type ListFields, type Op,
 import { STATUSES, STATUS_LABEL, type Game, type LenKind, type Lengths, type Measure, type Status } from "@backlog/shared/types";
 import { builtInViews, canonical, sameView, type View } from "@backlog/shared/views";
 import * as db from "./db.ts";
-import { navigate, route } from "./route.ts";
+import { listPath, navigate, route } from "./route.ts";
 import { download } from "./util.ts";
 
 export type Theme = "system" | "dark" | "light";
@@ -187,10 +187,20 @@ export const lists = signal<List[]>([]);
 /** Games of each hand-picked list: appid → position. */
 export const listItems = signal<ReadonlyMap<string, ReadonlyMap<number, string>>>(new Map());
 export const sortedLists = computed(() => [...lists.value].sort((a, b) => (a.position < b.position ? -1 : 1)));
-/** The list whose page is shown, or null on the library (and for a list that doesn't exist). */
+/** The user's own list whose page is shown, or null: on the library, and on someone else's (or a missing) list. */
 export const currentList = computed(() => {
   const r = route.value;
-  return r.page === "list" ? lists.value.find(l => l.id === r.id) ?? null : null;
+  if (r.page === "list") return lists.value.find(l => l.id === r.id) ?? null;
+  if (r.page === "shared") return lists.value.find(l => l.shareId === r.shareId) ?? null;
+  return null;
+});
+/** A shared list page of a list that isn't the user's: read-only. */
+export const viewing = computed(() => route.value.page === "shared" && !currentList.value);
+
+// Old /l/<id> addresses move to the list's link
+effect(() => {
+  const r = route.value, l = currentList.value;
+  if (r.page === "list" && l) navigate(listPath(l), true);
 });
 
 /** "list" is a hand-picked list's own order. */
@@ -270,7 +280,7 @@ function dropList(id: string) {
   });
   void db.saveLists([], [], items, [id]);
   onUserChanges?.([{ listId: id, set: { deleted: true } }]);
-  if (currentList.peek() === null && route.peek().page === "list") navigate("/", true);
+  if (currentList.peek() === null && route.peek().page !== "library") navigate("/", true);
 }
 
 /** A new list: hand-picked (with `appids` in it), or one that keeps the games of the library's current filter. */

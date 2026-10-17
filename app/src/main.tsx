@@ -14,7 +14,7 @@ import { Toast } from "./components/Toast.tsx";
 import { Welcome } from "./components/Welcome.tsx";
 import { installKeys } from "./keys.ts";
 import { route } from "./route.ts";
-import { fillInQueue, games, listsOpen, load, loaded, openId, paletteOpen, pickerFor, settingsOpen, shortcutsOpen } from "./store.ts";
+import { fillInQueue, games, listsOpen, viewing, load, loaded, openId, paletteOpen, pickerFor, settingsOpen, shortcutsOpen } from "./store.ts";
 import "./styles.css";
 
 // Viewers of a shared list download this part only when they open one
@@ -23,7 +23,7 @@ const SharedPage = lazy(() => import("./components/Shared.tsx").then(m => ({ def
 function App() {
   if (!loaded.value) return null;
   const r = route.value;
-  if (r.page === "shared") {
+  if (r.page === "shared" && viewing.value) {
     return (
       <>
         <Suspense fallback={null}><SharedPage key={r.shareId} shareId={r.shareId} /></Suspense>

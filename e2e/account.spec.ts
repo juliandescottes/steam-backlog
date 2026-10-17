@@ -214,6 +214,7 @@ test("share a list: one click for a link, viewers see it signed out, changes sho
   await expect(link).toHaveText(/^localhost:5180\/s\/[0-9a-z]{12}$/);
   await expect(page.getByRole("region", { name: "Sharing" })).toContainText("Shared as Dev user.");
   const path = new URL(await link.getAttribute("href")!).pathname;
+  expect(new URL(page.url()).pathname).toBe(path); // the owner's page has the same address
 
   // A signed-out viewer
   const viewer = await (await browser.newContext()).newPage();
@@ -241,4 +242,14 @@ test("share a list: one click for a link, viewers see it signed out, changes sho
     await viewer.reload();
     await expect(viewer.locator("h1")).toHaveText("List not found", { timeout: 1000 });
   }).toPass({ timeout: 10_000 });
+
+  // The owner on another device sees their own page at the same address once it has synced
+  const other = await browser.newPage();
+  await other.route("**/*steamstatic.com/**", r => r.abort());
+  await signIn(other, id);
+  await expect(async () => {
+    await other.goto(path);
+    await expect(other.getByRole("button", { name: "Rename" })).toBeVisible({ timeout: 1000 });
+  }).toPass({ timeout: 10_000 });
+  await other.close();
 });

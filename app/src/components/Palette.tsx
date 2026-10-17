@@ -34,7 +34,7 @@ function actions(): Item[] {
     { label: "Undo", keys: `${MOD}Z`, run: undo },
   );
   for (const v of views.value) out.push({ label: `View: ${v.name}`, run: () => { navigate("/"); applyView(v); } });
-  for (const l of sortedLists.value) out.push({ label: `List: ${l.title}`, run: () => navigate(listPath(l.id)) });
+  for (const l of sortedLists.value) out.push({ label: `List: ${l.title}`, run: () => navigate(listPath(l)) });
   if (currentList.value) out.push({ label: "Back to backlog", run: () => navigate("/") });
   out.push({ label: "Lists", run: () => (listsOpen.value = true) });
   out.push({ label: "Show all statuses", run: () => (statuses.value = STATUSES) });

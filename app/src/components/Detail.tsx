@@ -81,7 +81,7 @@ export function Detail() {
           <div class="chips">
             {listsOf(g.appid).map(l => (
               <span key={l.id} class="chip list-chip">
-                <a href={listPath(l.id)} onClick={ev => { ev.preventDefault(); openId.value = null; navigate(listPath(l.id)); }}>{l.title}</a>
+                <a href={listPath(l)} onClick={ev => { ev.preventDefault(); openId.value = null; navigate(listPath(l)); }}>{l.title}</a>
                 <button type="button" aria-label={`Remove from ${l.title}`} onClick={() => removeFromList(l.id, [g.appid])}>✕</button>
               </span>
             ))}

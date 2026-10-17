@@ -79,7 +79,7 @@ user_rev     (user_id PK, rev)   -- last rev handed out
 
 **Rendering.** Cover grid with fixed-height cards (2:3 cover, fixed text block) and `loading="lazy"` images. Each band mounts only the rows within a screen of the viewport, with spacers for the rest: mounting all cards took ~450 ms at 3,000 games on an M1 Pro (profiled 2026-10-17), and `content-visibility` didn't help. Portrait art (`library_600x900.jpg`) with `header.jpg` fallback via `onerror`, as in the prototype; record the fallback in the catalog (`has_portrait_art`) so later loads skip the failing request.
 
-**Routing.** A small hand-written router (`app/src/route.ts`, no dependency): `/` library, `/l/:listId`; later `/u/:handle`, `/u/:handle/l/:slug`. The share routes are their own lazily loaded chunk, so viewers download little.
+**Routing.** A small hand-written router (`app/src/route.ts`, no dependency): `/` library, `/s/:shareId` a list (the owner's page when the list is in this browser, the read-only shared page otherwise), `/l/:listId` redirects to it; later `/u/:handle`. The share routes are their own lazily loaded chunk, so viewers download little.
 
 **Keyboard and palette.** A global key handler maps keys to commands, skipping text inputs. Grid focus moves by computing columns from the grid's measured width. The palette searches over games, views, lists and actions, with simple ranking (prefix > word start > substring).
 

@@ -16,7 +16,7 @@ Milestone 4. M2 and lists deployed 2026-10-17.
 
 Done: lists (`shared/lists.ts`: fractional positions, slugs). Hand-picked or filter-based (from the current view); drawer from the header's Lists button; list page at `/l/<id>` (`app/src/route.ts`) with its own statuses and sort, "List order" for hand-picked ones; add with the cover's +, `A`, the detail panel, the selection bar or the palette; drag or Alt+←/→ to reorder; rename, describe, delete with undo. Sync (ops `list` and `item`, migration 0004) and backups include lists and views.
 
-Sharing deployed 2026-10-17, then simplified (not deployed): links are `/s/<shareId>` (migration 0005), the Share panel is Private / Anyone with the link + copy, viewers see the Steam name. `GET /api/s/:shareId` with ETag/304, `/s/*` pages with Open Graph tags. `POST /api/handle` stays for the profile, no UI yet. Viewer page `Shared.tsx` is a lazy chunk, read-only, polls every 30 s while visible.
+Sharing deployed 2026-10-17, then simplified (not deployed): links are `/s/<shareId>` (migration 0005), the Share panel is Private / Anyone with the link + copy, viewers see the Steam name. A list has one address, `/s/<shareId>`: the owner's page if the list is in this browser, the shared page otherwise; `/l/<id>` redirects. `GET /api/s/:shareId` with ETag/304, `/s/*` pages with Open Graph tags. `POST /api/handle` stays for the profile, no UI yet. Viewer page `Shared.tsx` is a lazy chunk, read-only, polls every 30 s while visible.
 
 Next: public profile (`/u/<handle>`, "profile" visibility; ask for the handle there, labelled as the public username), copy to my backlog, optional collections import.
 
@@ -33,6 +33,6 @@ Production check (2026-10-17, 761-game library): callback 594 ms, import 5.3 s w
 - Bulk select on touch screens: the checkbox only shows on hover, so there's no way to start a selection yet.
 - A focused card scrolled far away by mouse unmounts and drops focus; arrows resume from it.
 - Reordering a list on touch screens: HTML drag and drop doesn't work there, and Alt+arrows need a keyboard.
-- `/l/<id>` opened without the owner's data (private window) shows the sign-in page; say it's a private list page and to ask for the share link.
+- A private list's address opened by someone else says "List not found. It may be private now, or the link changed."; maybe say plainly that it's private (the API can't tell them apart on purpose).
 - Share panel: warn while the list hasn't synced yet, or the copied link says "List not found" for a few seconds.
 - Restoring a backup with "replace" clears the outbox and sync cursor too (`db.clearAll`), even when signed in.
