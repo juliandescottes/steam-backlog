@@ -86,17 +86,19 @@ section.band { display: grid; gap: 14px; scroll-margin-top: 72px; }
 .band-head h2 { font: 800 clamp(28px, 4vw, 40px)/1 var(--display); text-transform: uppercase; margin: 0; color: var(--c); letter-spacing: .02em; }
 .band-head p { margin: 0; color: var(--muted); font: 500 13px/1.3 var(--mono); font-variant-numeric: tabular-nums; }
 .band-head .btn { margin-left: auto; align-self: center; }
-.shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 22px 16px; }
+/* --card-text: card gap + name (2 lines) + played line. Shelf.tsx relies on every card having the same height. */
+.shelf { --card-text: 62px; display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 22px 16px; }
+.shelf-spacer { grid-column: 1 / -1; }
 .empty { color: var(--muted); font-style: italic; }
 @media (max-width: 600px) {
-  .shelf { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 18px 10px; }
+  .shelf { --card-text: 60px; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 18px 10px; }
   .tools { position: static; }
   .name { font-size: 13px; }
 }
 
 /* Cards */
-.game { position: relative; display: grid; gap: 8px; align-content: start; min-width: 0; content-visibility: auto; contain-intrinsic-size: auto 260px; }
-.game:has(.popover) { content-visibility: visible; z-index: 10; }
+.game { position: relative; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.game:has(.popover) { z-index: 10; }
 .cover-wrap { position: relative; }
 .cover { position: relative; display: block; width: 100%; aspect-ratio: 2 / 3; padding: 0; border: 0; border-radius: 4px; overflow: hidden;
   background: var(--surface); box-shadow: 0 1px 0 var(--line); cursor: pointer; }
@@ -132,7 +134,7 @@ section.band { display: grid; gap: 14px; scroll-margin-top: 72px; }
   .quick button { width: 24px; height: 24px; }
   .hrs { left: 4px; bottom: 4px; padding: 3px 5px; font-size: 12px; }
 }
-.meta { display: grid; gap: 2px; min-width: 0; }
+.meta { display: grid; align-content: start; gap: 2px; min-width: 0; height: calc(var(--card-text) - 8px); }
 .name { font-weight: 700; font-size: 14px; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
 .sub { font: 500 11.5px/1.35 var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; margin: 0; }
 

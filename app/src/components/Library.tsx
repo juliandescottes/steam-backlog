@@ -2,10 +2,10 @@ import { BANDS, UNKNOWN_BAND, bandOf } from "@backlog/shared/bands";
 import { SORT_LABEL, type Entry, type SortKey } from "@backlog/shared/filter";
 import { STATUSES, STATUS_LABEL, type Status } from "@backlog/shared/types";
 import {
-  editingId, played, query, settings, settingsOpen, sortKey, startFillIn, statuses, totals, visible,
+  played, query, settings, settingsOpen, sortKey, startFillIn, statuses, totals, visible,
 } from "../store.ts";
 import { count, thousands } from "../util.ts";
-import { Card } from "./Card.tsx";
+import { Shelf } from "./Shelf.tsx";
 
 const MEASURE_TEXT = {
   main_extra: <>by <b>Main + Extras</b> time: the main story plus the side content most players do</>,
@@ -81,11 +81,6 @@ function Toolbar() {
       </select>
     </div>
   );
-}
-
-function Shelf({ list }: { list: Entry[] }) {
-  const editing = editingId.value;
-  return <div class="shelf">{list.map(e => <Card key={e.game.appid} e={e} editing={editing === e.game.appid} />)}</div>;
 }
 
 export function Library() {

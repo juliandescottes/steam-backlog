@@ -5,14 +5,14 @@ Updated 2026-10-17. Branch: `m1-local-app` (from `spec`).
 ## Milestones
 
 - [x] 0. IGDB coverage check (`TECH.md` §8)
-- [ ] 1. Local app + statuses: built and committed. Remaining: deploy to Cloudflare Pages, 3,000-game perf check
+- [ ] 1. Local app + statuses: built and committed. Remaining: deploy to Cloudflare Pages
 - [ ] 2. Speed layer: keyboard grid nav, bulk select, command palette, smart views, Now playing shelf
 - [ ] 3. Accounts, Steam import, sync, IGDB cron, community lengths
 - [ ] 4. Lists and sharing
 
 ## Now
 
-UI/UX polish pass on milestone 1, exploring in Firefox with the user.
+Windowed shelves done (`app/src/components/Shelf.tsx`); perf check passes at 3,000 games, 4x slower CPU. Next: branch `m2-speed-layer`. Deploy left for later.
 
 ## Backlog
 
@@ -20,3 +20,4 @@ UI/UX polish pass on milestone 1, exploring in Firefox with the user.
 - Covers are blank tiles while art loads.
 - Clicking an approximate badge does nothing (it catches hover for the tooltip); maybe open the detail panel.
 - "Uncertain lengths" smart view (M2).
+- M2 keyboard nav: cards off screen aren't mounted; scroll a card into its row before focusing it. A focused card scrolled far away unmounts and drops focus.

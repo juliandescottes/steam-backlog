@@ -16,3 +16,4 @@ Newest last. Don't reverse these without asking.
 - **Quick actions (P/F/D):** bottom-right column; hidden on touch screens.
 - **Hours display:** quarters under 3 h, whole hours above, no space before the unit (`1.75h`, `113h`). Stored to the quarter hour; detail panel shows the stored value.
 - **Approximate lengths:** no "~" on covers; dotted band edge plus a tooltip with the reason. Normal cursor.
+- **Windowed shelves:** bands mount only rows near the screen; cards have a fixed height. Perf budget checked at 4x CPU slowdown (`e2e/perf.spec.ts`).

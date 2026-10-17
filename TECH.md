@@ -76,7 +76,7 @@ user_rev     (user_id PK, rev)   -- last rev handed out
 
 **Mutations and undo.** Every user action is a command: `{ apply(), invert() }`, built from ops (`setStatus`, `setNote`, `addToList`, …). Applying one updates the signals, writes IndexedDB, and appends ops to the outbox. Undo applies the inverse as a new command. One bulk action is one command, so one undo.
 
-**Rendering.** Cover grid with fixed aspect-ratio cards, `loading="lazy"` images, `content-visibility: auto` per band section. That handles a few thousand covers without virtualization; add virtualization only if profiling says so. Portrait art (`library_600x900.jpg`) with `header.jpg` fallback via `onerror`, as in the prototype; record the fallback in the catalog (`has_portrait_art`) so later loads skip the failing request.
+**Rendering.** Cover grid with fixed-height cards (2:3 cover, fixed text block) and `loading="lazy"` images. Each band mounts only the rows within a screen of the viewport, with spacers for the rest: mounting all cards took ~450 ms at 3,000 games on an M1 Pro (profiled 2026-10-17), and `content-visibility` didn't help. Portrait art (`library_600x900.jpg`) with `header.jpg` fallback via `onerror`, as in the prototype; record the fallback in the catalog (`has_portrait_art`) so later loads skip the failing request.
 
 **Routing.** A small hand-written router (no dependency): `/` library, `/v/:viewId`, `/l/:listId`, `/settings`, `/u/:handle`, `/u/:handle/l/:slug`. The share routes are their own lazily loaded chunk, so viewers download little.
 

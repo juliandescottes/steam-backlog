@@ -4,12 +4,15 @@ import { readFileSync } from "node:fs";
 const LIBRARY = "e2e/fixtures/library.json";
 const LENGTHS = "e2e/fixtures/lengths.csv";
 
+// Shelves mount only the rows near the screen; a tall window keeps the whole fixture mounted
+test.use({ viewport: { width: 1280, height: 1600 } });
+
 async function openLibrary(page: Page) {
   // Covers fall back to the game name; keeps tests off the network
   await page.route("**/*steamstatic.com/**", r => r.abort());
   await page.goto("/");
   await page.setInputFiles("input[type=file]", LIBRARY);
-  await expect(page.locator(".game")).toHaveCount(6);
+  await expect(page.locator("h1")).toHaveText(/^6 games/);
 }
 
 const card = (page: Page, name: string) => page.locator(".game").filter({ has: page.locator(".name", { hasText: name }) });

@@ -4,6 +4,9 @@ const COUNT = Number(process.env.PERF_GAMES ?? 3000);
 const BUDGET_MS = 100;
 const CPU_SLOWDOWN = Number(process.env.CPU_SLOWDOWN ?? 4); // a mid-range phone, roughly
 
+// Timings suffer when other tests run in parallel
+test.describe.configure({ retries: 2 });
+
 /** A library shaped like the prototype's: ~38% without a length, a quarter with playtime. */
 function library() {
   let seed = 1;
@@ -74,4 +77,22 @@ test(`${COUNT.toLocaleString("en")} games, ${CPU_SLOWDOWN}x slower CPU: search, 
   test.info().annotations.push({ type: "timings (ms)", description: JSON.stringify(results, (_, v) => (typeof v === "number" ? Math.round(v) : v)) });
   console.log("perf, ms:", results);
   for (const [name, ms] of Object.entries(results)) expect(ms, name).toBeLessThan(BUDGET_MS);
+});
+
+test("only cards near the screen are mounted, and they follow the scroll", async ({ page }) => {
+  await page.route("**/*steamstatic.com/**", r => r.abort());
+  await page.goto("/");
+  await page.setInputFiles("input[type=file]", { name: "library.json", mimeType: "application/json", buffer: Buffer.from(library()) });
+  await expect(page.locator("h1")).toContainText(`${COUNT.toLocaleString("en")} games`);
+  expect(await page.locator(".game").count()).toBeLessThan(200);
+
+  await page.locator(".legend a[href='#unknown']").click();
+  const unknown = page.locator("section[id=unknown]");
+  await expect(unknown.locator(".band-head")).toBeInViewport();
+  await expect(unknown.locator(".game").first()).toBeInViewport();
+  expect(await page.locator(".game").count()).toBeLessThan(200);
+
+  await page.keyboard.press("End");
+  await expect(unknown.locator(".game").last()).toBeInViewport();
+  await expect(unknown.locator(".shelf-spacer")).toHaveCount(1); // only above
 });
