@@ -4,6 +4,7 @@ import {
   canReorder, clearSelection, currentList, editingId, fillInQueue, focusTarget, games, listsOpen, moveInList, openId, paletteOpen, pickerFor,
   selectAll, selection, setStatus, settingsOpen, shelves, shortcutsOpen, toggleSelected, undo, visible,
 } from "./store.ts";
+import { route } from "./route.ts";
 import { inTextField } from "./util.ts";
 
 const STATUS_KEYS: Record<string, Status> = { b: "backlog", p: "playing", f: "finished", d: "dropped" };
@@ -45,6 +46,7 @@ export function installKeys() {
 
   window.addEventListener("keydown", e => {
     if (fillInQueue.value) return; // fill-in mode handles its own keys
+    if (route.value.page === "shared") return; // someone else's list: nothing to act on
     const mod = e.metaKey || e.ctrlKey;
 
     if (mod && !e.shiftKey && !e.altKey && e.key.toLowerCase() === "k") { e.preventDefault(); paletteOpen.value = !paletteOpen.value; return; }

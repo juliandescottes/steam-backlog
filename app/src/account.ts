@@ -122,6 +122,25 @@ export async function setShareLengths(shareLengths: boolean) {
   }
 }
 
+/** Picks the name in /u/<handle> links. Resolves to an error message, or null once saved. */
+export async function setHandle(handle: string): Promise<string | null> {
+  const before = account.value;
+  if (!before) return "Sign in first";
+  try {
+    await api("POST", "/handle", { handle });
+  } catch (e) {
+    if (e instanceof ApiError && e.code === "handle_taken") return "That name is taken";
+    if (e instanceof ApiError && e.code === "bad_handle") return "Use 2 to 30 letters, digits or dashes";
+    return "Couldn't save. Try again when online.";
+  }
+  account.value = { ...before, handle };
+  await db.setMeta("account", account.value);
+  return null;
+}
+
+/** Ops not yet sent: a shared list's link only works once its change reached the server. */
+export const unsynced = () => outbox.length;
+
 function record(changes: UserChange[], schedule = true) {
   if (!account.value || !changes.length) return;
   const at = Date.now();

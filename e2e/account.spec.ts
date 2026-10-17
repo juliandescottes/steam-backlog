@@ -194,3 +194,53 @@ test("lists and their order sync between devices, and come along on first sign-i
   }).toPass({ timeout: 10_000 });
   await other.close();
 });
+
+test("share a list: pick a handle, viewers see it signed out, changes show up, private hides it", async ({ page, browser }) => {
+  const id = steamId();
+  await signIn(page, id);
+  await expect(page.locator(".bands .game .name")).toHaveText(DEV_GAMES);
+  for (const name of ["Portal", "Half-Life 2"]) {
+    await card(page, name).getByRole("checkbox").click();
+  }
+  await page.keyboard.press("a");
+  await page.getByRole("combobox", { name: "Find or create a list" }).fill("Valve classics");
+  await page.keyboard.press("Enter");
+  await page.getByRole("button", { name: "Lists" }).click();
+  await page.getByRole("link", { name: /Valve classics/ }).click();
+
+  await page.getByRole("button", { name: "Share" }).click();
+  const handle = `p${id.slice(-8)}`;
+  await expect(page.getByLabel(/pick the name for your links/)).toHaveValue("dev-user"); // from the Steam name
+  await page.getByLabel(/pick the name for your links/).fill(handle);
+  await page.getByRole("button", { name: "Save" }).click();
+  await page.getByRole("radio", { name: "Anyone with the link" }).click();
+  const link = page.getByRole("region", { name: "Sharing" }).getByRole("link");
+  await expect(link).toHaveText(`localhost:5180/u/${handle}/l/valve-classics`);
+
+  // A signed-out viewer
+  const viewer = await (await browser.newContext()).newPage();
+  await viewer.route("**/*steamstatic.com/**", r => r.abort());
+  await expect(async () => {
+    await viewer.goto(`/u/${handle}/l/valve-classics`);
+    await expect(viewer.locator("h1")).toHaveText("Valve classics", { timeout: 1000 });
+  }).toPass({ timeout: 10_000 });
+  await expect(viewer.locator(".eyebrow")).toHaveText("Dev user's list");
+  await expect(viewer.locator(".game .name")).toHaveText(["Portal", "Half-Life 2"]); // in the order they were added
+  await expect(viewer.locator(".game button")).toHaveCount(0); // read-only
+
+  // The owner finishes a game: the viewer sees the status after a refresh
+  await card(page, "Portal").hover();
+  await card(page, "Portal").getByRole("button", { name: "Mark Finished" }).click();
+  await expect(async () => {
+    await viewer.reload();
+    await expect(viewer.locator(".game", { hasText: "Portal" }).locator(".status-chip")).toHaveText("Finished", { timeout: 1000 });
+  }).toPass({ timeout: 10_000 });
+  await viewer.getByRole("button", { name: "Finished", exact: true }).click();
+  await expect(viewer.locator(".game .name")).toHaveText(["Half-Life 2"]);
+
+  await page.getByRole("radio", { name: "Private" }).click();
+  await expect(async () => {
+    await viewer.reload();
+    await expect(viewer.locator("h1")).toHaveText("List not found", { timeout: 1000 });
+  }).toPass({ timeout: 10_000 });
+});

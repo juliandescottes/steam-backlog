@@ -3,12 +3,12 @@
   "name": "baquelogue",
   "main": "worker/src/index.ts",
   "compatibility_date": "2026-10-01",
-  // The app is static; only /api/* reaches the Worker script
+  // The app is static; only /api/* and share pages (link previews) reach the Worker script
   "assets": {
     "directory": "./app/dist",
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
-    "run_worker_first": ["/api/*"]
+    "run_worker_first": ["/api/*", "/u/*"]
   },
   "d1_databases": [{ "binding": "DB", "database_name": "baquelogue", "database_id": "2fe01751-223c-490a-96b2-038dfcb2db02", "migrations_dir": "worker/migrations" }],
   "routes": [{ "pattern": "baquelogue.com", "custom_domain": true }],

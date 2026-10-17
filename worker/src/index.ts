@@ -4,6 +4,7 @@ import { body, HttpError, json, redirect } from "./http.ts";
 import { enrich } from "./igdb.ts";
 import { refreshLibrary } from "./library.ts";
 import { loginUrl, playerSummary, verifyCallback } from "./steam.ts";
+import { setHandle, sharedList, sharePage } from "./share.ts";
 import { sync } from "./sync.ts";
 import type { SyncRequest } from "@backlog/shared/sync";
 
@@ -18,6 +19,15 @@ async function route(req: Request, env: Env, ctx: ExecutionContext, url: URL): P
   // Forms can't set this header, so it blocks cross-site form posts on top of SameSite cookies
   if (req.method !== "GET" && req.method !== "HEAD" && req.headers.get("x-requested-with") !== "backlog") {
     throw new HttpError(403, "missing_header");
+  }
+
+  const shared = req.method === "GET" && url.pathname.match(/^\/api\/u\/([^/]+)\/l\/([^/]+)$/);
+  if (shared) {
+    const r = await sharedList(env, decodeURIComponent(shared[1]), decodeURIComponent(shared[2]));
+    if (!r) throw new HttpError(404, "not_found");
+    const headers = { etag: r.etag, "cache-control": "no-cache" };
+    if (req.headers.get("if-none-match") === r.etag) return new Response(null, { status: 304, headers });
+    return json(r.data, { headers });
   }
 
   switch (at) {
@@ -62,6 +72,11 @@ async function route(req: Request, env: Env, ctx: ExecutionContext, url: URL): P
       return json({ shareLengths });
     }
 
+    case "POST /api/handle": {
+      const { user } = await requireUser(req, env);
+      return json({ handle: await setHandle(env, user.id, (await body<{ handle?: unknown }>(req)).handle) });
+    }
+
     case "DELETE /api/account": {
       const { user } = await requireUser(req, env);
       await deleteAccount(env, user.id);
@@ -80,6 +95,14 @@ async function route(req: Request, env: Env, ctx: ExecutionContext, url: URL): P
 export default {
   async fetch(req, env, ctx) {
     const url = new URL(req.url);
+    if (url.pathname.startsWith("/u/")) {
+      try {
+        return await sharePage(env, req, url);
+      } catch (e) {
+        console.error(e);
+        return env.ASSETS.fetch(new Request(new URL("/", url), req));
+      }
+    }
     if (!url.pathname.startsWith("/api/")) return env.ASSETS.fetch(req);
     try {
       return await route(req, env, ctx, url);

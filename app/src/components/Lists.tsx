@@ -1,10 +1,13 @@
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
 import { normalizeName } from "@backlog/shared/names";
 import { rank } from "@backlog/shared/rank";
-import type { List } from "@backlog/shared/lists";
+import { slugify, type List } from "@backlog/shared/lists";
+import { sharePath, suggestHandle } from "@backlog/shared/share";
+import { account, setHandle, signIn } from "../account.ts";
 import { listPath, navigate, route } from "../route.ts";
 import {
-  createList, deleteList, listEntries, listItems, listsOpen, pickerFor, settingsOpen, sortedLists, toggleInList, updateList,
+  createList, deleteList, listEntries, listItems, listsOpen, pickerFor, setListSlug, setListVisibility, settingsOpen, showToast, sortedLists,
+  toggleInList, updateList,
 } from "../store.ts";
 import { count } from "../util.ts";
 
@@ -138,6 +141,7 @@ export function ListPicker() {
 /** Top of a list page: title, description, totals, and the owner's controls. */
 export function ListHeader({ list: l }: { list: List }) {
   const [editing, setEditing] = useState(false);
+  const [sharing, setSharing] = useState(false);
   const all = listEntries(l);
   const hours = all.reduce((s, e) => s + (e.len.hours ?? 0), 0);
   const finished = all.filter(e => e.game.status === "finished").length;
@@ -164,10 +168,90 @@ export function ListHeader({ list: l }: { list: List }) {
       {!editing && (
         <p class="row-actions">
           <button type="button" class="btn" onClick={() => setEditing(true)}>Rename</button>
+          <button type="button" class="btn" aria-expanded={sharing} onClick={() => setSharing(!sharing)}>
+            {l.visibility === "private" ? "Share" : "Shared ✓"}
+          </button>
           <button type="button" class="btn ghost" onClick={() => deleteList(l.id)}>Delete list</button>
         </p>
       )}
+      {sharing && !editing && <SharePanel list={l} />}
     </header>
+  );
+}
+
+/** Sharing needs an account (the server serves the page) and a handle for the link. */
+function SharePanel({ list: l }: { list: List }) {
+  const me = account.value;
+  if (!me) {
+    return (
+      <div class="callout share" role="region" aria-label="Sharing">
+        <p>Sharing needs an account, so the link keeps working when this browser is closed.</p>
+        <p class="row-actions"><button type="button" class="btn primary" onClick={signIn}>Sign in with Steam</button></p>
+      </div>
+    );
+  }
+  if (!me.handle) return <HandleForm name={me.name} />;
+  const url = `${location.origin}${sharePath(me.handle, l.slug)}`;
+  const shared = l.visibility !== "private";
+  return (
+    <div class="callout share" role="region" aria-label="Sharing">
+      <div class="segmented" role="radiogroup" aria-label="Who can see this list">
+        <button type="button" role="radio" aria-checked={!shared} onClick={() => setListVisibility(l.id, "private")}>Private</button>
+        <button type="button" role="radio" aria-checked={shared} onClick={() => setListVisibility(l.id, "link")}>Anyone with the link</button>
+      </div>
+      {shared && <>
+        <p class="share-link">
+          <a href={url} target="_blank" rel="noopener">{url.replace(/^https?:\/\//, "")}</a>
+          <button type="button" class="btn" onClick={() => navigator.clipboard.writeText(url).then(() => showToast("Link copied"), () => showToast("Couldn't copy the link"))}>
+            Copy link
+          </button>
+        </p>
+        <SlugForm list={l} />
+      </>}
+      <p class="hint">
+        {shared ? "Changes show up for viewers within seconds. " : ""}
+        Viewers see the games, their lengths and your statuses. Notes, playtime and dates stay private.
+      </p>
+    </div>
+  );
+}
+
+function HandleForm({ name }: { name: string }) {
+  const [handle, setValue] = useState(() => suggestHandle(name));
+  const [error, setError] = useState<string | null>(null);
+  const save = async (e: Event) => {
+    e.preventDefault();
+    setError(await setHandle(handle.trim().toLowerCase()));
+  };
+  return (
+    <form class="callout share" aria-label="Sharing" onSubmit={save}>
+      <label for="handle">First, pick the name for your links. You can change it later, but old links stop working.</label>
+      <p class="row-actions handle">
+        <span>{location.host}/u/</span>
+        <input id="handle" value={handle} maxLength={30} placeholder="your-name" autoComplete="off" onInput={e => setValue(e.currentTarget.value)} />
+        <button type="submit" class="btn primary" disabled={!handle.trim()}>Save</button>
+      </p>
+      {error && <p class="error" role="alert">{error}</p>}
+    </form>
+  );
+}
+
+function SlugForm({ list: l }: { list: List }) {
+  const [slug, setSlug] = useState(l.slug);
+  const [error, setError] = useState<string | null>(null);
+  const save = (e: Event) => {
+    e.preventDefault();
+    const next = slugify(slug);
+    setSlug(next);
+    setError(setListSlug(l.id, next) ? null : "Another of your lists uses that link");
+  };
+  return (
+    <form class="row-actions slug" onSubmit={save}>
+      <label for="slug">Link ends with</label>
+      <input id="slug" value={slug} maxLength={40} onInput={e => setSlug(e.currentTarget.value)} />
+      <button type="submit" class="btn" disabled={slug === l.slug}>Change</button>
+      {error && <span class="error" role="alert">{error}</span>}
+    </form>
   );
 }
 

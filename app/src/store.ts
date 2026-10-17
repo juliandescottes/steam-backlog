@@ -3,7 +3,7 @@ import { BANDS, bandOf, formatHours, type Band } from "@backlog/shared/bands";
 import { makeExport, newGame, type ExportFile, type LengthsEntry, type LibraryGame } from "@backlog/shared/files";
 import { compare, matches, type Entry, type Filter, type SortKey } from "@backlog/shared/filter";
 import { resolveLength } from "@backlog/shared/lengths";
-import { after, between, slugify, uniqueSlug, type List, type ListItem, type ListKind } from "@backlog/shared/lists";
+import { after, between, slugify, uniqueSlug, type List, type ListItem, type ListKind, type Visibility } from "@backlog/shared/lists";
 import { normalizeName } from "@backlog/shared/names";
 import { userFields, type GameFields, type ItemFields, type ListFields, type Op, type SyncItem, type SyncList, type SyncView, type ViewFields } from "@backlog/shared/sync";
 import { STATUSES, STATUS_LABEL, type Game, type LenKind, type Lengths, type Measure, type Status } from "@backlog/shared/types";
@@ -343,6 +343,27 @@ export function updateList(id: string, change: Partial<Pick<List, "title" | "des
   const fields = (x: List): Partial<ListFields> => ({ title: x.title, description: x.description, slug: x.slug });
   putList(next, fields(next));
   pushUndo({ label: change.title ? `Renamed to ${change.title}` : "Description saved", patches: [], revert: () => putList(l, fields(l)) });
+}
+
+/** Shares a list by link, or makes it private again (its link stops working). */
+export function setListVisibility(id: string, visibility: Visibility) {
+  const l = lists.value.find(x => x.id === id);
+  if (!l || l.visibility === visibility) return;
+  putList({ ...l, visibility }, { visibility });
+  pushUndo({ label: visibility === "private" ? `${l.title} is private` : `${l.title} is shared`, patches: [],
+    revert: () => putList(l, { visibility: l.visibility }) });
+}
+
+/** Changes the end of a list's link; false when another list of yours uses it. */
+export function setListSlug(id: string, slug: string): boolean {
+  const l = lists.value.find(x => x.id === id);
+  if (!l) return false;
+  if (lists.value.some(x => x.id !== id && x.slug === slug)) return false;
+  if (l.slug !== slug) {
+    putList({ ...l, slug }, { slug });
+    pushUndo({ label: "Link changed", patches: [], revert: () => putList(l, { slug: l.slug }) });
+  }
+  return true;
 }
 
 export function deleteList(id: string) {

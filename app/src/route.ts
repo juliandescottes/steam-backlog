@@ -1,11 +1,14 @@
 import { signal } from "@preact/signals";
 
-/** The page shown: the library, or one of the user's lists at /l/<id> (TECH.md §4). */
-export type Route = { page: "library" } | { page: "list"; id: string };
+/** The page shown: the library, one of the user's lists at /l/<id>, or someone's shared list (TECH.md §4). */
+export type Route = { page: "library" } | { page: "list"; id: string } | { page: "shared"; handle: string; slug: string };
 
 function parse(path: string): Route {
   const m = path.match(/^\/l\/([^/]+)\/?$/);
-  return m ? { page: "list", id: decodeURIComponent(m[1]) } : { page: "library" };
+  if (m) return { page: "list", id: decodeURIComponent(m[1]) };
+  const s = path.match(/^\/u\/([^/]+)\/l\/([^/]+)\/?$/);
+  if (s) return { page: "shared", handle: decodeURIComponent(s[1]), slug: decodeURIComponent(s[2]) };
+  return { page: "library" };
 }
 
 export const route = signal<Route>(parse(location.pathname));

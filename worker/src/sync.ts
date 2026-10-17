@@ -8,7 +8,7 @@ import { HttpError } from "./http.ts";
 const DAY = 24 * 60 * 60 * 1000;
 const MAX_OPS = 5000;
 
-type Row = {
+export type Row = {
   appid: number; name: string; has_portrait_art: number | null;
   igdb_main: number | null; igdb_main_extra: number | null; igdb_comp: number | null; igdb_count: number | null;
   comm_main_extra: number | null; comm_count: number; comm_endless_count: number;
@@ -17,7 +17,7 @@ type Row = {
   playtime_min: number; last_played_at: number | null; first_seen_at: number;
 };
 
-const toGame = (r: Row): Game => ({
+export const toGame = (r: Row): Game => ({
   appid: r.appid, name: r.name,
   portrait: r.has_portrait_art == null ? null : r.has_portrait_art === 1,
   playtimeMin: r.playtime_min, lastPlayedAt: r.last_played_at, addedAt: r.first_seen_at,
@@ -30,6 +30,12 @@ const toGame = (r: Row): Game => ({
     : { main: r.my_main, main_extra: r.my_main_extra, comp: r.my_comp },
   myKind: r.my_len_kind,
 });
+
+/** A game as a client gets it: `games g` joined with `user_games ug`. */
+export const GAME_COLUMNS = `g.appid, g.name, g.has_portrait_art, g.igdb_main, g.igdb_main_extra, g.igdb_comp, g.igdb_count,
+  g.comm_main_extra, g.comm_count, g.comm_endless_count,
+  ug.status, ug.status_at, ug.finished_at, ug.note, ug.my_main, ug.my_main_extra, ug.my_comp, ug.my_len_kind,
+  ug.playtime_min, ug.last_played_at, ug.first_seen_at`;
 
 /** Columns an op can set, and where each value sits in the flattened op. */
 const SETTABLE: [column: string, path: string][] = [
@@ -148,10 +154,7 @@ export async function sync(env: Env, userId: string, req: SyncRequest, now = Dat
   const [rev, rows, viewRows, listRows, itemRows] = await env.DB.batch<any>([
     env.DB.prepare("SELECT rev FROM user_rev WHERE user_id = ?").bind(userId),
     env.DB.prepare(
-      `SELECT g.appid, g.name, g.has_portrait_art, g.igdb_main, g.igdb_main_extra, g.igdb_comp, g.igdb_count,
-         g.comm_main_extra, g.comm_count, g.comm_endless_count,
-         ug.status, ug.status_at, ug.finished_at, ug.note, ug.my_main, ug.my_main_extra, ug.my_comp, ug.my_len_kind,
-         ug.playtime_min, ug.last_played_at, ug.first_seen_at
+      `SELECT ${GAME_COLUMNS}
        FROM user_games ug JOIN games g USING (appid)
        WHERE ug.user_id = ? AND (ug.rev > ? OR g.updated_at > ?)`,
     ).bind(userId, since, catalogSince),

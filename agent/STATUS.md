@@ -16,7 +16,9 @@ Milestone 4. M2 and lists deployed 2026-10-17.
 
 Done: lists (`shared/lists.ts`: fractional positions, slugs). Hand-picked or filter-based (from the current view); drawer from the header's Lists button; list page at `/l/<id>` (`app/src/route.ts`) with its own statuses and sort, "List order" for hand-picked ones; add with the cover's +, `A`, the detail panel, the selection bar or the palette; drag or Alt+←/→ to reorder; rename, describe, delete with undo. Sync (ops `list` and `item`, migration 0004) and backups include lists and views.
 
-Next: sharing (handle prompt, visibility, `/u/<handle>/l/<slug>` page with polling, link previews), then public profile, copy to my backlog, optional collections import.
+Sharing done (not deployed): Share panel on a list page (needs an account; asks for a handle first, suggested from the Steam name; Private / Anyone with the link; copy link; change the slug). `POST /api/handle`, `GET /api/u/:handle/l/:slug` with ETag/304, `/u/*` pages with Open Graph tags. Viewer page `Shared.tsx` is a lazy chunk, read-only, polls every 30 s while visible.
+
+Next: public profile (`/u/<handle>`, "profile" visibility), copy to my backlog, optional collections import.
 
 Production check (2026-10-17, 761-game library): callback 594 ms, import 5.3 s wall / 26 ms CPU, sync 8–14 ms CPU, cron 3–4.5 s wall / 10–14 ms CPU. All over the free plan's 10 ms CPU but none failed; watch `wrangler tail` for "exceeded CPU" (fix: Workers Paid, or paged sync and smaller batches).
 
