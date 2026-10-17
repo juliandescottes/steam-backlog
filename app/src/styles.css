@@ -63,6 +63,9 @@ h1 em { font-style: normal; color: var(--accent); }
 
 /* Band index */
 .index { display: grid; gap: 10px; }
+.triage { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; justify-content: space-between; padding: 14px 16px;
+  border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 8px; background: var(--surface); }
+.triage p:first-child { margin: 0; flex: 1 1 320px; }
 .bar { display: flex; height: 14px; border-radius: 3px; overflow: hidden; background: var(--line); }
 .bar a { display: block; min-width: 2px; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 8px; }

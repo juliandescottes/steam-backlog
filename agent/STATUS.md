@@ -20,9 +20,13 @@ Real Steam import checked (761 games). IGDB cron done and checked on that librar
 
 Community lengths done: rows mirror the user's games on each sync, median per game, Settings toggle. Imported lengths get `myKind: "imported"` and aren't shared.
 
-Next: triage prompt, collections import, account deletion, then remote D1 + secrets + deploy.
+Triage prompt done: banner above the library, once per browser (meta `triaged`); finished date = last played.
+
+Next: collections import, account deletion, then remote D1 + secrets + deploy.
 
 ## Backlog
+
+- Triage marks all candidates at once (125 on the real library, some fighting games among them); maybe a "Review them" view.
 
 - Delisted apps show "Steam app 11420"; IGDB has names for some.
 - Covers are blank tiles while art loads.

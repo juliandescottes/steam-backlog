@@ -145,3 +145,23 @@ test("no horizontal scrolling at phone width", async ({ page }) => {
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBe(0);
 });
+
+test("offers once to finish games played past 80% of their length", async ({ page }) => {
+  await page.route("**/*steamstatic.com/**", r => r.abort());
+  await page.goto("/");
+  const library = JSON.parse(readFileSync(LIBRARY, "utf8"));
+  library.games[0].playtimeMin = 100; // Short One: 2h, so 96 min is 80%
+  library.games[1].playtimeMin = 600; // Mid Game: 15h, not yet
+  await page.setInputFiles("input[type=file]", { name: "library.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(library)) });
+
+  const triage = page.getByRole("complementary", { name: "Finished games" });
+  await expect(triage).toContainText("You've played 1 game for at least 80% of its length (Short One). Mark it Finished?");
+  await triage.getByRole("button", { name: "Mark Finished" }).click();
+  await expect(card(page, "Short One")).toHaveCount(0);
+  await expect(triage).toHaveCount(0);
+  await page.locator(".toast").getByRole("button", { name: "Undo" }).click();
+  await expect(card(page, "Short One")).toHaveCount(1);
+  await page.reload();
+  await expect(page.locator("h1")).toHaveText(/^6 games/);
+  await expect(triage).toHaveCount(0); // asked once
+});

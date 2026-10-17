@@ -2,7 +2,7 @@ import { BANDS, UNKNOWN_BAND, bandOf } from "@backlog/shared/bands";
 import { SORT_LABEL, type Entry, type SortKey } from "@backlog/shared/filter";
 import { STATUSES, STATUS_LABEL, type Status } from "@backlog/shared/types";
 import {
-  played, query, settings, settingsOpen, sortKey, startFillIn, statuses, totals, visible,
+  dismissTriage, finishPlayed, played, query, settings, settingsOpen, sortKey, startFillIn, statuses, totals, triageCandidates, triaged, visible,
 } from "../store.ts";
 import { count, thousands } from "../util.ts";
 import { Shelf } from "./Shelf.tsx";
@@ -32,6 +32,25 @@ function Header() {
         <span>{t.finished} finished · {Math.round(done * 100)}% of hours cleared</span>
       </div>
     </header>
+  );
+}
+
+function Triage() {
+  const list = triageCandidates.value;
+  if (triaged.value || !list.length) return null;
+  const names = list.slice(0, 2).map(e => e.game.name);
+  const more = list.length - names.length;
+  return (
+    <aside class="triage" aria-label="Finished games">
+      <p>
+        You've played <b>{count(list.length, "game")}</b> for at least 80% of {list.length === 1 ? "its" : "their"} length
+        {" "}({names.join(", ")}{more > 0 && ` and ${more} more`}). Mark {list.length === 1 ? "it" : "them"} Finished?
+      </p>
+      <p class="row-actions">
+        <button type="button" class="btn primary" onClick={() => finishPlayed(list.map(e => e.game.appid))}>Mark Finished</button>
+        <button type="button" class="btn ghost" onClick={dismissTriage}>No thanks</button>
+      </p>
+    </aside>
   );
 }
 
@@ -91,6 +110,7 @@ export function Library() {
   return (
     <div class="wrap">
       <Header />
+      <Triage />
       {byLength && groups.length > 0 && <BandIndex groups={groups} />}
       <Toolbar />
       <main class="bands">
