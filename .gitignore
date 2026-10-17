@@ -6,3 +6,4 @@ tools/out/
 *.tsbuildinfo
 test-results/
 playwright-report/
+.wrangler/

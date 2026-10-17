@@ -2,14 +2,14 @@
 
 How to build what `SPEC.md` describes. Written 2026-10-17.
 
-Decided: TypeScript everywhere; Preact + Vite for the frontend; Cloudflare Workers + D1 for the backend, with the static site on Cloudflare Pages; shared lists update by polling, no push.
+Decided: TypeScript everywhere; Preact + Vite for the frontend; one Cloudflare Worker with static assets serving the app and the API, with D1; shared lists update by polling, no push.
 
 ## 1. Architecture
 
 ```
 Browser                                   Cloudflare
 ┌───────────────────────────┐             ┌──────────────────────────────┐
-│ Preact app (Pages)        │  /api/*     │ Worker (API)                 │
+│ Preact app (assets)       │  /api/*     │ Worker (API)                 │
 │  in-memory state (signals)│ ──────────▶ │  auth, sync, import, shares  │
 │  IndexedDB (persistence)  │             │  cron: length enrichment     │
 │  outbox of pending ops    │             └──────┬───────────────┬───────┘
@@ -22,7 +22,7 @@ Browser                                   Cloudflare
 - **Local-first.** The client holds the user's whole library in memory and persists it to IndexedDB. Every UI action changes local state synchronously, then queues an op for the server. The network never sits between a keypress and the UI.
 - **The server is the source of truth across devices** and is the only thing that can serve shared lists.
 - **Covers come straight from Steam's CDN.** No image hosting.
-- One Cloudflare project: Pages serves the app, and a Worker handles `/api/*` and the share-page metadata.
+- One Worker at `baquelogue.com` (`wrangler.jsonc`): its static assets serve the app, and its script handles `/api/*` and the share-page metadata.
 
 ## 2. Repo layout
 
@@ -183,7 +183,7 @@ The result carries its source and an approximate flag for the badge and detail p
 
 ## 12. Deployment
 
-- `wrangler` for the Worker, D1 migrations and Pages. Preview deployments per branch, with their own D1 database.
+- `wrangler` for the Worker, static assets and D1 migrations; `npm run deploy` builds and deploys. Preview deployments per branch (Workers Builds from GitHub), with their own D1 database, from milestone 3.
 - Secrets: `STEAM_API_KEY`, `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET`.
 - Local development: `wrangler dev` for the Worker + local D1, Vite dev server proxying `/api`. A dev-only sign-in route that skips Steam.
 
@@ -192,7 +192,7 @@ The result carries its source and an approximate flag for the badge and detail p
 Each one ends with something usable.
 
 0. **Spike: IGDB coverage** (§8). Done: IGDB plus user-entered lengths.
-1. **Local app + statuses.** Workspace setup, Preact app with the prototype's look: bands, cover grid, detail panel, statuses with undo, filters/sort/search, export/import, the fill-in flow for missing lengths and lengths import. No backend yet: a dev script converts `tools/hltb_results.json` + the CSV into an export file to load the prototype library. Deployed on Pages.
+1. **Local app + statuses.** Workspace setup, Preact app with the prototype's look: bands, cover grid, detail panel, statuses with undo, filters/sort/search, export/import, the fill-in flow for missing lengths and lengths import. No backend yet: a dev script converts `tools/hltb_results.json` + the CSV into an export file to load the prototype library. Deployed to `baquelogue.com`.
 2. **Speed layer.** Keyboard navigation, bulk select, command palette, smart views, Now playing shelf, header progress.
 3. **Accounts, import, sync.** Worker + D1, Steam sign-in, library refresh, sync endpoint and outbox, IGDB enrichment cron, community lengths, triage prompt, collection import, account deletion.
 4. **Lists and sharing.** Manual and filter lists, handles, share pages with polling and link previews, public profile, copy to my backlog.

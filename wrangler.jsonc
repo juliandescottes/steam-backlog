@@ -1,0 +1,11 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "baquelogue",
+  "compatibility_date": "2026-10-01",
+  // Static app only for now; the API Worker script joins in milestone 3
+  "assets": { "directory": "./app/dist", "not_found_handling": "single-page-application" },
+  "routes": [{ "pattern": "baquelogue.com", "custom_domain": true }],
+  // One origin only: local data lives in IndexedDB per origin
+  "workers_dev": false,
+  "preview_urls": false
+}

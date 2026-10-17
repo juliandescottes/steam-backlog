@@ -13,6 +13,7 @@ npm run e2e        # playwright, installed Chrome
 npm run typecheck
 npm run build
 npm run library    # tools/out/library.json + hltb_lengths.json from prototype data
+npm run deploy     # build + wrangler deploy to baquelogue.com (ask first)
 ```
 
 ## Layout
