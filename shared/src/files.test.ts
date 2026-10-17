@@ -49,7 +49,7 @@ describe("export", () => {
 
   it("round-trips views, lists and their games, dropping invalid ones", () => {
     const view = { id: "v", name: "Short", filter: { maxHours: 5 }, sort: "length" as const, position: "a" };
-    const list = { id: "l", title: "Up next", description: "", kind: "manual" as const, filter: null, sort: null, slug: "up-next", visibility: "private" as const, position: "i" };
+    const list = { id: "l", title: "Up next", description: "", kind: "manual" as const, filter: null, sort: null, shareId: "abcdefghijkl", visibility: "private" as const, position: "i" };
     const file = makeExport([], {}, { views: [view], lists: [list], listItems: [{ listId: "l", appid: 7, position: "i" }] });
     const back = parseExport(JSON.stringify({
       ...file,

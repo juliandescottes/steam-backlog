@@ -1,5 +1,4 @@
 import type { Filter, SortKey } from "./filter.ts";
-import { normalizeName } from "./names.ts";
 
 /** Hand-picked games in your order, or the games a filter matches, kept up to date (SPEC §7). */
 export type ListKind = "manual" | "filter";
@@ -12,7 +11,8 @@ export type List = {
   /** Filter lists only. */
   filter: Filter | null;
   sort: SortKey | null;
-  slug: string;
+  /** The id in the list's share link (/s/<shareId>): random, made with the list, never changed. */
+  shareId: string;
   visibility: Visibility;
   position: string;
 };
@@ -45,14 +45,9 @@ export function after(a: string | null, n: number): string[] {
   return out;
 }
 
-/** "Best short games (2026)" → "best-short-games-2026". */
-export function slugify(title: string): string {
-  return normalizeName(title).replace(/ /g, "-").slice(0, 40).replace(/-+$/, "") || "list";
-}
+export const SHARE_ID = /^[0-9a-z]{12}$/;
 
-/** `base`, or `base-2`, `base-3`… when taken. */
-export function uniqueSlug(base: string, taken: Iterable<string>): string {
-  const t = new Set(taken);
-  if (!t.has(base)) return base;
-  for (let i = 2; ; i++) if (!t.has(`${base}-${i}`)) return `${base}-${i}`;
+/** 12 random base-36 characters: about 62 bits, so ids made offline on different devices don't collide. */
+export function newShareId(): string {
+  return [...crypto.getRandomValues(new Uint8Array(12))].map(b => DIGITS[b % 36]).join("");
 }

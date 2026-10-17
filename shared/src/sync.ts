@@ -1,6 +1,6 @@
 /* Sync protocol between the client outbox and the Worker (TECH.md §5). */
 import { SORT_LABEL } from "./filter.ts";
-import type { List, ListItem } from "./lists.ts";
+import { SHARE_ID, type List, type ListItem } from "./lists.ts";
 import { STATUSES, type Game, type LenKind } from "./types.ts";
 import type { View } from "./views.ts";
 
@@ -88,7 +88,7 @@ function validListOp(op: ListOp): boolean {
     && (!("kind" in s) || KIND.includes(s.kind!))
     && (!("filter" in s) || s.filter === null || filterJson(s.filter))
     && (!("sort" in s) || s.sort === null || SORTS.includes(s.sort!))
-    && (!("slug" in s) || (typeof s.slug === "string" && /^[\p{L}\p{N}-]{1,60}$/u.test(s.slug)))
+    && (!("shareId" in s) || (typeof s.shareId === "string" && SHARE_ID.test(s.shareId)))
     && (!("visibility" in s) || VISIBILITY.includes(s.visibility!))
     && (!("position" in s) || position(s.position))
     && (!("deleted" in s) || typeof s.deleted === "boolean");

@@ -2,12 +2,13 @@ import { compare, matches, type Entry, type Filter, type SortKey } from "@backlo
 import { resolveLength } from "@backlog/shared/lengths";
 import type { ListKind } from "@backlog/shared/lists";
 import { normalizeName } from "@backlog/shared/names";
+import { SHARE_ID } from "@backlog/shared/lists";
 import { HANDLE, type SharedList } from "@backlog/shared/share";
 import type { Game } from "@backlog/shared/types";
 import { HttpError } from "./http.ts";
 import { GAME_COLUMNS, toGame, type Row } from "./sync.ts";
 
-/** Sets the user's handle; another user's handle is refused. */
+/** Sets the user's public username (profiles); another user's handle is refused. */
 export async function setHandle(env: Env, userId: string, handle: unknown): Promise<string> {
   if (typeof handle !== "string" || !HANDLE.test(handle)) throw new HttpError(400, "bad_handle");
   try {
@@ -31,12 +32,13 @@ const forViewers = (g: Game): Game => ({ ...g, note: "", playtimeMin: 0, lastPla
  * A list shared by link or on a profile, with an ETag that changes when the owner changes anything
  * (their rev) or a game's catalog row does. Null for private, deleted and missing lists alike.
  */
-export async function sharedList(env: Env, handle: string, slug: string): Promise<{ etag: string; data: SharedList } | null> {
+export async function sharedList(env: Env, shareId: string): Promise<{ etag: string; data: SharedList } | null> {
+  if (!SHARE_ID.test(shareId)) return null;
   const l = await env.DB.prepare(
     `SELECT u.id AS user_id, u.display_name, u.avatar_url, r.rev, l.id, l.title, l.description, l.kind, l.filter_json, l.sort
-     FROM users u JOIN lists l ON l.user_id = u.id JOIN user_rev r ON r.user_id = u.id
-     WHERE u.handle = ? AND l.slug = ? AND l.visibility != 'private' AND l.deleted = 0 ORDER BY l.id LIMIT 1`,
-  ).bind(handle, slug).first<ListRow>();
+     FROM lists l JOIN users u ON u.id = l.user_id JOIN user_rev r ON r.user_id = u.id
+     WHERE l.share_id = ? AND l.visibility != 'private' AND l.deleted = 0`,
+  ).bind(shareId).first<ListRow>();
   if (!l) return null;
 
   let rows: (Row & { updated_at: number })[];
@@ -62,7 +64,7 @@ export async function sharedList(env: Env, handle: string, slug: string): Promis
   return {
     etag: `"${l.rev}-${catalog}-${games.length}"`,
     data: {
-      owner: { handle, name: l.display_name, avatar: l.avatar_url },
+      owner: { name: l.display_name, avatar: l.avatar_url },
       list: { title: l.title, description: l.description, kind: l.kind, sort: l.sort },
       games: games.map(forViewers),
     },
@@ -74,8 +76,8 @@ const escape = (s: string) => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&
 /** The app's page with the list's title and a preview for chats and social sites (Open Graph). */
 export async function sharePage(env: Env, req: Request, url: URL): Promise<Response> {
   const page = await env.ASSETS.fetch(new Request(new URL("/", url), req));
-  const m = url.pathname.match(/^\/u\/([^/]+)\/l\/([^/]+)\/?$/);
-  const share = m && HANDLE.test(m[1]) ? await sharedList(env, m[1], decodeURIComponent(m[2])) : null;
+  const m = url.pathname.match(/^\/s\/([^/]+)\/?$/);
+  const share = m ? await sharedList(env, m[1]) : null;
   if (!share || !page.ok) return page;
   const { list, owner, games } = share.data;
   const hours = Math.round(games.reduce((s, g) => s + (resolveLength(g, "main_extra").hours ?? 0), 0));

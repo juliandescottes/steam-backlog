@@ -55,17 +55,17 @@ const toView = (r: ViewRow): SyncView => ({
 
 const LIST_SETTABLE: [column: string, path: string][] = [
   ["title", "title"], ["description", "description"], ["kind", "kind"], ["filter_json", "filter"], ["sort", "sort"],
-  ["slug", "slug"], ["visibility", "visibility"], ["position", "position"], ["deleted", "deleted"],
-];
+  ["visibility", "visibility"], ["position", "position"], ["deleted", "deleted"],
+]; // share_id is set when a list is created and never changes, so no update can hit the unique index
 const ITEM_SETTABLE: [column: string, path: string][] = [["position", "position"], ["deleted", "deleted"]];
 
 type ListRow = {
   id: string; title: string; description: string; kind: SyncList["kind"]; filter_json: string | null; sort: SyncList["sort"];
-  slug: string; visibility: SyncList["visibility"]; position: string; deleted: number;
+  share_id: string; visibility: SyncList["visibility"]; position: string; deleted: number;
 };
 const toList = (r: ListRow): SyncList => ({
   id: r.id, title: r.title, description: r.description, kind: r.kind, filter: r.filter_json == null ? null : JSON.parse(r.filter_json),
-  sort: r.sort, slug: r.slug, visibility: r.visibility, position: r.position, deleted: r.deleted === 1,
+  sort: r.sort, shareId: r.share_id, visibility: r.visibility, position: r.position, deleted: r.deleted === 1,
 });
 type ItemRow = { list_id: string; appid: number; position: string; deleted: number };
 const toItem = (r: ItemRow): SyncItem => ({ listId: r.list_id, appid: r.appid, position: r.position, deleted: r.deleted === 1 });
@@ -125,9 +125,9 @@ export async function sync(env: Env, userId: string, req: SyncRequest, now = Dat
            FROM json_each(?2) j WHERE lists.user_id = ?1 AND lists.id = j.value ->> 'id'`,
         ).bind(userId, JSON.stringify(listPatches)),
         env.DB.prepare(
-          `INSERT OR IGNORE INTO lists (id, user_id, title, description, kind, filter_json, sort, slug, visibility, position, rev, deleted)
+          `INSERT OR IGNORE INTO lists (id, user_id, title, description, kind, filter_json, sort, share_id, visibility, position, rev, deleted)
            SELECT j.value ->> 'id', ?1, coalesce(j.value ->> 'title', 'List'), coalesce(j.value ->> 'description', ''),
-             coalesce(j.value ->> 'kind', 'manual'), j.value ->> 'filter', j.value ->> 'sort', coalesce(j.value ->> 'slug', 'list'),
+             coalesce(j.value ->> 'kind', 'manual'), j.value ->> 'filter', j.value ->> 'sort', coalesce(j.value ->> 'shareId', lower(hex(randomblob(6)))),
              coalesce(j.value ->> 'visibility', 'private'), coalesce(j.value ->> 'position', 'i'), ${nextRev(atLists)},
              coalesce(j.value ->> 'deleted', 0)
            FROM json_each(?2) j WHERE NOT EXISTS (SELECT 1 FROM lists l WHERE l.id = j.value ->> 'id')`,
@@ -160,7 +160,7 @@ export async function sync(env: Env, userId: string, req: SyncRequest, now = Dat
     ).bind(userId, since, catalogSince),
     env.DB.prepare("SELECT id, name, filter_json, sort, position, deleted FROM views WHERE user_id = ? AND rev > ?").bind(userId, since),
     env.DB.prepare(
-      "SELECT id, title, description, kind, filter_json, sort, slug, visibility, position, deleted FROM lists WHERE user_id = ? AND rev > ?",
+      "SELECT id, title, description, kind, filter_json, sort, share_id, visibility, position, deleted FROM lists WHERE user_id = ? AND rev > ?",
     ).bind(userId, since),
     env.DB.prepare("SELECT list_id, appid, position, deleted FROM list_items WHERE user_id = ? AND rev > ?").bind(userId, since),
   ]);

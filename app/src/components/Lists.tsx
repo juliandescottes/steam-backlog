@@ -1,12 +1,12 @@
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
 import { normalizeName } from "@backlog/shared/names";
 import { rank } from "@backlog/shared/rank";
-import { slugify, type List } from "@backlog/shared/lists";
-import { sharePath, suggestHandle } from "@backlog/shared/share";
-import { account, setHandle, signIn } from "../account.ts";
+import type { List } from "@backlog/shared/lists";
+import { sharePath } from "@backlog/shared/share";
+import { account, signIn } from "../account.ts";
 import { listPath, navigate, route } from "../route.ts";
 import {
-  createList, deleteList, listEntries, listItems, listsOpen, pickerFor, setListSlug, setListVisibility, settingsOpen, showToast, sortedLists,
+  createList, deleteList, listEntries, listItems, listsOpen, pickerFor, setListVisibility, settingsOpen, showToast, sortedLists,
   toggleInList, updateList,
 } from "../store.ts";
 import { count } from "../util.ts";
@@ -179,7 +179,7 @@ export function ListHeader({ list: l }: { list: List }) {
   );
 }
 
-/** Sharing needs an account (the server serves the page) and a handle for the link. */
+/** Sharing needs an account: the server serves the page. Viewers see the owner's Steam name. */
 function SharePanel({ list: l }: { list: List }) {
   const me = account.value;
   if (!me) {
@@ -190,8 +190,7 @@ function SharePanel({ list: l }: { list: List }) {
       </div>
     );
   }
-  if (!me.handle) return <HandleForm name={me.name} />;
-  const url = `${location.origin}${sharePath(me.handle, l.slug)}`;
+  const url = `${location.origin}${sharePath(l.shareId)}`;
   const shared = l.visibility !== "private";
   return (
     <div class="callout share" role="region" aria-label="Sharing">
@@ -199,59 +198,19 @@ function SharePanel({ list: l }: { list: List }) {
         <button type="button" role="radio" aria-checked={!shared} onClick={() => setListVisibility(l.id, "private")}>Private</button>
         <button type="button" role="radio" aria-checked={shared} onClick={() => setListVisibility(l.id, "link")}>Anyone with the link</button>
       </div>
-      {shared && <>
+      {shared && (
         <p class="share-link">
           <a href={url} target="_blank" rel="noopener">{url.replace(/^https?:\/\//, "")}</a>
           <button type="button" class="btn" onClick={() => navigator.clipboard.writeText(url).then(() => showToast("Link copied"), () => showToast("Couldn't copy the link"))}>
             Copy link
           </button>
         </p>
-        <SlugForm list={l} />
-      </>}
+      )}
       <p class="hint">
-        {shared ? "Changes show up for viewers within seconds. " : ""}
+        {shared ? `Shared as ${me.name}. Changes show up for viewers within seconds. ` : ""}
         Viewers see the games, their lengths and your statuses. Notes, playtime and dates stay private.
       </p>
     </div>
-  );
-}
-
-function HandleForm({ name }: { name: string }) {
-  const [handle, setValue] = useState(() => suggestHandle(name));
-  const [error, setError] = useState<string | null>(null);
-  const save = async (e: Event) => {
-    e.preventDefault();
-    setError(await setHandle(handle.trim().toLowerCase()));
-  };
-  return (
-    <form class="callout share" aria-label="Sharing" onSubmit={save}>
-      <label for="handle">First, pick the name for your links. You can change it later, but old links stop working.</label>
-      <p class="row-actions handle">
-        <span>{location.host}/u/</span>
-        <input id="handle" value={handle} maxLength={30} placeholder="your-name" autoComplete="off" onInput={e => setValue(e.currentTarget.value)} />
-        <button type="submit" class="btn primary" disabled={!handle.trim()}>Save</button>
-      </p>
-      {error && <p class="error" role="alert">{error}</p>}
-    </form>
-  );
-}
-
-function SlugForm({ list: l }: { list: List }) {
-  const [slug, setSlug] = useState(l.slug);
-  const [error, setError] = useState<string | null>(null);
-  const save = (e: Event) => {
-    e.preventDefault();
-    const next = slugify(slug);
-    setSlug(next);
-    setError(setListSlug(l.id, next) ? null : "Another of your lists uses that link");
-  };
-  return (
-    <form class="row-actions slug" onSubmit={save}>
-      <label for="slug">Link ends with</label>
-      <input id="slug" value={slug} maxLength={40} onInput={e => setSlug(e.currentTarget.value)} />
-      <button type="submit" class="btn" disabled={slug === l.slug}>Change</button>
-      {error && <span class="error" role="alert">{error}</span>}
-    </form>
   );
 }
 

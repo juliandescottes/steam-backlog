@@ -5,7 +5,7 @@
  * - backlog-export: a backup of the user's own data
  */
 import { roundHours } from "./bands.ts";
-import type { List, ListItem } from "./lists.ts";
+import { newShareId, type List, type ListItem } from "./lists.ts";
 import { decodeEntities } from "./names.ts";
 import { validOp } from "./sync.ts";
 import { STATUSES, type Game, type LenKind, type Lengths, type Status } from "./types.ts";
@@ -161,9 +161,9 @@ export function parseExport(text: string): ExportFile {
     set.name && set.filter && set.sort && typeof set.position === "string" && validOp({ id: "x", type: "view", viewId: id, at: 0, set }))
     .map(({ id, name, filter, sort, position }) => ({ id, name, filter, sort, position }));
   const lists: List[] = arr(d.lists).filter(({ id, ...set }) =>
-    set.title && set.kind && set.slug && set.position && validOp({ id: "x", type: "list", listId: id, at: 0, set }))
-    .map(({ id, title, description = "", kind, filter = null, sort = null, slug, visibility = "private", position }) =>
-      ({ id, title, description, kind, filter, sort, slug, visibility, position }));
+    set.title && set.kind && set.position && validOp({ id: "x", type: "list", listId: id, at: 0, set: { ...set, slug: undefined } }))
+    .map(({ id, title, description = "", kind, filter = null, sort = null, shareId = newShareId(), visibility = "private", position }) =>
+      ({ id, title, description, kind, filter, sort, shareId, visibility, position }));
   const ids = new Set(lists.map(l => l.id));
   const listItems: ListItem[] = arr(d.listItems).filter(i =>
     ids.has(i.listId) && i.position && validOp({ id: "x", type: "item", listId: i.listId, appid: i.appid, at: 0, set: { position: i.position } }))

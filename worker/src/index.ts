@@ -21,9 +21,9 @@ async function route(req: Request, env: Env, ctx: ExecutionContext, url: URL): P
     throw new HttpError(403, "missing_header");
   }
 
-  const shared = req.method === "GET" && url.pathname.match(/^\/api\/u\/([^/]+)\/l\/([^/]+)$/);
+  const shared = req.method === "GET" && url.pathname.match(/^\/api\/s\/([^/]+)$/);
   if (shared) {
-    const r = await sharedList(env, decodeURIComponent(shared[1]), decodeURIComponent(shared[2]));
+    const r = await sharedList(env, shared[1]);
     if (!r) throw new HttpError(404, "not_found");
     const headers = { etag: r.etag, "cache-control": "no-cache" };
     if (req.headers.get("if-none-match") === r.etag) return new Response(null, { status: 304, headers });
@@ -95,7 +95,7 @@ async function route(req: Request, env: Env, ctx: ExecutionContext, url: URL): P
 export default {
   async fetch(req, env, ctx) {
     const url = new URL(req.url);
-    if (url.pathname.startsWith("/u/")) {
+    if (url.pathname.startsWith("/s/")) {
       try {
         return await sharePage(env, req, url);
       } catch (e) {

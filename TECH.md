@@ -64,7 +64,7 @@ user_rev     (user_id PK, rev)   -- last rev handed out
 ```
 
 - IDs for views and lists are generated on the client (UUIDs), so they can be created offline.
-- Migration 0004 recreated `lists` (no `UNIQUE(user_id, slug)`: two offline devices can pick the same slug; uniqueness is checked when sharing) and `list_items` (with `user_id`, for sync by rev).
+- Migration 0004 recreated `lists` and `list_items` (with `user_id`, for sync by rev). Migration 0005 replaced the per-user `slug` with `share_id`: 12 random base-36 characters made on the client with the list, globally unique, never updated by ops (so no sync batch can fail on the unique index).
 - `deleted` keeps soft deletes for sync and undo; purge them after 30 days.
 - Manual list order uses fractional index strings, so reordering one game writes one row.
 - **Purchase date:** Steam's API doesn't expose it. Use `first_seen_at` (the first import that saw the game) and label the sort "Date added". For the first import, take the date from `rtime_last_played` if older, otherwise the import date.
@@ -171,9 +171,9 @@ The result carries its source and an approximate flag for the badge and detail p
 
 - **Manual lists** store items in `list_items`. **Filter lists** store `filter_json` + `sort` and have no items.
 - **Filter engine** lives in `shared/filter.ts`: one JSON format (status set, length range, played/never launched, added before/after, name contains) and one `evaluate(filter, games)` function. The client uses it for views and filter lists; the Worker uses the same code to compute filter lists for viewers.
-- `GET /api/u/:handle/l/:slug` (`worker/src/share.ts`) returns list metadata, the owner's display name and avatar, and the games as client `Game`s with notes, playtime and dates blanked. `private`, deleted and missing lists all return 404. Filter lists are computed on the server by Main + Extras (the owner's measure is a local setting). Two lists of one user with the same slug (made offline): the first by id wins.
+- Share links are `/s/<shareId>` (decided 2026-10-17: a handle and a slug were too many steps; the handle is only for the public profile). `GET /api/s/:shareId` (`worker/src/share.ts`) returns list metadata, the owner's display name and avatar, and the games as client `Game`s with notes, playtime and dates blanked. `private`, deleted and missing lists all return 404. Filter lists are computed on the server by Main + Extras (the owner's measure is a local setting).
 - **Live updates:** the response carries an `ETag` from the owner's `rev`, the sum of the games' catalog `updated_at` and the game count. The viewer page re-fetches with `If-None-Match` when it regains focus and every 30 s while visible, so unchanged lists cost a 304.
-- **Link previews:** `/u/*` runs the Worker first (`run_worker_first`); it serves `index.html` with the `<title>` replaced (plain string replace, so tests run in Node), injecting `og:title`, `og:description` ("12 games · 48 h") and an `og:image` (the first cover), so links look good in chats.
+- **Link previews:** `/s/*` runs the Worker first (`run_worker_first`); it serves `index.html` with the `<title>` replaced (plain string replace, so tests run in Node), injecting `og:title`, `og:description` ("12 games · 48 h") and an `og:image` (the first cover), so links look good in chats.
 - **Copy to my backlog** (signed-in viewers): creates a manual list in the viewer's account with the same games, and marks which ones they don't own.
 - `GET /api/u/:handle` returns the public profile and the lists marked `profile`, or 404 when the profile is off.
 

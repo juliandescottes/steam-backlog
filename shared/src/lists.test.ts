@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { after, between, slugify, uniqueSlug } from "./lists.ts";
+import { after, between, newShareId, SHARE_ID } from "./lists.ts";
 
 test("between sorts strictly between its bounds", () => {
   expect(between(null, null)).toBe("i");
@@ -34,9 +34,8 @@ test("after appends keys in order", () => {
   expect(keys[0] > "i").toBe(true);
 });
 
-test("slugs", () => {
-  expect(slugify("Best short games (2026)")).toBe("best-short-games-2026");
-  expect(slugify("Pokémon™ & friends")).toBe("pokemon-friends");
-  expect(slugify("!!!")).toBe("list");
-  expect(uniqueSlug("up-next", ["up-next", "up-next-2"])).toBe("up-next-3");
+test("share ids", () => {
+  const ids = Array.from({ length: 100 }, newShareId);
+  expect(ids.every(id => SHARE_ID.test(id))).toBe(true);
+  expect(new Set(ids).size).toBe(100);
 });

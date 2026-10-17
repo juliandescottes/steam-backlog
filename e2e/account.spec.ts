@@ -195,7 +195,7 @@ test("lists and their order sync between devices, and come along on first sign-i
   await other.close();
 });
 
-test("share a list: pick a handle, viewers see it signed out, changes show up, private hides it", async ({ page, browser }) => {
+test("share a list: one click for a link, viewers see it signed out, changes show up, private hides it", async ({ page, browser }) => {
   const id = steamId();
   await signIn(page, id);
   await expect(page.locator(".bands .game .name")).toHaveText(DEV_GAMES);
@@ -209,19 +209,17 @@ test("share a list: pick a handle, viewers see it signed out, changes show up, p
   await page.getByRole("link", { name: /Valve classics/ }).click();
 
   await page.getByRole("button", { name: "Share" }).click();
-  const handle = `p${id.slice(-8)}`;
-  await expect(page.getByLabel(/pick the name for your links/)).toHaveValue("dev-user"); // from the Steam name
-  await page.getByLabel(/pick the name for your links/).fill(handle);
-  await page.getByRole("button", { name: "Save" }).click();
   await page.getByRole("radio", { name: "Anyone with the link" }).click();
   const link = page.getByRole("region", { name: "Sharing" }).getByRole("link");
-  await expect(link).toHaveText(`localhost:5180/u/${handle}/l/valve-classics`);
+  await expect(link).toHaveText(/^localhost:5180\/s\/[0-9a-z]{12}$/);
+  await expect(page.getByRole("region", { name: "Sharing" })).toContainText("Shared as Dev user.");
+  const path = new URL(await link.getAttribute("href")!).pathname;
 
   // A signed-out viewer
   const viewer = await (await browser.newContext()).newPage();
   await viewer.route("**/*steamstatic.com/**", r => r.abort());
   await expect(async () => {
-    await viewer.goto(`/u/${handle}/l/valve-classics`);
+    await viewer.goto(path);
     await expect(viewer.locator("h1")).toHaveText("Valve classics", { timeout: 1000 });
   }).toPass({ timeout: 10_000 });
   await expect(viewer.locator(".eyebrow")).toHaveText("Dev user's list");

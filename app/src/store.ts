@@ -3,7 +3,7 @@ import { BANDS, bandOf, formatHours, type Band } from "@backlog/shared/bands";
 import { makeExport, newGame, type ExportFile, type LengthsEntry, type LibraryGame } from "@backlog/shared/files";
 import { compare, matches, type Entry, type Filter, type SortKey } from "@backlog/shared/filter";
 import { resolveLength } from "@backlog/shared/lengths";
-import { after, between, slugify, uniqueSlug, type List, type ListItem, type ListKind, type Visibility } from "@backlog/shared/lists";
+import { after, between, newShareId, type List, type ListItem, type ListKind, type Visibility } from "@backlog/shared/lists";
 import { normalizeName } from "@backlog/shared/names";
 import { userFields, type GameFields, type ItemFields, type ListFields, type Op, type SyncItem, type SyncList, type SyncView, type ViewFields } from "@backlog/shared/sync";
 import { STATUSES, STATUS_LABEL, type Game, type LenKind, type Lengths, type Measure, type Status } from "@backlog/shared/types";
@@ -31,7 +31,8 @@ export async function load() {
   batch(() => {
     games.value = new Map(all.map(g => [g.appid, g]));
     userViews.value = v;
-    lists.value = l.lists;
+    // Lists from before share ids had a slug instead; a signed-in account's lists get theirs from the server
+    lists.value = l.lists.map(x => (x.shareId ? x : { ...x, shareId: newShareId() }));
     listItems.value = groupItems(l.items);
     settings.value = { ...DEFAULT_SETTINGS, ...s };
     triaged.value = t ?? false;
@@ -277,7 +278,7 @@ export function createList(title: string, kind: ListKind = "manual", appids: num
   const l: List = {
     id: crypto.randomUUID(), title, description: "", kind,
     filter: kind === "filter" ? currentFilter.value : null, sort: kind === "filter" ? sortKey.value : null,
-    slug: uniqueSlug(slugify(title), lists.value.map(x => x.slug)), visibility: "private",
+    shareId: newShareId(), visibility: "private",
     position: between(sortedLists.value.at(-1)?.position ?? null, null),
   };
   putList(l);
@@ -334,13 +335,12 @@ export function moveInList(listId: string, appid: number, target: number, side: 
   pushUndo({ label: `${nameOf(appid)} moved`, patches: [], revert: () => putItems(listId, [[appid, old]]) });
 }
 
-/** Renames or describes a list. A private list's link follows its title. */
+/** Renames or describes a list. */
 export function updateList(id: string, change: Partial<Pick<List, "title" | "description">>) {
   const l = lists.value.find(x => x.id === id);
   if (!l) return;
   const next = { ...l, ...change };
-  if (change.title && l.visibility === "private") next.slug = uniqueSlug(slugify(change.title), lists.value.filter(x => x.id !== id).map(x => x.slug));
-  const fields = (x: List): Partial<ListFields> => ({ title: x.title, description: x.description, slug: x.slug });
+  const fields = (x: List): Partial<ListFields> => ({ title: x.title, description: x.description });
   putList(next, fields(next));
   pushUndo({ label: change.title ? `Renamed to ${change.title}` : "Description saved", patches: [], revert: () => putList(l, fields(l)) });
 }
@@ -352,18 +352,6 @@ export function setListVisibility(id: string, visibility: Visibility) {
   putList({ ...l, visibility }, { visibility });
   pushUndo({ label: visibility === "private" ? `${l.title} is private` : `${l.title} is shared`, patches: [],
     revert: () => putList(l, { visibility: l.visibility }) });
-}
-
-/** Changes the end of a list's link; false when another list of yours uses it. */
-export function setListSlug(id: string, slug: string): boolean {
-  const l = lists.value.find(x => x.id === id);
-  if (!l) return false;
-  if (lists.value.some(x => x.id !== id && x.slug === slug)) return false;
-  if (l.slug !== slug) {
-    putList({ ...l, slug }, { slug });
-    pushUndo({ label: "Link changed", patches: [], revert: () => putList(l, { slug: l.slug }) });
-  }
-  return true;
 }
 
 export function deleteList(id: string) {
@@ -393,7 +381,7 @@ export function applyServerLists(ls: SyncList[], its: SyncItem[], pending: Op[],
       const { deleted, ...set } = op.set;
       const cur = next.get(op.listId);
       if (deleted) next.delete(op.listId);
-      else if (cur || (set.title && set.kind && set.slug && set.position)) next.set(op.listId, { ...cur!, ...set, id: op.listId });
+      else if (cur || (set.title && set.kind && set.shareId && set.position)) next.set(op.listId, { ...cur!, ...set, id: op.listId });
     } else if (op.type === "item") {
       if (op.set.deleted) items.get(op.listId)?.delete(op.appid);
       else if (op.set.position) itemsOf(op.listId).set(op.appid, op.set.position);

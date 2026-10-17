@@ -14,7 +14,7 @@ const POLL_MS = 30_000;
 type State = { kind: "loading" } | { kind: "missing" } | { kind: "offline" } | { kind: "ok"; data: SharedList };
 
 /** Fetches a shared list, then again every 30 s while the page is visible and when it comes back into view; unchanged lists cost a 304. */
-function useSharedList(handle: string, slug: string): State {
+function useSharedList(shareId: string): State {
   const [state, setState] = useState<State>({ kind: "loading" });
   const etag = useRef<string | null>(null);
   useEffect(() => {
@@ -22,7 +22,7 @@ function useSharedList(handle: string, slug: string): State {
     const load = async () => {
       if (document.visibilityState !== "visible") return;
       try {
-        const res = await fetch(`/api/u/${encodeURIComponent(handle)}/l/${encodeURIComponent(slug)}`,
+        const res = await fetch(`/api/s/${encodeURIComponent(shareId)}`,
           { headers: etag.current ? { "if-none-match": etag.current } : {}, cache: "no-cache" });
         if (stopped || res.status === 304) return;
         if (res.status === 404) { etag.current = null; return setState({ kind: "missing" }); }
@@ -43,13 +43,13 @@ function useSharedList(handle: string, slug: string): State {
       document.removeEventListener("visibilitychange", load);
       window.removeEventListener("focus", load);
     };
-  }, [handle, slug]);
+  }, [shareId]);
   return state;
 }
 
 /** Someone's shared list, read-only (SPEC §7). Viewers can filter and sort within it. */
-export function SharedPage({ handle, slug }: { handle: string; slug: string }) {
-  const state = useSharedList(handle, slug);
+export function SharedPage({ shareId }: { shareId: string }) {
+  const state = useSharedList(shareId);
   const data = state.kind === "ok" ? state.data : null;
   const [statuses, setStatuses] = useState<Status[]>(STATUSES);
   const [sort, setSort] = useState<SortKey | "list" | null>(null);

@@ -21,3 +21,4 @@ Newest last. Don't reverse these without asking.
 - **Milestone 3 before 2**, so others can use the live app.
 - **Sync ops carry field values**, not actions; last writer wins per field.
 - **First sign-in merges local data** into the account (owned games only); sign-out clears the browser.
+- **Share links are `/s/<random id>`**, one click to share; viewers see the Steam name. The handle (`/u/<handle>`) is only for the public profile. A handle plus a slug per list was too many steps.

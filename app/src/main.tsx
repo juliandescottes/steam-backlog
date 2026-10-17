@@ -26,7 +26,7 @@ function App() {
   if (r.page === "shared") {
     return (
       <>
-        <Suspense fallback={null}><SharedPage key={`${r.handle}/${r.slug}`} handle={r.handle} slug={r.slug} /></Suspense>
+        <Suspense fallback={null}><SharedPage key={r.shareId} shareId={r.shareId} /></Suspense>
         <div class="dock"><Toast /></div>
       </>
     );
