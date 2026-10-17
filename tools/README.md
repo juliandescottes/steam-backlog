@@ -15,6 +15,7 @@ Sorts the Steam collection "20 - Not started" (342 games) by HowLongToBeat **Mai
 | `hltb_20_-_Not_started.csv` | Collection export: names and Steam app IDs. |
 | `hltb_results.json` | HLTB results keyed by Steam app ID (hours: `main`, `main_extra`, `completionist`; plus `match`, `sim`). |
 | `hltb_cache.json` | Name cache from `hltb_sort.py`. |
+| `make_library.ts` | Builds `out/library.json` and `out/hltb_lengths.json` for the app (`npm run library`). |
 | `igdb_coverage.ts` | Compares IGDB time-to-beat data with `hltb_results.json` (milestone 0 in `TECH.md`). `TWITCH_CLIENT_ID=… TWITCH_CLIENT_SECRET=… node tools/igdb_coverage.ts` (Node 23.6+); writes `igdb_results.json`. |
 | `art/` | Original box art from Steam's CDN. |
 

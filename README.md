@@ -1,6 +1,6 @@
 # Backlog
 
-A fast, local-first game backlog tracker: your Steam games, shortest first. See `SPEC.md` for what it does, `TECH.md` for how it's built, and `HANDOFF.md` for context and decisions.
+A fast, local-first game backlog tracker: your Steam games, shortest first. See `SPEC.md` for what it does and `TECH.md` for how it's built. Working notes for agents are in `CLAUDE.md` and `agent/`.
 
 ## Development
 
