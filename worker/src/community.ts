@@ -79,3 +79,17 @@ export async function setSharing(env: Env, userId: string, share: boolean, now =
   ]);
   await recompute(env, appids, now);
 }
+
+/** Deletes an account and everything tied to it; games it gave a community length get theirs recomputed. */
+export async function deleteAccount(env: Env, userId: string, now = Date.now()) {
+  const appids = (await env.DB.prepare("SELECT DISTINCT appid FROM community_lengths WHERE user_id = ?").bind(userId).all<{ appid: number }>())
+    .results.map(r => r.appid);
+  // Foreign keys cascade, but deleting each table explicitly doesn't depend on them being enforced
+  await env.DB.batch([
+    env.DB.prepare("DELETE FROM list_items WHERE list_id IN (SELECT id FROM lists WHERE user_id = ?)").bind(userId),
+    ...["lists", "views", "community_lengths", "user_games", "applied_ops", "sessions", "user_rev"].map(t =>
+      env.DB.prepare(`DELETE FROM ${t} WHERE user_id = ?`).bind(userId)),
+    env.DB.prepare("DELETE FROM users WHERE id = ?").bind(userId),
+  ]);
+  await recompute(env, appids, now);
+}

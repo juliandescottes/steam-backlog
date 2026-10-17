@@ -161,6 +161,13 @@ test("offers once to finish games played past 80% of their length", async ({ pag
   await expect(triage).toHaveCount(0);
   await page.locator(".toast").getByRole("button", { name: "Undo" }).click();
   await expect(card(page, "Short One")).toHaveCount(1);
+  // Writes reach IndexedDB a moment later; reload once the undo is stored
+  await page.waitForFunction(() => new Promise(resolve => {
+    indexedDB.open("backlog").onsuccess = e => {
+      const get = (e.target as IDBOpenDBRequest).result.transaction("games").objectStore("games").get(1);
+      get.onsuccess = () => resolve(get.result.status === "backlog");
+    };
+  }));
   await page.reload();
   await expect(page.locator("h1")).toHaveText(/^6 games/);
   await expect(triage).toHaveCount(0); // asked once

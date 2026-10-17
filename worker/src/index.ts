@@ -1,4 +1,4 @@
-import { setSharing } from "./community.ts";
+import { deleteAccount, setSharing } from "./community.ts";
 import { clearCookie, createSession, currentUser, endSession, requireUser, upsertUser, type User } from "./auth.ts";
 import { body, HttpError, json, redirect } from "./http.ts";
 import { enrich } from "./igdb.ts";
@@ -60,6 +60,12 @@ async function route(req: Request, env: Env, ctx: ExecutionContext, url: URL): P
       if (typeof shareLengths !== "boolean") throw new HttpError(400, "bad_request");
       await setSharing(env, user.id, shareLengths);
       return json({ shareLengths });
+    }
+
+    case "DELETE /api/account": {
+      const { user } = await requireUser(req, env);
+      await deleteAccount(env, user.id);
+      return json({ ok: true }, { headers: { "set-cookie": clearCookie() } });
     }
 
     case "GET /api/me": {

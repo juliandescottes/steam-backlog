@@ -308,8 +308,9 @@ export function applyServerGames(list: Game[], pending: Op[], replace = false) {
 }
 
 export async function deleteEverything() {
-  await db.clearAll();
+  // Memory first: an update landing while IndexedDB clears (art probing, a sync) then finds no game to write back
   undoStack.length = 0;
+  silent.clear();
   batch(() => {
     games.value = new Map();
     settings.value = DEFAULT_SETTINGS;
@@ -317,4 +318,5 @@ export async function deleteEverything() {
     openId.value = null;
     settingsOpen.value = false;
   });
+  await db.clearAll();
 }

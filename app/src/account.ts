@@ -185,8 +185,10 @@ async function syncOnce(replace: boolean): Promise<boolean> {
   if (account.value?.id !== who) return false; // signed out or switched while this was in flight
   const done = new Set(sent.map(o => o.id));
   outbox = outbox.filter(o => !done.has(o.id));
-  await db.removeOps([...done]);
+  // Applied before any await: a sign-out during one would clear the browser, then get the games written back
   applyServerGames(r.games, outbox, replace);
+  await db.removeOps([...done]);
+  if (account.value?.id !== who) return false;
   await db.setMeta("cursor", { since: r.rev, catalogSince: r.catalogAt } satisfies Cursor);
   if (outbox.length) again = true;
   return true;
@@ -202,4 +204,18 @@ export async function signOut() {
   await api("POST", "/auth/logout").catch(() => {});
   account.value = null;
   await deleteEverything();
+}
+
+/** Deletes the account and everything synced, then this browser's copy. */
+export async function deleteAccount() {
+  try {
+    await api("DELETE", "/account");
+  } catch {
+    showToast("Couldn't delete your account. Try again when you're online.");
+    return;
+  }
+  account.value = null;
+  outbox = [];
+  await deleteEverything();
+  showToast("Account deleted");
 }

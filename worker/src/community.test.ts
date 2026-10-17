@@ -81,3 +81,16 @@ test("median", () => {
   expect(median([1, 2])).toBe(1.5);
   expect(median([10, 11, 12, 500])).toBe(11.5);
 });
+
+test("deleting an account removes all its data and its community entries", async () => {
+  await newUser();
+  await set(620, typed(40));
+  const steamId = `765611900000${String(users).padStart(5, "0")}`;
+  expect((await w.call("DELETE", "/api/account")).headers.get("set-cookie")).toMatch(/^sid=;/);
+  expect(await w.env.DB.prepare("SELECT count(*) AS n FROM users WHERE steam_id = ?").bind(steamId).first("n")).toBe(0);
+  for (const t of ["user_games", "community_lengths", "sessions", "user_rev", "applied_ops"]) {
+    expect(await w.env.DB.prepare(`SELECT count(*) AS n FROM ${t} t WHERE NOT EXISTS (SELECT 1 FROM users u WHERE u.id = t.user_id)`).first("n")).toBe(0);
+  }
+  expect(await w.env.DB.prepare("SELECT comm_count FROM games WHERE appid = 620").first("comm_count")).toBe(0);
+  expect((await w.call("GET", "/api/me")).status).toBe(401);
+});

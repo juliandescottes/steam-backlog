@@ -202,13 +202,13 @@ Each one ends with something usable.
 0. **Spike: IGDB coverage** (§8). Done: IGDB plus user-entered lengths.
 1. **Local app + statuses.** Workspace setup, Preact app with the prototype's look: bands, cover grid, detail panel, statuses with undo, filters/sort/search, export/import, the fill-in flow for missing lengths and lengths import. No backend yet: a dev script converts `tools/hltb_results.json` + the CSV into an export file to load the prototype library. Deployed to `baquelogue.com`.
 2. **Speed layer.** Keyboard navigation, bulk select, command palette, smart views, Now playing shelf, header progress.
-3. **Accounts, import, sync.** Worker + D1, Steam sign-in, library refresh, sync endpoint and outbox, IGDB enrichment cron, community lengths, triage prompt, collection import, account deletion.
-4. **Lists and sharing.** Manual and filter lists, handles, share pages with polling and link previews, public profile, copy to my backlog.
+3. **Accounts, import, sync.** Worker + D1, Steam sign-in, library refresh, sync endpoint and outbox, IGDB enrichment cron, community lengths, triage prompt, account deletion.
+4. **Lists and sharing.** Manual and filter lists, handles, share pages with polling and link previews, public profile, copy to my backlog. Optional: Steam collections import (lists to land in).
 
 ## 14. Risks and open points
 
 - **Unknown lengths** will be common for older and niche libraries (38% here). The fill-in flow has to be fast, and community lengths only help once there are users.
-- **Community abuse:** anyone can submit lengths. Trimmed medians and the 3-entry threshold limit it for v1; add per-user rate limits if needed.
+- **Community abuse:** anyone can submit lengths. Medians, one entry per user, and the 3-entry threshold limit it for v1; add per-user rate limits if needed.
 - **Steam API limits:** 100,000 calls per day per key, far above what a personal project needs. `GetOwnedGames` from Cloudflare IPs is untested; check it in milestone 3.
 - **Delisted apps** have no name in `GetOwnedGames` either; show "Steam app <id>" as the prototype does.
 - **Last-writer-wins** can drop a note edited on two devices at once. Accepted for v1.

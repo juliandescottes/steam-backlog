@@ -80,3 +80,22 @@ test("another account signing in on this browser gets its own library", async ({
   await page.reload(); // and the library is stored, not only in memory
   await expect(page.locator(".game .name")).toHaveText(DEV_GAMES);
 });
+
+test("deleting the account offers a backup, then removes everything", async ({ page }) => {
+  const id = steamId();
+  await signIn(page, id);
+  await expect(page.locator(".game .name")).toHaveText(DEV_GAMES);
+  await page.getByRole("button", { name: "Settings" }).click();
+  await page.getByRole("button", { name: "Delete account…" }).click();
+  const [download] = await Promise.all([page.waitForEvent("download"), page.locator(".callout").getByRole("button", { name: "Export backup" }).click()]);
+  expect(download.suggestedFilename()).toMatch(/^backlog-.*\.json$/);
+  await page.getByRole("button", { name: "Delete my account" }).click();
+  await expect(page.locator(".toast")).toContainText("Account deleted");
+  await expect(page.getByRole("button", { name: "Sign in with Steam" })).toBeVisible();
+  expect((await page.request.get("/api/me")).status()).toBe(401);
+
+  // Signing in again starts a new, empty account: nothing from before comes back
+  await signIn(page, id);
+  await expect(page.locator(".game .name")).toHaveText(DEV_GAMES);
+  await expect(page.locator(".status-chip")).toHaveCount(0);
+});

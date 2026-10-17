@@ -8,7 +8,7 @@ Updated 2026-10-17. Branch: `m1-local-app` (from `spec`).
 - [x] 1. Local app + statuses. Live at https://baquelogue.com (deployed 2026-10-17, `npm run deploy`)
 - [ ] 2. Speed layer: keyboard grid nav, bulk select, command palette, smart views, Now playing shelf
 - [ ] 3. Accounts, Steam import, sync, IGDB cron, community lengths (in progress)
-- [ ] 4. Lists and sharing
+- [ ] 4. Lists and sharing (+ optional Steam collections import, moved from 3 on 2026-10-17)
 
 ## Now
 
@@ -22,7 +22,9 @@ Community lengths done: rows mirror the user's games on each sync, median per ga
 
 Triage prompt done: banner above the library, once per browser (meta `triaged`); finished date = last played.
 
-Next: collections import, account deletion, then remote D1 + secrets + deploy.
+Account deletion done: `DELETE /api/account`, Settings offers a backup first.
+
+Next: then remote D1 + secrets + deploy.
 
 ## Backlog
 

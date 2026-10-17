@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import { makeExport, parseExport, parseLengths, parseLibrary, type ExportFile } from "@backlog/shared/files";
 import type { Measure } from "@backlog/shared/types";
-import { account, refreshLibrary, setShareLengths, signIn, signOut } from "../account.ts";
+import { account, deleteAccount, refreshLibrary, setShareLengths, signIn, signOut } from "../account.ts";
 import {
   deleteEverything, games, importLengths, mergeLibrary, restoreBackup, settings, settingsOpen, showToast, updateSettings, type Theme,
 } from "../store.ts";
@@ -131,16 +131,30 @@ export function Settings() {
 
         {error && <p class="error" role="alert">{error}</p>}
 
-        <section class="detail-section">
-          <h3>Local data</h3>
-          {confirmDelete
-            ? <p class="row-actions">
-                <span>This removes your library, statuses and lengths from this browser. Export a backup first.</span>
-                <button type="button" class="btn danger" onClick={() => void deleteEverything()}>Delete everything</button>
-                <button type="button" class="btn ghost" onClick={() => setConfirmDelete(false)}>Keep it</button>
-              </p>
-            : <button type="button" class="btn ghost" onClick={() => setConfirmDelete(true)}>Delete local data…</button>}
-        </section>
+        {account.value
+          ? <section class="detail-section">
+              <h3>Delete account</h3>
+              {confirmDelete
+                ? <div class="callout">
+                    <p>This deletes your account and everything synced to it: statuses, notes, your lengths and what you shared with the community. Your Steam account isn't affected. Export a backup first to keep your data.</p>
+                    <p class="row-actions">
+                      <button type="button" class="btn" onClick={exportNow}>Export backup</button>
+                      <button type="button" class="btn danger" onClick={() => void deleteAccount()}>Delete my account</button>
+                      <button type="button" class="btn ghost" onClick={() => setConfirmDelete(false)}>Keep it</button>
+                    </p>
+                  </div>
+                : <button type="button" class="btn ghost" onClick={() => setConfirmDelete(true)}>Delete account…</button>}
+            </section>
+          : <section class="detail-section">
+              <h3>Local data</h3>
+              {confirmDelete
+                ? <p class="row-actions">
+                    <span>This removes your library, statuses and lengths from this browser. Export a backup first.</span>
+                    <button type="button" class="btn danger" onClick={() => void deleteEverything()}>Delete everything</button>
+                    <button type="button" class="btn ghost" onClick={() => setConfirmDelete(false)}>Keep it</button>
+                  </p>
+                : <button type="button" class="btn ghost" onClick={() => setConfirmDelete(true)}>Delete local data…</button>}
+            </section>}
       </div>
     </div>
   );
