@@ -1,7 +1,8 @@
 import { useEffect, useRef } from "preact/hooks";
 import { shortcutsOpen } from "../store.ts";
+import { isMac } from "../util.ts";
 
-const MOD = /Mac|iPhone|iPad/.test(navigator.platform) ? "⌘" : "Ctrl";
+const MOD = isMac ? "⌘" : "Ctrl";
 
 const GROUPS: [string, [keys: string[], what: string][]][] = [
   ["Library", [
@@ -10,7 +11,13 @@ const GROUPS: [string, [keys: string[], what: string][]][] = [
     [["/"], "Search"],
     [["Esc"], "Close"],
   ]],
-  ["Status of the focused game", [
+  ["Selection", [
+    [["X"], "Select the focused game"],
+    [["Shift", "X"], "Select up to the focused game"],
+    [[MOD, "A"], "Select all shown"],
+    [["Esc"], "Clear the selection"],
+  ]],
+  ["Status of the focused game, or the selection", [
     [["B"], "Backlog"], [["P"], "Playing"], [["F"], "Finished"], [["D"], "Dropped"],
     [[MOD, "Z"], "Undo"],
   ]],

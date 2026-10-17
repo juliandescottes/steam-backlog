@@ -2,7 +2,7 @@ import { UNKNOWN_BAND, type Band } from "@backlog/shared/bands";
 import { SORT_LABEL, type Entry, type SortKey } from "@backlog/shared/filter";
 import { STATUSES, STATUS_LABEL, type Status } from "@backlog/shared/types";
 import {
-  dismissTriage, finishPlayed, played, query, settings, settingsOpen, shelves, sortKey, startFillIn, statuses, totals, triageCandidates, triaged, visible,
+  dismissTriage, finishPlayed, played, query, selection, settings, settingsOpen, shelves, sortKey, startFillIn, statuses, totals, triageCandidates, triaged, visible,
 } from "../store.ts";
 import { count, thousands } from "../util.ts";
 import { Shelf } from "./Shelf.tsx";
@@ -110,7 +110,7 @@ export function Library() {
       <Triage />
       {byLength && bands.length > 0 && <BandIndex groups={bands} />}
       <Toolbar />
-      <main class="bands">
+      <main class={`bands${selection.value.size ? " selecting" : ""}`}>
         {list.length === 0 && <p class="empty">No games match. Try other statuses or clear the search.</p>}
         {byLength ? bands.map(({ band, entries }) => {
           const hours = entries.reduce((s, e) => s + (e.len.hours ?? 0), 0);

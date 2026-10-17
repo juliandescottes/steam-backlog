@@ -107,6 +107,32 @@ export const shelves = computed<{ band: Band | null; entries: Entry[] }[]>(() =>
   return BANDS.map(band => ({ band, entries: list.filter(e => bandOf(e.len) === band) })).filter(s => s.entries.length);
 });
 
+/** Bulk selection (SPEC §6). Only games on screen stay selected, so an action never touches hidden ones. */
+export const selection = signal<ReadonlySet<number>>(new Set());
+let anchor: number | null = null;
+const shownOrder = () => shelves.value.flatMap(s => s.entries.map(e => e.game.appid));
+
+/** Toggles one game; with `range`, selects everything between the last toggled game and this one. */
+export function toggleSelected(id: number, range = false) {
+  const next = new Set(selection.value);
+  const order = range && anchor != null ? shownOrder() : [];
+  const [a, b] = [order.indexOf(anchor!), order.indexOf(id)];
+  if (a >= 0 && b >= 0) for (const x of order.slice(Math.min(a, b), Math.max(a, b) + 1)) next.add(x);
+  else if (!next.delete(id)) next.add(id);
+  anchor = id;
+  selection.value = next;
+}
+
+export function selectAll() { selection.value = new Set(shownOrder()); }
+export function clearSelection() { selection.value = new Set(); anchor = null; }
+
+effect(() => {
+  const sel = selection.value;
+  if (!sel.size) return;
+  const shown = new Set(visible.value.map(e => e.game.appid));
+  if ([...sel].some(id => !shown.has(id))) selection.value = new Set([...sel].filter(id => shown.has(id)));
+});
+
 export const openId = signal<number | null>(null);
 /** A card to focus: its shelf scrolls it into view, focuses it once mounted, then clears this. */
 export const focusTarget = signal<number | null>(null);
@@ -338,6 +364,7 @@ export async function deleteEverything() {
     games.value = new Map();
     settings.value = DEFAULT_SETTINGS;
     triaged.value = false;
+    selection.value = new Set();
     openId.value = null;
     settingsOpen.value = false;
   });

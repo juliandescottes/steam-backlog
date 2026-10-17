@@ -1,7 +1,8 @@
 import { move, type Direction } from "@backlog/shared/grid";
 import type { Status } from "@backlog/shared/types";
 import {
-  editingId, fillInQueue, focusTarget, games, openId, setStatus, settingsOpen, shelves, shortcutsOpen, undo,
+  clearSelection, editingId, fillInQueue, focusTarget, games, openId, selectAll, selection, setStatus, settingsOpen, shelves,
+  shortcutsOpen, toggleSelected, undo,
 } from "./store.ts";
 import { inTextField } from "./util.ts";
 
@@ -51,10 +52,13 @@ export function installKeys() {
       else if (editingId.value != null) editingId.value = null;
       else if (openId.value != null) openId.value = null;
       else if (settingsOpen.value) settingsOpen.value = false;
+      else if (selection.value.size) clearSelection();
       return;
     }
     if (inTextField(e)) return;
     if (mod && !e.shiftKey && e.key.toLowerCase() === "z") { e.preventDefault(); undo(); return; }
+    const inPanel = openId.value != null || settingsOpen.value || shortcutsOpen.value;
+    if (mod && !e.shiftKey && e.key.toLowerCase() === "a" && !inPanel) { e.preventDefault(); selectAll(); return; }
     if (mod || e.altKey) return;
 
     if (e.key === "?") { e.preventDefault(); shortcutsOpen.value = !shortcutsOpen.value; return; }
@@ -65,8 +69,12 @@ export function installKeys() {
       return;
     }
     if (e.key === "/") { e.preventDefault(); document.getElementById("search")?.focus(); return; }
+    const id = focusedGame();
+    if (e.key.toLowerCase() === "x" && id != null && openId.value == null) { e.preventDefault(); toggleSelected(id, e.shiftKey); return; }
     const status = STATUS_KEYS[e.key.toLowerCase()];
-    const id = status && focusedGame();
-    if (status && id != null && games.value.has(id)) { e.preventDefault(); setStatus([id], status); }
+    if (!status) return;
+    // With a selection, status keys apply to all of it (one undo)
+    if (selection.value.size && !inPanel) { e.preventDefault(); setStatus([...selection.value], status); clearSelection(); return; }
+    if (id != null && games.value.has(id)) { e.preventDefault(); setStatus([id], status); }
   });
 }

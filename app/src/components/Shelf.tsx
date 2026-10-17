@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
 import type { Entry } from "@backlog/shared/filter";
-import { editingId, focusTarget } from "../store.ts";
+import { editingId, focusTarget, selection } from "../store.ts";
 import { Card } from "./Card.tsx";
 
 const OVERSCAN = 1; // viewport heights rendered above and below the screen
@@ -75,6 +75,7 @@ export function Shelf({ list }: { list: Entry[] }) {
   }, []);
 
   const editing = editingId.value;
+  const selected = selection.value;
   const r = rows ?? { cols: 1, pitch: 0, gap: 0, start: 0, end: 0 };
   const total = Math.ceil(list.length / r.cols);
   const spacer = (key: string, n: number) => n > 0 && <div key={key} class="shelf-spacer" style={{ height: `${n * r.pitch - r.gap}px` }} />;
@@ -82,7 +83,7 @@ export function Shelf({ list }: { list: Entry[] }) {
   return (
     <div class="shelf" ref={ref}>
       {spacer("above", r.start)}
-      {list.slice(r.start * r.cols, r.end * r.cols).map(e => <Card key={e.game.appid} e={e} editing={editing === e.game.appid} />)}
+      {list.slice(r.start * r.cols, r.end * r.cols).map(e => <Card key={e.game.appid} e={e} editing={editing === e.game.appid} selected={selected.has(e.game.appid)} />)}
       {spacer("below", total - r.end)}
     </div>
   );

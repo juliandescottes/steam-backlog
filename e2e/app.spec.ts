@@ -214,3 +214,41 @@ test("keyboard focus reaches games far down a long shelf", async ({ page }) => {
   expect(box!.y).toBeGreaterThanOrEqual(0);
   expect(box!.y + box!.height).toBeLessThanOrEqual(700);
 });
+
+test("bulk select: click, shift-click a range, act on all with one undo", async ({ page }) => {
+  await openLibrary(page);
+  const bar = page.getByRole("toolbar", { name: "Selected games" });
+  await card(page, "Short One").hover();
+  await card(page, "Short One").getByRole("checkbox").click();
+  await card(page, "Long Haul").getByRole("checkbox").click({ modifiers: ["Shift"] });
+  await expect(bar).toContainText("3 games selected"); // Short One, Mid Game, Long Haul
+  await expect(card(page, "Mid Game").getByRole("checkbox")).toHaveAttribute("aria-checked", "true");
+
+  await page.keyboard.press("f");
+  await expect(page.locator(".toast")).toContainText("3 games → Finished");
+  await expect(bar).toHaveCount(0);
+  await expect(page.locator(".game")).toHaveCount(3);
+  await page.locator(".toast").getByRole("button", { name: "Undo" }).click();
+  await expect(page.locator(".game")).toHaveCount(6);
+});
+
+test("bulk select from the keyboard", async ({ page }) => {
+  await openLibrary(page);
+  const bar = page.getByRole("toolbar", { name: "Selected games" });
+  await page.keyboard.press(process.platform === "darwin" ? "Meta+a" : "Control+a");
+  await expect(bar).toContainText("6 games selected");
+  await page.keyboard.press("Escape");
+  await expect(bar).toHaveCount(0);
+
+  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("x");
+  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("x");
+  await expect(bar).toContainText("2 games selected");
+  // While selecting, clicking a cover selects instead of opening details
+  await card(page, "Long Haul").locator("button.cover").click();
+  await expect(bar).toContainText("3 games selected");
+  await expect(page.locator("#detail-title")).toHaveCount(0);
+  await bar.getByRole("button", { name: "Playing" }).click();
+  await expect(page.locator(".toast")).toContainText("3 games → Playing");
+});

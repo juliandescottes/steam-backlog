@@ -4,6 +4,7 @@ import { Detail } from "./components/Detail.tsx";
 import { FillIn } from "./components/FillIn.tsx";
 import { Import } from "./components/Import.tsx";
 import { Library } from "./components/Library.tsx";
+import { SelectionBar } from "./components/SelectionBar.tsx";
 import { Settings } from "./components/Settings.tsx";
 import { Shortcuts } from "./components/Shortcuts.tsx";
 import { Toast } from "./components/Toast.tsx";
@@ -21,7 +22,10 @@ function App() {
       {settingsOpen.value && <Settings />}
       {fillInQueue.value && <FillIn />}
       {shortcutsOpen.value && <Shortcuts />}
-      <Toast />
+      <div class="dock">
+        <Toast />
+        {!importing.value && <SelectionBar />}
+      </div>
     </>
   );
 }
