@@ -12,7 +12,7 @@ Updated 2026-10-18. Branch: `m4-lists` (from `m2-speed-layer`).
 
 ## Now
 
-The v1 plan (milestones 0–4) is done and deployed (2026-10-17). Next: the UX pass below.
+The v1 plan (milestones 0–4) is done and deployed (2026-10-17): production runs `416f902` (whole backlog on the profile), D1 migrations up to 0005. `m4-lists` holds M3, M2 and M4 stacked and is not merged into `main` yet (ask). Next: the UX pass below.
 
 Lists (`shared/lists.ts`: fractional positions, share ids). Hand-picked or filter-based (from the current view); drawer from the header's Lists button; list page (`app/src/route.ts`) with its own statuses and sort, "List order" for hand-picked ones; add with the cover's +, `A`, the detail panel, the selection bar or the palette; drag or Alt+←/→ to reorder; rename, describe, delete with undo. Sync (ops `list` and `item`, migration 0004) and backups include lists and views.
 
