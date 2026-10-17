@@ -2,9 +2,10 @@ import { UNKNOWN_BAND, type Band } from "@backlog/shared/bands";
 import { SORT_LABEL, type Entry, type SortKey } from "@backlog/shared/filter";
 import { STATUSES, STATUS_LABEL, type Status } from "@backlog/shared/types";
 import {
-  dismissTriage, finishPlayed, played, query, selection, settings, settingsOpen, shelves, sortKey, startFillIn, statuses, totals, triageCandidates, triaged, visible,
+  dismissTriage, editingId, finishPlayed, nowPlaying, played, query, selection, settings, settingsOpen, shelves, sortKey, startFillIn, statuses, totals, triageCandidates, triaged, visible,
 } from "../store.ts";
 import { count, thousands } from "../util.ts";
+import { Card } from "./Card.tsx";
 import { Shelf } from "./Shelf.tsx";
 import { ConditionPills, ViewTabs } from "./Views.tsx";
 
@@ -52,6 +53,25 @@ function Triage() {
         <button type="button" class="btn ghost" onClick={dismissTriage}>No thanks</button>
       </p>
     </aside>
+  );
+}
+
+/** Games in progress, in a row that scrolls sideways; hidden when there are none (SPEC §3). */
+function NowPlaying() {
+  const list = nowPlaying.value;
+  if (!list.length) return null;
+  const editing = editingId.value;
+  const selected = selection.value;
+  return (
+    <section class="now-playing" aria-labelledby="now-playing-title">
+      <div class="band-head">
+        <h2 id="now-playing-title">Now playing</h2>
+        <p>{count(list.length, "game")}</p>
+      </div>
+      <div class="now-row">
+        {list.map(e => <Card key={e.game.appid} e={e} editing={editing === e.game.appid} selected={selected.has(e.game.appid)} />)}
+      </div>
+    </section>
   );
 }
 
@@ -110,6 +130,7 @@ export function Library() {
     <div class="wrap">
       <Header />
       <Triage />
+      <NowPlaying />
       <ViewTabs />
       {byLength && bands.length > 0 && <BandIndex groups={bands} />}
       <Toolbar />

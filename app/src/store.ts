@@ -167,6 +167,10 @@ export function applyServerViews(list: SyncView[], pending: Op[], replace = fals
   void db.replaceViews(userViews.value);
 }
 
+/** The Now playing shelf: every Playing game whatever the view, most recently started first. */
+export const nowPlaying = computed(() =>
+  entries.value.filter(e => e.game.status === "playing").sort((a, b) => (b.game.statusAt ?? 0) - (a.game.statusAt ?? 0)));
+
 /** What the library shows: one shelf per length band, or a single one for other sorts. */
 export const shelves = computed<{ band: Band | null; entries: Entry[] }[]>(() => {
   const list = visible.value;

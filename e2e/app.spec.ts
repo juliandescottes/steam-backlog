@@ -15,7 +15,7 @@ async function openLibrary(page: Page) {
   await expect(page.locator("h1")).toHaveText(/^6 games/);
 }
 
-const card = (page: Page, name: string) => page.locator(".game").filter({ has: page.locator(".name", { hasText: name }) });
+const card = (page: Page, name: string) => page.locator(".bands .game").filter({ has: page.locator(".name", { hasText: name }) });
 const band = (page: Page, id: string) => page.locator(`section[id="${id}"]`);
 
 test("opens a library file and groups games by length", async ({ page }) => {
@@ -210,7 +210,7 @@ test("keyboard focus reaches games far down a long shelf", async ({ page }) => {
   const cols = await page.evaluate(() => getComputedStyle(document.querySelector(".shelf")!).gridTemplateColumns.split(" ").length);
   const name = `Game ${String(Math.min(30 * cols, 299 - (299 % cols))).padStart(3, "0")}`;
   await expect.poll(() => page.evaluate(() => document.activeElement?.closest(".game")?.querySelector(".name")?.textContent)).toBe(name);
-  const box = await page.locator(".game", { hasText: name }).boundingBox();
+  const box = await page.locator(".bands .game", { hasText: name }).boundingBox();
   expect(box!.y).toBeGreaterThanOrEqual(0);
   expect(box!.y + box!.height).toBeLessThanOrEqual(700);
 });
@@ -227,9 +227,9 @@ test("bulk select: click, shift-click a range, act on all with one undo", async 
   await page.keyboard.press("f");
   await expect(page.locator(".toast")).toContainText("3 games → Finished");
   await expect(bar).toHaveCount(0);
-  await expect(page.locator(".game")).toHaveCount(3);
+  await expect(page.locator(".bands .game")).toHaveCount(3);
   await page.locator(".toast").getByRole("button", { name: "Undo" }).click();
-  await expect(page.locator(".game")).toHaveCount(6);
+  await expect(page.locator(".bands .game")).toHaveCount(6);
 });
 
 test("bulk select from the keyboard", async ({ page }) => {
@@ -295,13 +295,13 @@ test("smart views: built-in ones, conditions as pills, save and delete your own"
   await expect(views.locator("[aria-current]")).toHaveText("To play");
 
   await views.getByRole("button", { name: "Under 5 h" }).click();
-  await expect(page.locator(".game .name")).toHaveText(["Short One"]);
+  await expect(page.locator(".bands .game .name")).toHaveText(["Short One"]);
   await page.getByRole("button", { name: "Remove condition: Under 5 h" }).click();
   await expect(views.locator("[aria-current]")).toHaveText("To play");
-  await expect(page.locator(".game")).toHaveCount(6);
+  await expect(page.locator(".bands .game")).toHaveCount(6);
 
   await views.getByRole("button", { name: "Needs a length" }).click();
-  await expect(page.locator(".game")).toHaveCount(3);
+  await expect(page.locator(".bands .game")).toHaveCount(3);
 
   await page.getByRole("button", { name: "Dropped", exact: true }).click();
   await expect(views.locator("[aria-current]")).toHaveCount(0);
@@ -319,9 +319,34 @@ test("smart views: built-in ones, conditions as pills, save and delete your own"
   await page.reload();
   await expect(page.locator("h1")).toHaveText(/^6 games/);
   await views.getByRole("button", { name: "Unknown incl. dropped", exact: true }).click();
-  await expect(page.locator(".game")).toHaveCount(3);
+  await expect(page.locator(".bands .game")).toHaveCount(3);
   await views.getByRole("button", { name: "Delete view Unknown incl. dropped" }).click();
   await expect(views.getByRole("button", { name: "Unknown incl. dropped", exact: true })).toHaveCount(0);
   await page.locator(".toast").getByRole("button", { name: "Undo" }).click();
   await expect(views.getByRole("button", { name: "Unknown incl. dropped", exact: true })).toHaveCount(1);
+});
+
+test("Now playing shelf: Playing games, latest first, hidden when empty", async ({ page }) => {
+  await openLibrary(page);
+  const shelf = page.getByRole("region", { name: "Now playing" });
+  await expect(shelf).toHaveCount(0);
+
+  for (const name of ["Short One", "Mid Game"]) {
+    await card(page, name).locator("button.cover").focus();
+    await page.keyboard.press("p");
+  }
+  await expect(shelf.locator(".game .name")).toHaveText(["Mid Game", "Short One"]);
+
+  // Still shown when the view hides Playing games
+  await page.getByRole("button", { name: "Playing", exact: true }).click();
+  await expect(card(page, "Mid Game")).toHaveCount(0);
+  await expect(shelf.locator(".game")).toHaveCount(2);
+
+  const short = shelf.locator(".game", { hasText: "Short One" });
+  await short.hover();
+  await short.getByRole("button", { name: "Mark Finished" }).click();
+  await expect(shelf.locator(".game .name")).toHaveText(["Mid Game"]);
+  await shelf.locator(".game").hover();
+  await shelf.getByRole("button", { name: "Back to Backlog" }).click();
+  await expect(shelf).toHaveCount(0);
 });

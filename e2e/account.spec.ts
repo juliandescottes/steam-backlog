@@ -14,12 +14,12 @@ async function signIn(page: Page, id: string) {
   await page.reload();
 }
 
-const card = (page: Page, name: string) => page.locator(".game").filter({ has: page.locator(".name", { hasText: new RegExp(`^${name}$`) }) });
+const card = (page: Page, name: string) => page.locator(".bands .game").filter({ has: page.locator(".name", { hasText: new RegExp(`^${name}$`) }) });
 
 test("sign in, import the Steam library, and see a change on another device", async ({ page, browser }) => {
   const id = steamId();
   await signIn(page, id);
-  await expect(page.locator(".game .name")).toHaveText(DEV_GAMES);
+  await expect(page.locator(".bands .game .name")).toHaveText(DEV_GAMES);
 
   // Never played, so finishing it adds no community length that would reorder parallel tests
   await card(page, "Stardew Valley").hover();
@@ -58,7 +58,7 @@ test("what was done before signing in comes along", async ({ page }) => {
 
   await page.request.post("/api/auth/dev", { data: { steamId: steamId() }, headers: { "x-requested-with": "backlog" } });
   await page.reload();
-  await expect(page.locator(".game .name")).toHaveText(DEV_GAMES);
+  await expect(page.locator(".bands .game .name")).toHaveText(DEV_GAMES);
   await expect(card(page, "Portal 2").locator(".status-chip")).toHaveText("Playing");
 
   await page.reload(); // and it's on the server, not only local
@@ -70,7 +70,7 @@ test("what was done before signing in comes along", async ({ page }) => {
 
 test("sign out clears this browser", async ({ page }) => {
   await signIn(page, steamId());
-  await expect(page.locator(".game")).toHaveCount(5);
+  await expect(page.locator(".bands .game")).toHaveCount(5);
   await page.getByRole("button", { name: "Settings" }).click();
   await expect(page.locator(".account")).toContainText("Signed in as Dev user");
   await page.getByRole("button", { name: "Sign out" }).click();
@@ -100,16 +100,16 @@ test("another account signing in on this browser gets its own library", async ({
 
   await page.request.post("/api/auth/dev", { data: { steamId: steamId() }, headers: { "x-requested-with": "backlog" } });
   await page.reload();
-  await expect(page.locator(".game .name")).toHaveText(DEV_GAMES);
+  await expect(page.locator(".bands .game .name")).toHaveText(DEV_GAMES);
   await expect(card(page, "Portal 2").locator(".status-chip")).toHaveCount(0);
   await page.reload(); // and the library is stored, not only in memory
-  await expect(page.locator(".game .name")).toHaveText(DEV_GAMES);
+  await expect(page.locator(".bands .game .name")).toHaveText(DEV_GAMES);
 });
 
 test("deleting the account offers a backup, then removes everything", async ({ page }) => {
   const id = steamId();
   await signIn(page, id);
-  await expect(page.locator(".game .name")).toHaveText(DEV_GAMES);
+  await expect(page.locator(".bands .game .name")).toHaveText(DEV_GAMES);
   await page.getByRole("button", { name: "Settings" }).click();
   await page.getByRole("button", { name: "Delete account…" }).click();
   const [download] = await Promise.all([page.waitForEvent("download"), page.locator(".callout").getByRole("button", { name: "Export backup" }).click()]);
@@ -121,14 +121,14 @@ test("deleting the account offers a backup, then removes everything", async ({ p
 
   // Signing in again starts a new, empty account: nothing from before comes back
   await signIn(page, id);
-  await expect(page.locator(".game .name")).toHaveText(DEV_GAMES);
+  await expect(page.locator(".bands .game .name")).toHaveText(DEV_GAMES);
   await expect(page.locator(".status-chip")).toHaveCount(0);
 });
 
 test("views sync between devices, deletes included", async ({ page, browser }) => {
   const id = steamId();
   await signIn(page, id);
-  await expect(page.locator(".game .name")).toHaveText(DEV_GAMES);
+  await expect(page.locator(".bands .game .name")).toHaveText(DEV_GAMES);
   const views = (p: Page) => p.getByRole("navigation", { name: "Views" });
   await page.getByRole("button", { name: "Finished", exact: true }).click();
   await views(page).getByRole("button", { name: "+ Save view" }).click();
@@ -145,7 +145,7 @@ test("views sync between devices, deletes included", async ({ page, browser }) =
 
   await expect(async () => {
     await page.reload();
-    await expect(page.locator(".game")).toHaveCount(5);
+    await expect(page.locator(".bands .game")).toHaveCount(5);
     await expect(views(page).getByRole("button", { name: "Everything open or done", exact: true })).toHaveCount(0, { timeout: 1000 });
   }).toPass({ timeout: 10_000 });
   await other.close();
