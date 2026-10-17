@@ -1,7 +1,9 @@
 import { signal } from "@preact/signals";
 import type { Op, SyncResponse } from "@backlog/shared/sync";
 import * as db from "./db.ts";
-import { applyServerGames, deleteEverything, games, listenUserChanges, showToast, type UserChange } from "./store.ts";
+import {
+  applyServerGames, applyServerViews, deleteEverything, games, listenUserChanges, localViewChanges, showToast, type UserChange,
+} from "./store.ts";
 
 /** Account, Steam import and background sync (TECH.md §5, §7). Without an account the app stays local-only. */
 
@@ -71,7 +73,10 @@ export async function initAccount() {
  */
 async function firstSync() {
   const local = [...games.value.values()].filter(g => g.status !== "backlog" || g.note || g.myKind);
-  record(local.map(g => ({ appid: g.appid, set: { status: g.status, statusAt: g.statusAt, finishedAt: g.finishedAt, note: g.note, my: g.my, myKind: g.myKind } })), false);
+  record([
+    ...local.map(g => ({ appid: g.appid, set: { status: g.status, statusAt: g.statusAt, finishedAt: g.finishedAt, note: g.note, my: g.my, myKind: g.myKind } })),
+    ...localViewChanges(),
+  ], false);
   importing.value = "running";
   try {
     await api("POST", "/library/refresh");
@@ -118,7 +123,9 @@ export async function setShareLengths(shareLengths: boolean) {
 function record(changes: UserChange[], schedule = true) {
   if (!account.value || !changes.length) return;
   const at = Date.now();
-  const ops = changes.map((c): Op => ({ id: newOpId(at), type: "game", appid: c.appid, at, set: c.set }));
+  const ops = changes.map((c): Op => "viewId" in c
+    ? { id: newOpId(at), type: "view", viewId: c.viewId, at, set: c.set }
+    : { id: newOpId(at), type: "game", appid: c.appid, at, set: c.set });
   outbox.push(...ops);
   void db.addOps(ops);
   if (schedule) scheduleSync();
@@ -187,6 +194,7 @@ async function syncOnce(replace: boolean): Promise<boolean> {
   outbox = outbox.filter(o => !done.has(o.id));
   // Applied before any await: a sign-out during one would clear the browser, then get the games written back
   applyServerGames(r.games, outbox, replace);
+  applyServerViews(r.views ?? [], outbox, replace);
   await db.removeOps([...done]);
   if (account.value?.id !== who) return false;
   await db.setMeta("cursor", { since: r.rev, catalogSince: r.catalogAt } satisfies Cursor);

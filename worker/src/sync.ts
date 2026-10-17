@@ -1,4 +1,4 @@
-import { mergeOps, validOp, type GameFields, type SyncRequest, type SyncResponse } from "@backlog/shared/sync";
+import { mergeOps, mergeViewOps, validOp, type GameFields, type SyncRequest, type SyncResponse, type SyncView } from "@backlog/shared/sync";
 import type { Game, LenKind, Status } from "@backlog/shared/types";
 import { recompute, writeRows } from "./community.ts";
 import { HttpError } from "./http.ts";
@@ -35,14 +35,24 @@ const SETTABLE: [column: string, path: string][] = [
   ["my_main", "myMain"], ["my_main_extra", "myMainExtra"], ["my_comp", "myComp"], ["my_len_kind", "myKind"],
 ];
 
+/** View columns an op can set, and the op field holding each. */
+const VIEW_SETTABLE: [column: string, path: string][] = [
+  ["name", "name"], ["filter_json", "filter"], ["sort", "sort"], ["position", "position"], ["deleted", "deleted"],
+];
+
+type ViewRow = { id: string; name: string; filter_json: string; sort: SyncView["sort"]; position: string; deleted: number };
+const toView = (r: ViewRow): SyncView => ({
+  id: r.id, name: r.name, filter: JSON.parse(r.filter_json), sort: r.sort, position: r.position, deleted: r.deleted === 1,
+});
+
 function flatten(appid: number, s: Partial<GameFields>) {
   const { my, ...rest } = s;
   return { appid, ...rest, ...("my" in s ? { myMain: my?.main ?? null, myMainExtra: my?.main_extra ?? null, myComp: my?.comp ?? null } : {}) };
 }
 
 /**
- * Applies ops (skipping ones already applied), then returns every game of the user changed since the
- * client's cursors. Last writer wins per field, in the order the server receives ops.
+ * Applies ops (skipping ones already applied), then returns every game and view of the user changed
+ * since the client's cursors. Last writer wins per field, in the order the server receives ops.
  */
 export async function sync(env: Env, userId: string, req: SyncRequest, now = Date.now()): Promise<SyncResponse> {
   const since = Number(req.since) || 0, catalogSince = Number(req.catalogSince) || 0;
@@ -55,26 +65,42 @@ export async function sync(env: Env, userId: string, req: SyncRequest, now = Dat
     ).bind(userId, JSON.stringify(ops.map(o => o.id))).all<{ op_id: string }>()).results.map(r => r.op_id));
     const fresh = ops.filter(o => !seen.has(o.id));
     const patches = [...mergeOps(fresh)].map(([appid, set]) => flatten(appid, set));
+    const viewPatches = [...mergeViewOps(fresh)].map(([id, set]) => ({ id, ...set }));
     // A field missing from the op keeps its value; JSON null sets NULL
-    const sets = SETTABLE.map(([col, path]) =>
+    const keep = (cols: [string, string][]) => cols.map(([col, path]) =>
       `${col} = CASE WHEN json_type(j.value, '$.${path}') IS NULL THEN ${col} ELSE j.value ->> '${path}' END`).join(", ");
-    if (patches.length) {
+    // Every changed row gets the next rev: games first, then views
+    const n = patches.length + viewPatches.length;
+    const nextRev = (offset: number) => `(SELECT rev FROM user_rev WHERE user_id = ?1) - ${n} + ${offset} + j.key + 1`;
+    if (fresh.length) {
       await env.DB.batch([
-        env.DB.prepare("UPDATE user_rev SET rev = rev + ?2 WHERE user_id = ?1").bind(userId, patches.length),
+        env.DB.prepare("UPDATE user_rev SET rev = rev + ?2 WHERE user_id = ?1").bind(userId, n),
         env.DB.prepare(
-          `UPDATE user_games SET ${sets}, rev = (SELECT rev FROM user_rev WHERE user_id = ?1) - ?3 + j.key + 1
+          `UPDATE user_games SET ${keep(SETTABLE)}, rev = ${nextRev(0)}
            FROM json_each(?2) j WHERE user_games.user_id = ?1 AND user_games.appid = j.value ->> 'appid'`,
-        ).bind(userId, JSON.stringify(patches), patches.length),
+        ).bind(userId, JSON.stringify(patches)),
+        // Views: update the user's own, then create new ones (an id taken by another user is ignored)
+        env.DB.prepare(
+          `UPDATE views SET ${keep(VIEW_SETTABLE)}, rev = ${nextRev(patches.length)}
+           FROM json_each(?2) j WHERE views.user_id = ?1 AND views.id = j.value ->> 'id'`,
+        ).bind(userId, JSON.stringify(viewPatches)),
+        env.DB.prepare(
+          `INSERT OR IGNORE INTO views (id, user_id, name, filter_json, sort, position, rev, deleted)
+           SELECT j.value ->> 'id', ?1, coalesce(j.value ->> 'name', ''), coalesce(j.value ->> 'filter', '{}'),
+             coalesce(j.value ->> 'sort', 'length'), coalesce(j.value ->> 'position', ''), ${nextRev(patches.length)},
+             coalesce(j.value ->> 'deleted', 0)
+           FROM json_each(?2) j WHERE NOT EXISTS (SELECT 1 FROM views v WHERE v.id = j.value ->> 'id')`,
+        ).bind(userId, JSON.stringify(viewPatches)),
         env.DB.prepare("INSERT OR IGNORE INTO applied_ops (user_id, op_id, at) SELECT ?1, value, ?3 FROM json_each(?2)")
           .bind(userId, JSON.stringify(fresh.map(o => o.id)), now),
         env.DB.prepare("DELETE FROM applied_ops WHERE user_id = ? AND at < ?").bind(userId, now - DAY),
         ...writeRows(env, userId, patches.map(p => p.appid), now),
       ]);
-      await recompute(env, patches.map(p => p.appid), now);
+      if (patches.length) await recompute(env, patches.map(p => p.appid), now);
     }
   }
 
-  const [rev, rows] = await env.DB.batch<any>([
+  const [rev, rows, viewRows] = await env.DB.batch<any>([
     env.DB.prepare("SELECT rev FROM user_rev WHERE user_id = ?").bind(userId),
     env.DB.prepare(
       `SELECT g.appid, g.name, g.has_portrait_art, g.igdb_main, g.igdb_main_extra, g.igdb_comp, g.igdb_count,
@@ -84,7 +110,9 @@ export async function sync(env: Env, userId: string, req: SyncRequest, now = Dat
        FROM user_games ug JOIN games g USING (appid)
        WHERE ug.user_id = ? AND (ug.rev > ? OR g.updated_at > ?)`,
     ).bind(userId, since, catalogSince),
+    env.DB.prepare("SELECT id, name, filter_json, sort, position, deleted FROM views WHERE user_id = ? AND rev > ?").bind(userId, since),
   ]);
   // The catalog cursor trails by a minute: a row another request writes during this one is sent again, not missed
-  return { rev: (rev.results[0] as { rev: number }).rev, catalogAt: now - 60_000, games: (rows.results as Row[]).map(toGame) };
+  return { rev: (rev.results[0] as { rev: number }).rev, catalogAt: now - 60_000, games: (rows.results as Row[]).map(toGame),
+    views: (viewRows.results as ViewRow[]).map(toView) };
 }

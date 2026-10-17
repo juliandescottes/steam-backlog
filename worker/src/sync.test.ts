@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, beforeEach, expect, test, vi } from "vitest";
-import type { Op, SyncResponse } from "@backlog/shared/sync";
+import type { GameOp, Op, SyncResponse, ViewOp } from "@backlog/shared/sync";
 import { testWorker } from "./testing.ts";
 
 let w: Awaited<ReturnType<typeof testWorker>>;
@@ -7,7 +7,8 @@ beforeAll(async () => { w = await testWorker({ DEV_LOGIN: "true", STEAM_API_KEY:
 afterAll(() => w.dispose());
 
 let n = 0;
-const op = (appid: number, set: Op["set"], id = `op-${++n}`): Op => ({ id, type: "game", appid, at: 1_000, set });
+const op = (appid: number, set: GameOp["set"], id = `op-${++n}`): Op => ({ id, type: "game", appid, at: 1_000, set });
+const viewOp = (viewId: string, set: ViewOp["set"]): Op => ({ id: `op-${++n}`, type: "view", viewId, at: 1_000, set });
 // Catalog rows written in the last minute come back on every sync; "later" skips that overlap
 const LATER = Date.now() + 120_000;
 const sync = async (since: number, ops: Op[] = [], catalogSince = since ? LATER : 0) =>
@@ -97,4 +98,35 @@ test("users only see and change their own games", async () => {
   expect(other.games).toEqual([]);
   const notes = await w.env.DB.prepare("SELECT note FROM user_games WHERE appid = 1 AND note != ''").all();
   expect(notes.results).not.toContainEqual({ note: "theirs" });
+});
+
+test("views: create, edit, delete; each change comes back once, with games in the same rev sequence", async () => {
+  const { rev } = await sync(0);
+  const created = await sync(rev, [
+    op(1, { status: "playing" }),
+    viewOp("v1", { name: "Short", filter: { maxHours: 5 }, sort: "length", position: "a", deleted: false }),
+  ]);
+  expect(created.views).toEqual([{ id: "v1", name: "Short", filter: { maxHours: 5 }, sort: "length", position: "a", deleted: false }]);
+  expect(created.rev).toBe(rev + 2);
+  expect((await sync(created.rev)).views).toEqual([]);
+
+  const renamed = await sync(created.rev, [viewOp("v1", { name: "Very short", filter: { maxHours: 2 } })]);
+  expect(renamed.views[0]).toMatchObject({ name: "Very short", filter: { maxHours: 2 }, sort: "length", position: "a" });
+  const deleted = await sync(renamed.rev, [viewOp("v1", { deleted: true })]);
+  expect(deleted.views).toEqual([expect.objectContaining({ id: "v1", deleted: true, name: "Very short" })]);
+  // A full sync still sends deleted views, so a device that had one drops it
+  expect((await sync(0)).views.map(v => [v.id, v.deleted])).toEqual([["v1", true]]);
+});
+
+test("another user can't touch a view by guessing its id; bad view ops are dropped", async () => {
+  await sync(0, [viewOp("shared-id", { name: "Mine", filter: {}, sort: "name", position: "a", deleted: false })]);
+  await w.call("POST", "/api/auth/dev", { steamId: `76561198${String(++n).padStart(9, "0")}` });
+  const r = await sync(0, [
+    viewOp("shared-id", { name: "Stolen" }),
+    viewOp("bad", { sort: "nope" as never }),
+    viewOp("long", { name: "x".repeat(61) }),
+  ]);
+  expect(r.views).toEqual([]);
+  const row = await w.env.DB.prepare("SELECT name FROM views WHERE id = 'shared-id'").first("name");
+  expect(row).toBe("Mine");
 });

@@ -29,6 +29,11 @@ export async function putView(v: View): Promise<void> {
   await (await db()).put("views", v);
 }
 
+export async function replaceViews(views: View[]): Promise<void> {
+  const tx = (await db()).transaction("views", "readwrite");
+  await Promise.all([tx.store.clear(), ...views.map(v => tx.store.put(v)), tx.done]);
+}
+
 export async function deleteView(id: string): Promise<void> {
   await (await db()).delete("views", id);
 }

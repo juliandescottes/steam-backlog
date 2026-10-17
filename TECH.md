@@ -99,6 +99,7 @@ POST /api/sync
 Types and op validation in `shared/src/sync.ts`, server in `worker/src/sync.ts`, client in `app/src/account.ts`. Views and lists join the response in milestones 2 and 4.
 
 - **Ops carry values, not actions** ("status = finished, finishedAt = …", not "finish"). Undo is just another op, and replaying one is harmless.
+- Ops are `game` (by appid) or `view` (by view id: name, filter, sort, position, `deleted`). Views are created on first op and only their owner's ops update them.
 - The server merges ops per game (later ones win per field), applies them in one D1 batch giving each changed row the next `rev`, then returns every game of this user with `rev > since` or a catalog change (IGDB, community) since `catalogSince`. `catalogAt` trails by a minute so a concurrent write is sent twice rather than missed.
 - **Conflicts:** last writer wins per field, ordered by when the server receives them. This is one person on a few devices. Notes are the only field where a lost edit would hurt; accept the risk.
 - **D1 limits** (100 bound parameters per query, 50 queries per request on the free plan): bulk writes pass their rows as one JSON parameter and expand them with `json_each`.

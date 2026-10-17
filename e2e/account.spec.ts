@@ -43,6 +43,18 @@ test("what was done before signing in comes along", async ({ page }) => {
   await card(page, "Portal 2").locator("button.cover").focus();
   await page.keyboard.press("p");
   await expect(card(page, "Portal 2").locator(".status-chip")).toHaveText("Playing");
+  const view = page.getByRole("navigation", { name: "Views" }).getByRole("button", { name: "With dropped", exact: true });
+  await page.getByRole("button", { name: "Dropped", exact: true }).click();
+  await page.getByRole("button", { name: "+ Save view" }).click();
+  await page.keyboard.type("With dropped");
+  await page.keyboard.press("Enter");
+  await expect(view).toBeVisible();
+  await page.waitForFunction(() => new Promise(resolve => {
+    indexedDB.open("backlog").onsuccess = e => {
+      const n = (e.target as IDBOpenDBRequest).result.transaction("views").objectStore("views").count();
+      n.onsuccess = () => resolve(n.result === 1);
+    };
+  }));
 
   await page.request.post("/api/auth/dev", { data: { steamId: steamId() }, headers: { "x-requested-with": "backlog" } });
   await page.reload();
@@ -53,6 +65,7 @@ test("what was done before signing in comes along", async ({ page }) => {
   await page.evaluate(() => new Promise(ok => { const r = indexedDB.deleteDatabase("backlog"); r.onsuccess = r.onerror = r.onblocked = ok; }));
   await page.reload();
   await expect(card(page, "Portal 2").locator(".status-chip")).toHaveText("Playing");
+  await expect(view).toBeVisible();
 });
 
 test("sign out clears this browser", async ({ page }) => {
@@ -72,6 +85,18 @@ test("another account signing in on this browser gets its own library", async ({
   await card(page, "Portal 2").locator("button.cover").focus();
   await page.keyboard.press("p");
   await expect(card(page, "Portal 2").locator(".status-chip")).toHaveText("Playing");
+  const view = page.getByRole("navigation", { name: "Views" }).getByRole("button", { name: "With dropped", exact: true });
+  await page.getByRole("button", { name: "Dropped", exact: true }).click();
+  await page.getByRole("button", { name: "+ Save view" }).click();
+  await page.keyboard.type("With dropped");
+  await page.keyboard.press("Enter");
+  await expect(view).toBeVisible();
+  await page.waitForFunction(() => new Promise(resolve => {
+    indexedDB.open("backlog").onsuccess = e => {
+      const n = (e.target as IDBOpenDBRequest).result.transaction("views").objectStore("views").count();
+      n.onsuccess = () => resolve(n.result === 1);
+    };
+  }));
 
   await page.request.post("/api/auth/dev", { data: { steamId: steamId() }, headers: { "x-requested-with": "backlog" } });
   await page.reload();
@@ -98,4 +123,30 @@ test("deleting the account offers a backup, then removes everything", async ({ p
   await signIn(page, id);
   await expect(page.locator(".game .name")).toHaveText(DEV_GAMES);
   await expect(page.locator(".status-chip")).toHaveCount(0);
+});
+
+test("views sync between devices, deletes included", async ({ page, browser }) => {
+  const id = steamId();
+  await signIn(page, id);
+  await expect(page.locator(".game .name")).toHaveText(DEV_GAMES);
+  const views = (p: Page) => p.getByRole("navigation", { name: "Views" });
+  await page.getByRole("button", { name: "Finished", exact: true }).click();
+  await views(page).getByRole("button", { name: "+ Save view" }).click();
+  await page.keyboard.type("Everything open or done");
+  await page.keyboard.press("Enter");
+
+  const other = await browser.newPage();
+  await expect(async () => {
+    await signIn(other, id);
+    await expect(views(other).getByRole("button", { name: "Everything open or done", exact: true })).toBeVisible({ timeout: 1000 });
+  }).toPass({ timeout: 10_000 });
+  await views(other).getByRole("button", { name: "Everything open or done", exact: true }).click();
+  await views(other).getByRole("button", { name: "Delete view Everything open or done" }).click();
+
+  await expect(async () => {
+    await page.reload();
+    await expect(page.locator(".game")).toHaveCount(5);
+    await expect(views(page).getByRole("button", { name: "Everything open or done", exact: true })).toHaveCount(0, { timeout: 1000 });
+  }).toPass({ timeout: 10_000 });
+  await other.close();
 });

@@ -4,7 +4,7 @@ import { makeExport, newGame, type ExportGame, type LengthsEntry, type LibraryGa
 import { compare, matches, type Entry, type Filter, type SortKey } from "@backlog/shared/filter";
 import { resolveLength } from "@backlog/shared/lengths";
 import { normalizeName } from "@backlog/shared/names";
-import { userFields, type GameFields, type Op } from "@backlog/shared/sync";
+import { userFields, type GameFields, type Op, type SyncView, type ViewFields } from "@backlog/shared/sync";
 import { STATUSES, STATUS_LABEL, type Game, type LenKind, type Lengths, type Measure, type Status } from "@backlog/shared/types";
 import { builtInViews, canonical, sameView, type View } from "@backlog/shared/views";
 import * as db from "./db.ts";
@@ -127,18 +127,44 @@ export function applyView(v: View) {
   });
 }
 
-export function saveView(name: string) {
-  const v: View = { id: crypto.randomUUID(), name, filter: currentFilter.value, sort: sortKey.value, position: Date.now().toString(36) };
+const viewFields = ({ name, filter, sort, position }: View): ViewFields => ({ name, filter, sort, position, deleted: false });
+
+function addView(v: View) {
   userViews.value = [...userViews.value, v];
   void db.putView(v);
+  onUserChanges?.([{ viewId: v.id, set: viewFields(v) }]);
+}
+
+export function saveView(name: string) {
+  addView({ id: crypto.randomUUID(), name, filter: currentFilter.value, sort: sortKey.value, position: Date.now().toString(36) });
 }
 
 export function deleteView(id: string) {
   const v = userViews.value.find(x => x.id === id);
   if (!v) return;
-  const remove = () => { userViews.value = userViews.value.filter(x => x.id !== id); void db.deleteView(id); };
-  remove();
-  pushUndo({ label: `View "${v.name}" deleted`, patches: [], revert: () => { userViews.value = [...userViews.value, v]; void db.putView(v); } });
+  userViews.value = userViews.value.filter(x => x.id !== id);
+  void db.deleteView(id);
+  onUserChanges?.([{ viewId: id, set: { deleted: true } }]);
+  pushUndo({ label: `View "${v.name}" deleted`, patches: [], revert: () => addView(v) });
+}
+
+/** Local views as changes, for the first sign-in on this device. */
+export const localViewChanges = (): UserChange[] => userViews.value.map(v => ({ viewId: v.id, set: viewFields(v) }));
+
+/** Views from the server, with view ops still in the outbox applied on top. `replace` drops views the server didn't send. */
+export function applyServerViews(list: SyncView[], pending: Op[], replace = false) {
+  if (!list.length && !replace) return;
+  const next = new Map(replace ? [] : userViews.value.map(v => [v.id, v]));
+  for (const { deleted, ...v } of list) deleted ? next.delete(v.id) : next.set(v.id, v);
+  for (const op of pending) {
+    if (op.type !== "view") continue;
+    const { deleted, ...set } = op.set;
+    const cur = next.get(op.viewId);
+    if (deleted) next.delete(op.viewId);
+    else if (cur || (set.name && set.filter && set.sort && set.position != null)) next.set(op.viewId, { ...cur!, ...set, id: op.viewId });
+  }
+  userViews.value = [...next.values()];
+  void db.replaceViews(userViews.value);
 }
 
 /** What the library shows: one shelf per length band, or a single one for other sorts. */
@@ -223,7 +249,8 @@ type Command = { label: string; patches: Patch[]; revert?: () => void };
 const undoStack: Command[] = [];
 const UNDO_LIMIT = 100;
 
-export type UserChange = { appid: number; set: Partial<GameFields> };
+/** A change the account should sync: fields of a game, or of a view. */
+export type UserChange = { appid: number; set: Partial<GameFields> } | { viewId: string; set: Partial<ViewFields> };
 let onUserChanges: ((changes: UserChange[]) => void) | null = null;
 /** Called with every change to the user's own fields; account.ts turns them into sync ops. */
 export function listenUserChanges(fn: typeof onUserChanges) {
@@ -395,8 +422,8 @@ export function applyServerGames(list: Game[], pending: Op[], replace = false) {
     next.set(g.appid, { ...g, portrait: g.portrait ?? local?.portrait ?? null });
   }
   for (const op of pending) {
-    const g = next.get(op.appid);
-    if (g) next.set(op.appid, { ...g, ...op.set });
+    const g = op.type === "game" && next.get(op.appid);
+    if (g) next.set(g.appid, { ...g, ...op.set });
   }
   for (const g of list) changed.push(next.get(g.appid)!);
   if (replace) void db.replaceGames(next.values());
