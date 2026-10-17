@@ -33,8 +33,8 @@ Backlog (default) · Playing · Finished · Dropped.
 
 ## 5. Finding and organizing
 - **Search-as-you-type** (`/` focuses it) over names across the whole library.
-- **Filters:** status (multi-select, default: Backlog + Playing), length range, played / never launched, owned since.
-- **Sort:** length (default, shortest first), name, purchase date, playtime, recently changed.
+- **Filters:** status (multi-select, default: Backlog + Playing), length range, played / never launched, date added (Steam does not expose purchase dates).
+- **Sort:** length (default, shortest first), name, date added, playtime, recently changed.
 - **Smart views:** a saved filter + sort with a name ("Under 5 h", "Never launched", "Finished in 2026"). A few are built in; users can save their own from the current filter state. Shown as tabs/chips under the header.
 - **Keyboard:** arrow keys move focus across the grid; `Enter` opens details; `Esc` closes. `?` shows the shortcut sheet.
 - **Bulk select:** click the checkbox on a card or `x` on the focused card; shift-click selects a range; `Ctrl+A` selects all visible. With a selection, status keys and "Add to list" apply to all, with one undo.
