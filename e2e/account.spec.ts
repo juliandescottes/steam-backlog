@@ -256,3 +256,47 @@ test("share a list: one click for a link, viewers see it signed out, changes sho
   }).toPass({ timeout: 10_000 });
   await other.close();
 });
+
+test("public profile: off until turned on with a username, shows the lists picked for it", async ({ page, browser }) => {
+  const id = steamId();
+  await signIn(page, id);
+  await expect(page.locator(".bands .game .name")).toHaveText(DEV_GAMES);
+  await card(page, "Portal").hover();
+  await card(page, "Portal").getByRole("button", { name: "Add Portal to a list" }).click();
+  await page.getByRole("combobox", { name: "Find or create a list" }).fill("Puzzles");
+  await page.keyboard.press("Enter");
+  await page.getByRole("button", { name: "Lists" }).click();
+  await page.getByRole("link", { name: /Puzzles/ }).click();
+  await page.getByRole("button", { name: "Share" }).click();
+  await page.getByRole("radio", { name: "Anyone with the link" }).click();
+  await page.getByRole("checkbox", { name: /Show on my public profile/ }).check();
+  await expect(page.getByRole("region", { name: "Sharing" })).toContainText("it's off");
+
+  // Turn the profile on from Settings, with a username
+  await page.getByRole("button", { name: "turn it on in Settings" }).click();
+  const handle = `p${id.slice(-9)}`;
+  await expect(page.getByLabel("Username")).toHaveValue("dev-user");
+  await page.getByLabel("Username").fill(handle);
+  await page.getByRole("checkbox", { name: "Public profile", exact: true }).check();
+  await expect(page.getByRole("link", { name: "View your profile →" })).toBeVisible();
+
+  const viewer = await (await browser.newContext()).newPage();
+  await viewer.route("**/*steamstatic.com/**", r => r.abort());
+  await expect(async () => {
+    await viewer.goto(`/u/${handle}`);
+    await expect(viewer.locator("h1")).toHaveText("Dev user", { timeout: 1000 });
+    await expect(viewer.locator(".profile-list")).toHaveCount(1, { timeout: 1000 });
+  }).toPass({ timeout: 10_000 });
+  await expect(viewer.locator(".profile-head .list-meta")).toHaveText("0 games finished · 0 hours cleared");
+  await expect(viewer.locator(".profile-list")).toContainText("Puzzles1 game");
+  await viewer.locator(".profile-list").click();
+  await expect(viewer.locator("h1")).toHaveText("Puzzles");
+  await viewer.getByRole("link", { name: "Dev user's list" }).click(); // back to the profile
+  await expect(viewer).toHaveURL(new RegExp(`/u/${handle}$`));
+
+  await page.getByRole("checkbox", { name: "Public profile", exact: true }).uncheck();
+  await expect(async () => {
+    await viewer.reload();
+    await expect(viewer.locator("h1")).toHaveText("Profile not found", { timeout: 1000 });
+  }).toPass({ timeout: 10_000 });
+});

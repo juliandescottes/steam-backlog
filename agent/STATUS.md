@@ -18,7 +18,9 @@ Done: lists (`shared/lists.ts`: fractional positions, slugs). Hand-picked or fil
 
 Sharing deployed 2026-10-17, simplified the same day (the `/l/` addresses are not deployed yet): links are `/l/<shareId>` (migration 0005; `/s/` redirects), the Share panel is Private / Anyone with the link + copy, viewers see the Steam name. A list has one address, `/l/<shareId>`: the owner's page if the list is in this browser, the shared page otherwise; `/l/<internal id>` and `/s/<shareId>` redirect. `GET /api/s/:shareId` with ETag/304, `/l/*` pages with Open Graph tags. `POST /api/handle` stays for the profile, no UI yet. Viewer page `Shared.tsx` is a lazy chunk, read-only, polls every 30 s while visible.
 
-Next: public profile (`/u/<handle>`, "profile" visibility; ask for the handle there, labelled as the public username), copy to my backlog, optional collections import.
+Public profile done (not deployed): Settings → Public profile (off by default; username suggested from the Steam name; stats on/off), "Show on my public profile" in the Share panel (visibility `profile`). `/u/<handle>` page with the chosen lists (covers, size, hours); shared list pages link to it when it's on. `POST /api/profile` replaced `/api/handle`; `GET /api/u/:handle`; `/u/*` link previews.
+
+Next: copy to my backlog, then optional collections import. That ends the v1 plan (milestones 0–4).
 
 Production check (2026-10-17, 761-game library): callback 594 ms, import 5.3 s wall / 26 ms CPU, sync 8–14 ms CPU, cron 3–4.5 s wall / 10–14 ms CPU. All over the free plan's 10 ms CPU but none failed; watch `wrangler tail` for "exceeded CPU" (fix: Workers Paid, or paged sync and smaller batches).
 
@@ -35,4 +37,5 @@ Production check (2026-10-17, 761-game library): callback 594 ms, import 5.3 s w
 - Reordering a list on touch screens: HTML drag and drop doesn't work there, and Alt+arrows need a keyboard.
 - A private list's address opened by someone else says "List not found. It may be private now, or the link changed."; maybe say plainly that it's private (the API can't tell them apart on purpose).
 - Share panel: warn while the list hasn't synced yet, or the copied link says "List not found" for a few seconds.
+- Ops reach IndexedDB asynchronously (`void db.addOps`): closing or reloading the tab right after a change can lose it before it syncs. Maybe flush on `pagehide`, or await the write before scheduling.
 - Restoring a backup with "replace" clears the outbox and sync cursor too (`db.clearAll`), even when signed in.

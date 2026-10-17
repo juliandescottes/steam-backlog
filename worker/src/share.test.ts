@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, beforeEach, expect, test } from "vitest";
 import type { ListOp, Op, SyncResponse } from "@backlog/shared/sync";
-import type { SharedList } from "@backlog/shared/share";
+import type { Profile, SharedList } from "@backlog/shared/share";
 import { testWorker } from "./testing.ts";
 
 const INDEX = `<!doctype html><html><head><title>Backlog</title></head><body></body></html>`;
@@ -14,24 +14,65 @@ let n = 0;
 const listOp = (listId: string, set: ListOp["set"]): Op => ({ id: `op-${++n}`, type: "list", listId, at: 1, set });
 const sync = async (ops: Op[]) => (await (await w.call("POST", "/api/sync", { since: 0, catalogSince: 0, ops })).json()) as SyncResponse;
 const LIST = { title: "Up <next>", description: "", kind: "manual", filter: null, sort: null, shareId: "upnext000001", visibility: "link", position: "i", deleted: false } as const;
-let handle = "";
+let handle = "", steamId = "";
 
-/** A signed-in user with the dev library (Portal 400, Portal 2 620, Half-Life 2 220, Terraria 105600, Stardew 413150) and a handle. */
+/** A signed-in user with the dev library (Portal 400, Portal 2 620, Half-Life 2 220, Terraria 105600, Stardew 413150). */
 beforeEach(async () => {
-  await w.call("POST", "/api/auth/dev", { steamId: `76561190${String(++n).padStart(9, "0")}` });
+  steamId = `76561190${String(++n).padStart(9, "0")}`;
+  await w.call("POST", "/api/auth/dev", { steamId });
   await w.call("POST", "/api/library/refresh");
   handle = `player-${n}`;
-  expect((await w.call("POST", "/api/handle", { handle })).status).toBe(200);
 });
 
-test("handles: valid, unique", async () => {
-  expect((await w.call("POST", "/api/handle", { handle: "Bad Name" })).status).toBe(400);
-  expect((await w.call("POST", "/api/handle", { handle: "-x" })).status).toBe(400);
+const me = async () => (await (await w.call("GET", "/api/me")).json()) as { handle: string | null; profilePublic: boolean; showStats: boolean };
+
+test("profile settings: a valid, unique handle; on needs one", async () => {
+  expect((await w.call("POST", "/api/profile", { public: true })).status).toBe(400); // no handle yet
+  expect((await w.call("POST", "/api/profile", { handle: "Bad Name" })).status).toBe(400);
+  expect((await w.call("POST", "/api/profile", { handle: "-x" })).status).toBe(400);
+  expect((await w.call("POST", "/api/profile", { public: "yes" })).status).toBe(400);
+  expect((await w.call("POST", "/api/profile", { handle, public: true })).status).toBe(200);
+  expect(await me()).toMatchObject({ handle, profilePublic: true, showStats: true });
+  expect((await w.call("POST", "/api/profile", { showStats: false })).status).toBe(200);
+  expect(await me()).toMatchObject({ handle, profilePublic: true, showStats: false });
+
   const mine = handle;
   await w.call("POST", "/api/auth/dev", { steamId: "76561190999999999" });
-  const taken = await w.call("POST", "/api/handle", { handle: mine });
+  const taken = await w.call("POST", "/api/profile", { handle: mine });
   expect(taken.status).toBe(409);
   expect(await taken.json()).toEqual({ error: "handle_taken" });
+});
+
+test("a public profile: lists marked for it with their size, stats unless hidden; off is 404", async () => {
+  await sync([
+    listOp("pl1", { ...LIST, visibility: "profile", shareId: "onprofile001", position: "b" }),
+    { id: `op-${++n}`, type: "item", listId: "pl1", appid: 620, at: 1, set: { position: "a", deleted: false } },
+    { id: `op-${++n}`, type: "item", listId: "pl1", appid: 400, at: 1, set: { position: "b", deleted: false } },
+    listOp("pl2", { ...LIST, kind: "filter", filter: { statuses: ["finished"] }, sort: "name", visibility: "profile", shareId: "onprofile002", position: "a" }),
+    listOp("pl3", { ...LIST, visibility: "link", shareId: "linkonly0001" }),
+    { id: `op-${++n}`, type: "game", appid: 400, at: 1, set: { status: "finished", my: { main: null, main_extra: 4, comp: null }, myKind: "exact" } },
+  ]);
+  expect((await w.call("GET", `/api/u/${handle}`)).status).toBe(404); // no handle yet
+  await w.call("POST", "/api/profile", { handle, public: true });
+  w.signOut();
+  const p = (await (await w.call("GET", `/api/u/${handle}`)).json()) as Profile;
+  expect(p).toEqual({
+    handle, name: "Dev user", avatar: null, stats: { finished: 1, hoursCleared: 4 },
+    lists: [
+      { shareId: "onprofile002", title: "Up <next>", description: "", kind: "filter", games: 1, hours: 4, covers: [400] },
+      { shareId: "onprofile001", title: "Up <next>", description: "", kind: "manual", games: 2, hours: 4, covers: [620, 400] },
+    ],
+  });
+  // Shared lists link to a public profile
+  expect(((await (await w.call("GET", "/api/s/linkonly0001")).json()) as SharedList).owner.handle).toBe(handle);
+  expect(await (await w.call("GET", `/u/${handle}`)).text()).toContain("<title>Dev user on Backlog</title>");
+
+  await w.call("POST", "/api/auth/dev", { steamId }); // signed in again
+  await w.call("POST", "/api/profile", { showStats: false });
+  expect(((await (await w.call("GET", `/api/u/${handle}`)).json()) as Profile).stats).toBeNull();
+  await w.call("POST", "/api/profile", { public: false });
+  expect((await w.call("GET", `/api/u/${handle}`)).status).toBe(404);
+  expect(((await (await w.call("GET", "/api/s/linkonly0001")).json()) as SharedList).owner.handle).toBeNull();
 });
 
 test("a shared list: games in order with lengths and status, nothing private; 304 until something changes", async () => {
@@ -45,7 +86,7 @@ test("a shared list: games in order with lengths and status, nothing private; 30
   const res = await w.call("GET", `/api/s/upnext000001`);
   expect(res.status).toBe(200);
   const data = (await res.json()) as SharedList;
-  expect(data.owner).toEqual({ name: "Dev user", avatar: null });
+  expect(data.owner).toEqual({ name: "Dev user", avatar: null, handle: null });
   expect(data.list).toEqual({ title: "Up <next>", description: "", kind: "manual", sort: null });
   expect(data.games.map(g => g.name)).toEqual(["Half-Life 2", "Portal"]);
   expect(data.games[1]).toMatchObject({ status: "finished", my: { main: 3, main_extra: 4, comp: null }, note: "", playtimeMin: 0, lastPlayedAt: null, finishedAt: null });

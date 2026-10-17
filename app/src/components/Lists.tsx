@@ -198,14 +198,19 @@ function SharePanel({ list: l }: { list: List }) {
         <button type="button" role="radio" aria-checked={!shared} onClick={() => setListVisibility(l.id, "private")}>Private</button>
         <button type="button" role="radio" aria-checked={shared} onClick={() => setListVisibility(l.id, "link")}>Anyone with the link</button>
       </div>
-      {shared && (
+      {shared && <>
         <p class="share-link">
           <a href={url} target="_blank" rel="noopener">{url.replace(/^https?:\/\//, "")}</a>
           <button type="button" class="btn" onClick={() => navigator.clipboard.writeText(url).then(() => showToast("Link copied"), () => showToast("Couldn't copy the link"))}>
             Copy link
           </button>
         </p>
-      )}
+        <label class="check">
+          <input type="checkbox" checked={l.visibility === "profile"} onChange={e => setListVisibility(l.id, e.currentTarget.checked ? "profile" : "link")} />
+          Show on my public profile
+          {!me.profilePublic && <> (it's off: <button type="button" class="link" onClick={() => (settingsOpen.value = true)}>turn it on in Settings</button>)</>}
+        </label>
+      </>}
       <p class="hint">
         {shared ? `Shared as ${me.name}. Changes show up for viewers within seconds. ` : ""}
         Viewers see the games, their lengths and your statuses. Notes, playtime and dates stay private.

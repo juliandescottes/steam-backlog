@@ -4,13 +4,14 @@ import { body, HttpError, json, redirect } from "./http.ts";
 import { enrich } from "./igdb.ts";
 import { refreshLibrary } from "./library.ts";
 import { loginUrl, playerSummary, verifyCallback } from "./steam.ts";
-import { setHandle, sharedList, sharePage } from "./share.ts";
+import { profile, setProfile, sharedList, sharePage, type ProfileSettings } from "./share.ts";
 import { sync } from "./sync.ts";
 import type { SyncRequest } from "@backlog/shared/sync";
 
 const me = (u: User) => ({
   id: u.id, steamId: u.steam_id, handle: u.handle, name: u.display_name, avatar: u.avatar_url, librarySyncedAt: u.library_synced_at,
   shareLengths: JSON.parse(u.settings_json).shareLengths !== false,
+  profilePublic: u.profile_public === 1, showStats: JSON.parse(u.settings_json).showStats !== false,
 });
 
 async function route(req: Request, env: Env, ctx: ExecutionContext, url: URL): Promise<Response> {
@@ -28,6 +29,12 @@ async function route(req: Request, env: Env, ctx: ExecutionContext, url: URL): P
     const headers = { etag: r.etag, "cache-control": "no-cache" };
     if (req.headers.get("if-none-match") === r.etag) return new Response(null, { status: 304, headers });
     return json(r.data, { headers });
+  }
+  const user = req.method === "GET" && url.pathname.match(/^\/api\/u\/([^/]+)$/);
+  if (user) {
+    const p = await profile(env, decodeURIComponent(user[1]));
+    if (!p) throw new HttpError(404, "not_found");
+    return json(p, { headers: { "cache-control": "no-cache" } });
   }
 
   switch (at) {
@@ -72,9 +79,10 @@ async function route(req: Request, env: Env, ctx: ExecutionContext, url: URL): P
       return json({ shareLengths });
     }
 
-    case "POST /api/handle": {
+    case "POST /api/profile": {
       const { user } = await requireUser(req, env);
-      return json({ handle: await setHandle(env, user.id, (await body<{ handle?: unknown }>(req)).handle) });
+      await setProfile(env, user.id, await body<ProfileSettings>(req));
+      return json({ ok: true });
     }
 
     case "DELETE /api/account": {
@@ -95,7 +103,7 @@ async function route(req: Request, env: Env, ctx: ExecutionContext, url: URL): P
 export default {
   async fetch(req, env, ctx) {
     const url = new URL(req.url);
-    if (/^\/[ls]\//.test(url.pathname)) {
+    if (/^\/[lsu]\//.test(url.pathname)) {
       try {
         return await sharePage(env, req, url);
       } catch (e) {

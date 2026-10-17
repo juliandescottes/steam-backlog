@@ -8,7 +8,10 @@ import {
 
 /** Account, Steam import and background sync (TECH.md §5, §7). Without an account the app stays local-only. */
 
-export type Me = { id: string; steamId: string; handle: string | null; name: string; avatar: string | null; librarySyncedAt: number | null; shareLengths: boolean };
+export type Me = {
+  id: string; steamId: string; handle: string | null; name: string; avatar: string | null; librarySyncedAt: number | null;
+  shareLengths: boolean; profilePublic: boolean; showStats: boolean;
+};
 type Cursor = { since: number; catalogSince: number };
 
 export const account = signal<Me | null>(null);
@@ -122,18 +125,18 @@ export async function setShareLengths(shareLengths: boolean) {
   }
 }
 
-/** Picks the name in /u/<handle> links. Resolves to an error message, or null once saved. */
-export async function setHandle(handle: string): Promise<string | null> {
+/** Public profile settings (username, on/off, stats). Resolves to an error message, or null once saved. */
+export async function setProfile(change: Partial<Pick<Me, "handle" | "profilePublic" | "showStats">>): Promise<string | null> {
   const before = account.value;
   if (!before) return "Sign in first";
   try {
-    await api("POST", "/handle", { handle });
+    await api("POST", "/profile", { handle: change.handle, public: change.profilePublic, showStats: change.showStats });
   } catch (e) {
-    if (e instanceof ApiError && e.code === "handle_taken") return "That name is taken";
-    if (e instanceof ApiError && e.code === "bad_handle") return "Use 2 to 30 letters, digits or dashes";
+    if (e instanceof ApiError && e.code === "handle_taken") return "That username is taken";
+    if (e instanceof ApiError && e.code === "bad_handle") return "Use 2 to 30 lowercase letters, digits or dashes";
     return "Couldn't save. Try again when online.";
   }
-  account.value = { ...before, handle };
+  account.value = { ...account.value!, ...change };
   await db.setMeta("account", account.value);
   return null;
 }

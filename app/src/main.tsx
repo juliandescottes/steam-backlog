@@ -19,14 +19,17 @@ import "./styles.css";
 
 // Viewers of a shared list download this part only when they open one
 const SharedPage = lazy(() => import("./components/Shared.tsx").then(m => ({ default: m.SharedPage })));
+const ProfilePage = lazy(() => import("./components/Shared.tsx").then(m => ({ default: m.ProfilePage })));
 
 function App() {
   if (!loaded.value) return null;
   const r = route.value;
-  if (r.page === "list" && viewing.value) {
+  if (viewing.value) {
     return (
       <>
-        <Suspense fallback={null}><SharedPage key={r.shareId} shareId={r.shareId} /></Suspense>
+        <Suspense fallback={null}>
+          {r.page === "profile" ? <ProfilePage key={r.handle} handle={r.handle} /> : r.page === "list" && <SharedPage key={r.shareId} shareId={r.shareId} />}
+        </Suspense>
         <div class="dock"><Toast /></div>
       </>
     );

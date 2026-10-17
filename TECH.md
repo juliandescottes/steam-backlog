@@ -175,7 +175,7 @@ The result carries its source and an approximate flag for the badge and detail p
 - **Live updates:** the response carries an `ETag` from the owner's `rev`, the sum of the games' catalog `updated_at` and the game count. The viewer page re-fetches with `If-None-Match` when it regains focus and every 30 s while visible, so unchanged lists cost a 304.
 - **Link previews:** `/l/*` and `/s/*` run the Worker first (`run_worker_first`); it serves `index.html` with the `<title>` replaced (plain string replace, so tests run in Node), injecting `og:title`, `og:description` ("12 games · 48 h") and an `og:image` (the first cover), so links look good in chats.
 - **Copy to my backlog** (signed-in viewers): creates a manual list in the viewer's account with the same games, and marks which ones they don't own.
-- `GET /api/u/:handle` returns the public profile and the lists marked `profile`, or 404 when the profile is off.
+- `GET /api/u/:handle` returns the public profile (name, avatar, stats unless `settings_json.showStats` is false) and the lists marked `profile` with their size, hours and first covers, or 404 when the profile is off. `POST /api/profile { handle?, public?, showStats? }` sets them; turning it on needs a handle. Shared lists carry the owner's handle only when the profile is on.
 
 ## 10. Export / import and account deletion
 

@@ -7,9 +7,20 @@ import type { Game } from "./types.ts";
  * owner's status, never notes, playtime or dates: those are blanked out.
  */
 export type SharedList = {
-  owner: { name: string; avatar: string | null };
+  /** `handle` only when the owner's public profile is on, to link to it. */
+  owner: { name: string; avatar: string | null; handle: string | null };
   list: { title: string; description: string; kind: ListKind; sort: SortKey | null };
   games: Game[];
+};
+
+/** A public profile (GET /api/u/:handle): the lists the owner chose to show, with their size. */
+export type Profile = {
+  handle: string;
+  name: string;
+  avatar: string | null;
+  /** Null when the owner hides them. */
+  stats: { finished: number; hoursCleared: number } | null;
+  lists: { shareId: string; title: string; description: string; kind: ListKind; games: number; hours: number; covers: number[] }[];
 };
 
 /** 2 to 30 lowercase letters, digits and inner dashes: the public username in /u/<handle> (profiles). */
@@ -24,3 +35,4 @@ export function suggestHandle(name: string): string {
 
 /** A list's address, for its owner and for viewers. */
 export const sharePath = (shareId: string) => `/l/${shareId}`;
+export const profilePath = (handle: string) => `/u/${handle}`;

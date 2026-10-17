@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import { parseExport, parseLengths, parseLibrary, type ExportFile } from "@backlog/shared/files";
 import type { Measure } from "@backlog/shared/types";
-import { account, deleteAccount, refreshLibrary, setShareLengths, signIn, signOut } from "../account.ts";
+import { profilePath, suggestHandle } from "@backlog/shared/share";
+import { account, deleteAccount, refreshLibrary, setProfile, setShareLengths, signIn, signOut, type Me } from "../account.ts";
+import { navigate } from "../route.ts";
 import {
   deleteEverything, exportBackup, games, importLengths, mergeLibrary, restoreBackup, settings, settingsOpen, showToast, updateSettings, type Theme,
 } from "../store.ts";
@@ -28,6 +30,38 @@ function Radio<T extends string>({ name, value, options, onChange }: { name: str
         <button type="button" key={v} role="radio" aria-checked={value === v} onClick={() => onChange(v)}>{label}</button>
       ))}
     </div>
+  );
+}
+
+/** The public profile at /u/<handle>: off by default; turning it on needs a username. */
+function ProfileSettings({ me }: { me: Me }) {
+  const [handle, setHandle] = useState(me.handle ?? suggestHandle(me.name));
+  const [error, setError] = useState<string | null>(null);
+  const save = async (change: Parameters<typeof setProfile>[0]) => setError(await setProfile(change));
+  const typed = handle.trim().toLowerCase();
+  return (
+    <>
+      <label class="check">
+        <input type="checkbox" checked={me.profilePublic}
+          onChange={e => void save(e.currentTarget.checked ? { profilePublic: true, ...(typed !== me.handle ? { handle: typed } : {}) } : { profilePublic: false })} />
+        Public profile
+      </label>
+      <form class="row-actions handle" onSubmit={e => { e.preventDefault(); void save({ handle: typed }); }}>
+        <label for="handle">Username</label>
+        <span class="prefix">{location.host}/u/</span>
+        <input id="handle" value={handle} maxLength={30} autoComplete="off" placeholder="your-name" onInput={e => setHandle(e.currentTarget.value)} />
+        {me.handle && typed !== me.handle && <button type="submit" class="btn">Save</button>}
+      </form>
+      {error && <p class="error" role="alert">{error}</p>}
+      <label class="check">
+        <input type="checkbox" checked={me.showStats} disabled={!me.profilePublic} onChange={e => void save({ showStats: e.currentTarget.checked })} />
+        Show games finished and hours cleared
+      </label>
+      <p class="hint">
+        Shows your Steam name and avatar, and the lists you pick in their Share panel. Changing the username breaks old profile links.
+        {me.profilePublic && me.handle && <> <a href={profilePath(me.handle)} onClick={e => { e.preventDefault(); settingsOpen.value = false; navigate(profilePath(me.handle!)); }}>View your profile →</a></>}
+      </p>
+    </>
   );
 }
 
@@ -73,6 +107,13 @@ export function Settings() {
                 <p class="hint">Imports your Steam library and syncs across devices. What you've done in this browser comes along.</p>
               </>}
         </section>
+
+        {account.value && (
+          <section class="detail-section">
+            <h3>Public profile</h3>
+            <ProfileSettings me={account.value} />
+          </section>
+        )}
 
         <section class="detail-section">
           <h3>Theme</h3>

@@ -4,11 +4,14 @@ import { sharePath } from "@backlog/shared/share";
 
 /**
  * The page shown: the library, or a list at /l/<shareId>: the owner's list page when the list is in this browser,
- * the read-only shared page otherwise. /l/<internal id> and /s/<shareId> are older addresses (TECH.md §4).
+ * the read-only shared page otherwise; or a public profile at /u/<handle>. /l/<internal id> and /s/<shareId> are
+ * older addresses (TECH.md §4).
  */
-export type Route = { page: "library" } | { page: "list"; shareId: string } | { page: "oldList"; id: string };
+export type Route = { page: "library" } | { page: "list"; shareId: string } | { page: "oldList"; id: string } | { page: "profile"; handle: string };
 
 function parse(path: string): Route {
+  const u = path.match(/^\/u\/([^/]+)\/?$/);
+  if (u) return { page: "profile", handle: decodeURIComponent(u[1]) };
   const m = path.match(/^\/[ls]\/([^/]+)\/?$/);
   if (!m) return { page: "library" };
   const id = decodeURIComponent(m[1]);

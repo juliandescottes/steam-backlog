@@ -194,8 +194,8 @@ export const currentList = computed(() => {
   if (r.page === "oldList") return lists.value.find(l => l.id === r.id) ?? null;
   return null;
 });
-/** A shared list page of a list that isn't the user's: read-only. */
-export const viewing = computed(() => route.value.page === "list" && !currentList.value);
+/** A read-only page: someone's profile, or a shared list that isn't the user's. */
+export const viewing = computed(() => route.value.page === "profile" || (route.value.page === "list" && !currentList.value));
 
 // Old /l/<internal id> addresses move to the list's link
 effect(() => {
@@ -360,7 +360,8 @@ export function setListVisibility(id: string, visibility: Visibility) {
   const l = lists.value.find(x => x.id === id);
   if (!l || l.visibility === visibility) return;
   putList({ ...l, visibility }, { visibility });
-  pushUndo({ label: visibility === "private" ? `${l.title} is private` : `${l.title} is shared`, patches: [],
+  const label = { private: "is private", link: "is shared by link", profile: "is on your profile" }[visibility];
+  pushUndo({ label: `${l.title} ${label}`, patches: [],
     revert: () => putList(l, { visibility: l.visibility }) });
 }
 
