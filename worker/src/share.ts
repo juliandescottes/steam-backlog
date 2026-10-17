@@ -76,7 +76,7 @@ const escape = (s: string) => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&
 /** The app's page with the list's title and a preview for chats and social sites (Open Graph). */
 export async function sharePage(env: Env, req: Request, url: URL): Promise<Response> {
   const page = await env.ASSETS.fetch(new Request(new URL("/", url), req));
-  const m = url.pathname.match(/^\/s\/([^/]+)\/?$/);
+  const m = url.pathname.match(/^\/[ls]\/([^/]+)\/?$/);
   const share = m ? await sharedList(env, m[1]) : null;
   if (!share || !page.ok) return page;
   const { list, owner, games } = share.data;

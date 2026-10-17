@@ -1,18 +1,22 @@
 import { signal } from "@preact/signals";
+import { SHARE_ID } from "@backlog/shared/lists";
+import { sharePath } from "@backlog/shared/share";
 
 /**
- * The page shown: the library, or a list at /s/<shareId>, which is the owner's list page when the list is in
- * this browser and the read-only shared page otherwise. /l/<id> is the old address of a list page (TECH.md §4).
+ * The page shown: the library, or a list at /l/<shareId>: the owner's list page when the list is in this browser,
+ * the read-only shared page otherwise. /l/<internal id> and /s/<shareId> are older addresses (TECH.md §4).
  */
-export type Route = { page: "library" } | { page: "list"; id: string } | { page: "shared"; shareId: string };
+export type Route = { page: "library" } | { page: "list"; shareId: string } | { page: "oldList"; id: string };
 
 function parse(path: string): Route {
-  const m = path.match(/^\/l\/([^/]+)\/?$/);
-  if (m) return { page: "list", id: decodeURIComponent(m[1]) };
-  const s = path.match(/^\/s\/([^/]+)\/?$/);
-  if (s) return { page: "shared", shareId: decodeURIComponent(s[1]) };
-  return { page: "library" };
+  const m = path.match(/^\/[ls]\/([^/]+)\/?$/);
+  if (!m) return { page: "library" };
+  const id = decodeURIComponent(m[1]);
+  return SHARE_ID.test(id) ? { page: "list", shareId: id } : { page: "oldList", id };
 }
+
+// Links from before lists moved to /l/
+if (/^\/s\//.test(location.pathname)) history.replaceState(null, "", location.pathname.replace(/^\/s\//, "/l/"));
 
 export const route = signal<Route>(parse(location.pathname));
 
@@ -22,6 +26,6 @@ export function navigate(path: string, replace = false) {
   window.scrollTo(0, 0);
 }
 
-export const listPath = (l: { shareId: string }) => `/s/${l.shareId}`;
+export const listPath = (l: { shareId: string }) => sharePath(l.shareId);
 
 window.addEventListener("popstate", () => (route.value = parse(location.pathname)));

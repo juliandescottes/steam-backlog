@@ -11,7 +11,7 @@ export type List = {
   /** Filter lists only. */
   filter: Filter | null;
   sort: SortKey | null;
-  /** The id in the list's share link (/s/<shareId>): random, made with the list, never changed. */
+  /** The id in the list's address (/l/<shareId>): random, made with the list, never changed. */
   shareId: string;
   visibility: Visibility;
   position: string;

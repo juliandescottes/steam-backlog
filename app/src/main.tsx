@@ -23,7 +23,7 @@ const SharedPage = lazy(() => import("./components/Shared.tsx").then(m => ({ def
 function App() {
   if (!loaded.value) return null;
   const r = route.value;
-  if (r.page === "shared" && viewing.value) {
+  if (r.page === "list" && viewing.value) {
     return (
       <>
         <Suspense fallback={null}><SharedPage key={r.shareId} shareId={r.shareId} /></Suspense>

@@ -190,17 +190,17 @@ export const sortedLists = computed(() => [...lists.value].sort((a, b) => (a.pos
 /** The user's own list whose page is shown, or null: on the library, and on someone else's (or a missing) list. */
 export const currentList = computed(() => {
   const r = route.value;
-  if (r.page === "list") return lists.value.find(l => l.id === r.id) ?? null;
-  if (r.page === "shared") return lists.value.find(l => l.shareId === r.shareId) ?? null;
+  if (r.page === "list") return lists.value.find(l => l.shareId === r.shareId) ?? null;
+  if (r.page === "oldList") return lists.value.find(l => l.id === r.id) ?? null;
   return null;
 });
 /** A shared list page of a list that isn't the user's: read-only. */
-export const viewing = computed(() => route.value.page === "shared" && !currentList.value);
+export const viewing = computed(() => route.value.page === "list" && !currentList.value);
 
-// Old /l/<id> addresses move to the list's link
+// Old /l/<internal id> addresses move to the list's link
 effect(() => {
   const r = route.value, l = currentList.value;
-  if (r.page === "list" && l) navigate(listPath(l), true);
+  if (r.page === "oldList" && l) navigate(listPath(l), true);
 });
 
 /** "list" is a hand-picked list's own order. */

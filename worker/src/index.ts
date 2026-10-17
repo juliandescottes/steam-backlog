@@ -95,7 +95,7 @@ async function route(req: Request, env: Env, ctx: ExecutionContext, url: URL): P
 export default {
   async fetch(req, env, ctx) {
     const url = new URL(req.url);
-    if (url.pathname.startsWith("/s/")) {
+    if (/^\/[ls]\//.test(url.pathname)) {
       try {
         return await sharePage(env, req, url);
       } catch (e) {

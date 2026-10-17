@@ -42,7 +42,7 @@ test("hand-picked list: create from a cover, add a selection, reorder, remove, s
   // The list page, in the order games were added
   await page.getByRole("button", { name: "Lists" }).click();
   await page.getByRole("dialog", { name: "Lists" }).getByRole("link", { name: /Up next/ }).click();
-  await expect(page).toHaveURL(/\/s\/[0-9a-z]{12}$/);
+  await expect(page).toHaveURL(/\/l\/[0-9a-z]{12}$/);
   await expect(page.locator("h1")).toHaveText("Up next");
   await expect(page.locator(".list-meta")).toHaveText("3 games · 107 hours");
   await expect(names(page)).toHaveText(["Mid Game", "Short One", "Long Haul"]);
@@ -129,7 +129,7 @@ test("old /l/<id> addresses move to the list's link; a missing one says so", asy
   }));
   await page.goto(`/l/${id}`);
   await expect(page.locator("h1")).toHaveText("Old address");
-  await expect(page).toHaveURL(/\/s\/[0-9a-z]{12}$/);
+  await expect(page).toHaveURL(/\/l\/[0-9a-z]{12}$/);
   await page.goto("/l/nope");
   await expect(page.locator("h1")).toHaveText("List not found");
   await page.getByRole("link", { name: "Back to your backlog" }).click();

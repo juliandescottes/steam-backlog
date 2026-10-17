@@ -22,4 +22,5 @@ export function suggestHandle(name: string): string {
   return HANDLE.test(h) ? h : "";
 }
 
-export const sharePath = (shareId: string) => `/s/${shareId}`;
+/** A list's address, for its owner and for viewers. */
+export const sharePath = (shareId: string) => `/l/${shareId}`;

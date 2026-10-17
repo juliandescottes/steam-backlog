@@ -211,7 +211,7 @@ test("share a list: one click for a link, viewers see it signed out, changes sho
   await page.getByRole("button", { name: "Share" }).click();
   await page.getByRole("radio", { name: "Anyone with the link" }).click();
   const link = page.getByRole("region", { name: "Sharing" }).getByRole("link");
-  await expect(link).toHaveText(/^localhost:5180\/s\/[0-9a-z]{12}$/);
+  await expect(link).toHaveText(/^localhost:5180\/l\/[0-9a-z]{12}$/);
   await expect(page.getByRole("region", { name: "Sharing" })).toContainText("Shared as Dev user.");
   const path = new URL(await link.getAttribute("href")!).pathname;
   expect(new URL(page.url()).pathname).toBe(path); // the owner's page has the same address
@@ -224,6 +224,9 @@ test("share a list: one click for a link, viewers see it signed out, changes sho
     await expect(viewer.locator("h1")).toHaveText("Valve classics", { timeout: 1000 });
   }).toPass({ timeout: 10_000 });
   await expect(viewer.locator(".eyebrow")).toHaveText("Dev user's list");
+  await viewer.goto(path.replace("/l/", "/s/")); // links from before lists moved to /l/
+  await expect(viewer).toHaveURL(new RegExp(`${path}$`));
+  await expect(viewer.locator("h1")).toHaveText("Valve classics");
   await expect(viewer.locator(".game .name")).toHaveText(["Portal", "Half-Life 2"]); // in the order they were added
   await expect(viewer.locator(".game button")).toHaveCount(0); // read-only
 

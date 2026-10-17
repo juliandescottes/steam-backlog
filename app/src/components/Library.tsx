@@ -136,7 +136,7 @@ function Toolbar() {
 
 export function Library() {
   const openList = currentList.value;
-  if (!openList && route.value.page === "list") return <MissingList />;
+  if (!openList && route.value.page === "oldList") return <MissingList />;
   const list = visible.value;
   const groups = shelves.value;
   const byLength = sorting.value === "length";

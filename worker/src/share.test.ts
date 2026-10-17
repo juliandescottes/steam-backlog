@@ -79,9 +79,10 @@ test("private, deleted and missing lists are all 404", async () => {
 
 test("share pages get a title and a link preview, escaped", async () => {
   await sync([listOp("l3", { ...LIST, shareId: "third0000001" }), { id: `op-${++n}`, type: "item", listId: "l3", appid: 620, at: 1, set: { position: "a", deleted: false } }]);
-  const html = await (await w.call("GET", "/s/third0000001")).text();
+  const html = await (await w.call("GET", "/l/third0000001")).text();
   expect(html).toContain("<title>Up &lt;next&gt; · Dev user</title>");
   expect(html).toContain(`<meta property="og:description" content="1 game · 0 h">`);
   expect(html).toContain("/apps/620/header.jpg");
-  expect(await (await w.call("GET", "/s/nope00000001")).text()).toBe(INDEX);
+  expect(await (await w.call("GET", "/l/nope00000001")).text()).toBe(INDEX);
+  expect(await (await w.call("GET", "/s/third0000001")).text()).toContain("og:title"); // older links
 });
