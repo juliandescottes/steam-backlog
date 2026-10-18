@@ -74,6 +74,11 @@ a.eyebrow:hover { color: var(--fg); }
 .handle .prefix { font: 500 14px/1 var(--mono); color: var(--muted); }
 .handle input { flex: 1; min-width: 0; padding: 7px 9px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); font: 500 14px/1 var(--mono); }
 .check:has(input:disabled) { color: var(--muted); }
+/* A setting with its description underneath */
+.option { display: grid; gap: 4px; min-width: 0; }
+.option .check { margin: 0; }
+/* Descriptions line up with the checkbox labels; options without a checkbox are indented to match */
+.option .check + .hint, .option.indented { padding-left: 22px; }
 header.profile-head { grid-template-columns: auto 1fr; align-items: center; gap: 0 20px; }
 .profile-head img { border-radius: 8px; }
 .profile-head > div { display: grid; gap: 8px; }

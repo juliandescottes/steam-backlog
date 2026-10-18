@@ -41,26 +41,35 @@ function ProfileSettings({ me }: { me: Me }) {
   const typed = handle.trim().toLowerCase();
   return (
     <>
-      <label class="check">
-        <input type="checkbox" checked={me.profilePublic}
-          onChange={e => void save(e.currentTarget.checked ? { profilePublic: true, ...(typed !== me.handle ? { handle: typed } : {}) } : { profilePublic: false })} />
-        Public profile
-      </label>
-      <form class="row-actions handle" onSubmit={e => { e.preventDefault(); void save({ handle: typed }); }}>
-        <label for="handle">Username</label>
-        <span class="prefix">{location.host}/u/</span>
-        <input id="handle" value={handle} maxLength={30} autoComplete="off" placeholder="your-name" onInput={e => setHandle(e.currentTarget.value)} />
-        {me.handle && typed !== me.handle && <button type="submit" class="btn">Save</button>}
-      </form>
-      {error && <p class="error" role="alert">{error}</p>}
-      <label class="check">
-        <input type="checkbox" checked={me.showBacklog} disabled={!me.profilePublic} onChange={e => void save({ showBacklog: e.currentTarget.checked })} />
-        Show my whole backlog
-      </label>
-      <p class="hint">
-        Shows your Steam name and avatar, games finished and hours cleared, and the lists you pick in their Share panel. The whole backlog shows every game with its length and status, never notes or playtime. Changing the username breaks old profile links.
-        {me.profilePublic && me.handle && <> <a href={profilePath(me.handle)} onClick={e => { e.preventDefault(); settingsOpen.value = false; navigate(profilePath(me.handle!)); }}>View your profile →</a></>}
-      </p>
+      <div class="option">
+        <label class="check">
+          <input type="checkbox" checked={me.profilePublic} aria-describedby="profile-hint"
+            onChange={e => void save(e.currentTarget.checked ? { profilePublic: true, ...(typed !== me.handle ? { handle: typed } : {}) } : { profilePublic: false })} />
+          Public profile
+        </label>
+        <p class="hint" id="profile-hint">
+          Your Steam name and avatar, games finished and hours cleared, and the lists you pick in their Share panel.
+          {me.profilePublic && me.handle && <> <a href={profilePath(me.handle)} onClick={e => { e.preventDefault(); settingsOpen.value = false; navigate(profilePath(me.handle!)); }}>View your profile →</a></>}
+        </p>
+      </div>
+      <div class="option indented">
+        <form class="row-actions handle" onSubmit={e => { e.preventDefault(); void save({ handle: typed }); }}>
+          <label for="handle">Username</label>
+          <span class="prefix">{location.host}/u/</span>
+          <input id="handle" value={handle} maxLength={30} autoComplete="off" placeholder="your-name" aria-describedby="handle-hint" onInput={e => setHandle(e.currentTarget.value)} />
+          {me.handle && typed !== me.handle && <button type="submit" class="btn">Save</button>}
+        </form>
+        <p class="hint" id="handle-hint">Changing it breaks old profile links.</p>
+        {error && <p class="error" role="alert">{error}</p>}
+      </div>
+      <div class="option">
+        <label class="check">
+          <input type="checkbox" checked={me.showBacklog} disabled={!me.profilePublic} aria-describedby="backlog-hint"
+            onChange={e => void save({ showBacklog: e.currentTarget.checked })} />
+          Show my whole backlog
+        </label>
+        <p class="hint" id="backlog-hint">Every game with its length and status, never notes or playtime.</p>
+      </div>
     </>
   );
 }
