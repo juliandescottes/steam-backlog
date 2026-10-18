@@ -149,7 +149,7 @@ The client's cursor carries a `schema` number (`app/src/account.ts`): when sync 
 - Measured on a 761-game library (2026-10-17): 752 matched, 483 with Main or Main + Extras, 289 with 3+ submissions; 8 runs of 2–6 s.
 - Decode HTML entities in Steam names at import (`&amp;` appears in `GetOwnedGames` names).
 
-**Community lengths**
+**Community lengths** (off since 2026-10-18: `COMMUNITY_LENGTHS` unset, so `writeRows` writes nothing and `toGame` sends `community: null`; rows from before stay in D1. Turning it back on needs a `recompute` of every game.)
 - `community_lengths` gets one row per user and game and kind: `typed` when a user enters an exact length, `finished_playtime` when they mark a game Finished with playtime over 30 min, `endless` for No ending. Approximate guesses aren't recorded. Users who turn off sharing write no rows; turning it off deletes theirs.
 - `community_lengths` mirrors the user's games: the sync batch that changes a game rewrites its rows (`worker/src/community.ts`). Imported lengths (`myKind: "imported"`) aren't shared, and `/api/settings` `{ shareLengths }` deletes or rewrites all of a user's rows.
 - Then the Worker recomputes the game's `comm_main_extra`, `comm_count`, `comm_endless_count`. Each user counts once (typed Main + Extras, else finished playtime; No ending instead of either). The median limits idle-time outliers.

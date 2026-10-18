@@ -5,6 +5,7 @@ import { normalizeName } from "@backlog/shared/names";
 import { SHARE_ID } from "@backlog/shared/lists";
 import { HANDLE, type Profile, type SharedList } from "@backlog/shared/share";
 import type { Game } from "@backlog/shared/types";
+import { communityOn } from "./community.ts";
 import { HttpError } from "./http.ts";
 import { GAME_COLUMNS, toGame, type Row } from "./sync.ts";
 
@@ -64,12 +65,12 @@ export async function sharedList(env: Env, shareId: string): Promise<{ etag: str
        LEFT JOIN user_games ug ON ug.user_id = ?1 AND ug.appid = li.appid
        WHERE li.list_id = ?2 AND li.deleted = 0 ORDER BY li.position`,
     ).bind(l.user_id, l.id).all<Row & { updated_at: number }>()).results;
-    games = rows.map(r => toGame({ ...r, status: r.status ?? "backlog", note: r.note ?? "", playtime_min: r.playtime_min ?? 0, first_seen_at: r.first_seen_at ?? 0 }));
+    games = rows.map(r => toGame({ ...r, status: r.status ?? "backlog", note: r.note ?? "", playtime_min: r.playtime_min ?? 0, first_seen_at: r.first_seen_at ?? 0 }, communityOn(env)));
   } else {
     // Filter lists are computed here with the client's filter code; lengths by Main + Extras, the default measure
     rows = await allGames(env, l.user_id);
     const filter: Filter = l.filter_json ? JSON.parse(l.filter_json) : {};
-    games = rows.map(r => entry(toGame(r)))
+    games = rows.map(r => entry(toGame(r, communityOn(env))))
       .filter(e => matches(e, filter)).sort(compare(l.sort ?? "length")).map(e => e.game);
   }
   // A sum, not the latest: any one game's catalog row changing changes it
@@ -101,7 +102,7 @@ export async function profile(env: Env, handle: string): Promise<Profile | null>
        WHERE l.user_id = ? AND l.visibility = 'profile' AND l.deleted = 0 AND li.deleted = 0 ORDER BY li.position`,
     ).bind(u.id),
   ]);
-  const all = (rows.results as Row[]).map(r => entry(toGame(r)));
+  const all = (rows.results as Row[]).map(r => entry(toGame(r, communityOn(env))));
   const byAppid = new Map(all.map(e => [e.game.appid, e]));
   const finished = all.filter(e => e.game.status === "finished");
   const open = all.filter(e => e.game.status === "backlog" || e.game.status === "playing").sort(compare("length"));
@@ -140,7 +141,7 @@ export async function sharedBacklog(env: Env, handle: string): Promise<{ etag: s
   ).bind(handle).first<{ id: string; display_name: string; avatar_url: string | null; rev: number }>();
   if (!u) return null;
   const rows = await allGames(env, u.id);
-  const games = rows.map(r => entry(toGame(r))).sort(compare("length")).map(e => forViewers(e.game));
+  const games = rows.map(r => entry(toGame(r, communityOn(env)))).sort(compare("length")).map(e => forViewers(e.game));
   return {
     etag: `"${u.rev}-${rows.reduce((sum, r) => sum + r.updated_at, 0)}-${games.length}"`,
     data: { owner: { name: u.display_name, avatar: u.avatar_url, handle }, list: { title: "Backlog", description: "", kind: "filter", sort: "length" }, games },

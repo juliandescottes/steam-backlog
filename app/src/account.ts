@@ -17,7 +17,7 @@ export type Me = {
  * moved past them, so a cursor from an older schema starts over with a full sync. Bump it when sync responses gain a kind of data.
  */
 type Cursor = { since: number; catalogSince: number; schema?: number };
-const SCHEMA = 2; // 2: views, lists and items
+const SCHEMA = 3; // 2: views, lists and items; 3: community lengths off (LEN-15)
 
 export const account = signal<Me | null>(null);
 /** Steam library import, shown full screen on first sign-in. */

@@ -5,7 +5,7 @@ import { testWorker } from "./testing.ts";
 
 // Without a Steam API key, every dev sign-in imports the dev library: Portal (400) has 190 min of playtime
 let w: Awaited<ReturnType<typeof testWorker>>;
-beforeAll(async () => { w = await testWorker({ DEV_LOGIN: "true" }); });
+beforeAll(async () => { w = await testWorker({ DEV_LOGIN: "true", COMMUNITY_LENGTHS: "true" }); });
 afterAll(() => w.dispose());
 beforeEach(async () => {
   await w.env.DB.prepare("DELETE FROM community_lengths").run();
@@ -73,6 +73,21 @@ test("LEN-15: turning sharing off removes the user's entries, and on brings them
   expect(community(on, 620)?.main_extra).toBe(7);
   expect(community(on, 220)?.main_extra).toBe(9);
   expect((await w.call("POST", "/api/settings", { shareLengths: "no" })).status).toBe(400);
+});
+
+test("LEN-15: off by default: nothing is recorded and no community length is sent", async () => {
+  const off = await testWorker({ DEV_LOGIN: "true" });
+  try {
+    await off.call("POST", "/api/auth/dev", { steamId: "76561190000099999" });
+    await off.call("POST", "/api/library/refresh");
+    await off.env.DB.prepare("UPDATE games SET comm_main_extra = 9, comm_count = 5 WHERE appid = 400").run(); // recorded while it was on
+    const op = { id: "op-off", type: "game", appid: 620, at: 1, set: { ...typed(40), status: "finished", finishedAt: 1 } };
+    const r = (await (await off.call("POST", "/api/sync", { since: 0, catalogSince: 0, ops: [op] })).json()) as SyncResponse;
+    expect(await off.env.DB.prepare("SELECT count(*) AS n FROM community_lengths").first("n")).toBe(0);
+    expect(r.games.find(g => g.appid === 400)!.community).toBeNull();
+  } finally {
+    await off.dispose();
+  }
 });
 
 test("median", () => {

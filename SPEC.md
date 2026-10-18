@@ -53,8 +53,8 @@ IGDB has no time for a large share of most libraries (38% of the prototype colle
 - **LEN-12** The user's own length wins over IGDB and community lengths. The detail panel edits it, can remove it, and names the source: IGDB (with the number of submissions), Community, Yours, or Approximate.
 - **LEN-13** IGDB times with fewer than 3 submissions are approximate.
 - **LEN-14** Import lengths (Settings): a JSON or CSV file of Steam app ID + hours becomes the user's own lengths.
-- **LEN-15** Lengths the user types, and the Steam playtime of games they finish, are shared anonymously with the community. On by default, off in Settings (which removes them). Rough guesses and imported lengths are never shared; un-finishing takes the playtime back.
-- **LEN-16** Once a game has 3 or more community entries, other users see their median, labeled Community.
+- **LEN-15** Community lengths are off (a server switch, `COMMUNITY_LENGTHS`): nothing is recorded and none are shown. When on: lengths the user types, and the Steam playtime of games they finish, are shared anonymously, unless the user turned sharing off (which removes them). Rough guesses and imported lengths are never shared; un-finishing takes the playtime back.
+- **LEN-16** When community lengths are on, once a game has 3 or more community entries, other users see their median, labeled Community.
 
 ## 5. Statuses
 
@@ -118,7 +118,7 @@ A list is a named, ordered collection of games with an optional description, han
 - **SET-2** Length measure for sorting and totals: Main + Extras (default) or Main story.
 - **SET-3** A link to the user's Steam profile. (planned)
 
-Settings also holds the account, public profile, community sharing, import lengths, backup and delete controls covered above.
+Settings also holds the account, public profile, import lengths, backup and delete controls covered above.
 
 ## 11. Platforms
 
