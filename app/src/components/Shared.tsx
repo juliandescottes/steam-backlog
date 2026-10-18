@@ -70,8 +70,8 @@ function NotThere({ state, what }: { state: State<unknown>; what: string }) {
 }
 
 /** Someone's public profile: name, stats, and the lists they chose to show (SPEC §7). */
-export function ProfilePage({ handle }: { handle: string }) {
-  const state = useRemote<Profile>(`/api/u/${encodeURIComponent(handle)}`, false);
+export function ProfilePage({ id }: { id: string }) {
+  const state = useRemote<Profile>(`/api/u/${encodeURIComponent(id)}`, false);
   const p = state.kind === "ok" ? state.data : null;
   useEffect(() => {
     document.title = p ? `${p.name} on Backlog` : "Backlog";
@@ -90,7 +90,7 @@ export function ProfilePage({ handle }: { handle: string }) {
       </header>
       <main class="profile-lists">
         {p.backlog && (
-          <Go href={backlogPath(p.handle)} class="profile-list">
+          <Go href={backlogPath(p.id)} class="profile-list">
             <MiniCovers covers={p.backlog.covers} />
             <span class="profile-list-text">
               <b>Backlog</b>
@@ -151,8 +151,8 @@ export function SharedPage({ src, whole = false }: { src: string; whole?: boolea
     <div class="wrap shared">
       <header class="top">
         <div class="eyebrow-row">
-          {owner.handle
-            ? <Go href={profilePath(owner.handle)} class="eyebrow owner">
+          {owner.profileId
+            ? <Go href={profilePath(owner.profileId)} class="eyebrow owner">
                 {owner.avatar && <img src={owner.avatar} alt="" width={20} height={20} />}
                 {owner.name}'s {whole ? "games" : "list"}
               </Go>

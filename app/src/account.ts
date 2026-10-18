@@ -9,7 +9,7 @@ import {
 /** Account, Steam import and background sync (TECH.md §5, §7). Without an account the app stays local-only. */
 
 export type Me = {
-  id: string; steamId: string; handle: string | null; name: string; avatar: string | null; librarySyncedAt: number | null;
+  id: string; steamId: string; profileId: string; name: string; avatar: string | null; librarySyncedAt: number | null;
   shareLengths: boolean; profilePublic: boolean; showBacklog: boolean;
 };
 /**
@@ -130,15 +130,13 @@ export async function setShareLengths(shareLengths: boolean) {
   }
 }
 
-/** Public profile settings (username, on/off, whole backlog). Resolves to an error message, or null once saved. */
-export async function setProfile(change: Partial<Pick<Me, "handle" | "profilePublic" | "showBacklog">>): Promise<string | null> {
+/** Public profile settings (on/off, whole backlog). Resolves to an error message, or null once saved. */
+export async function setProfile(change: Partial<Pick<Me, "profilePublic" | "showBacklog">>): Promise<string | null> {
   const before = account.value;
   if (!before) return "Sign in first";
   try {
-    await api("POST", "/profile", { handle: change.handle, public: change.profilePublic, showBacklog: change.showBacklog });
-  } catch (e) {
-    if (e instanceof ApiError && e.code === "handle_taken") return "That username is taken";
-    if (e instanceof ApiError && e.code === "bad_handle") return "Use 2 to 30 lowercase letters, digits or dashes";
+    await api("POST", "/profile", { public: change.profilePublic, showBacklog: change.showBacklog });
+  } catch {
     return "Couldn't save. Try again when online.";
   }
   account.value = { ...account.value!, ...change };

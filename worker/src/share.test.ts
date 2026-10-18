@@ -14,33 +14,29 @@ let n = 0;
 const listOp = (listId: string, set: ListOp["set"]): Op => ({ id: `op-${++n}`, type: "list", listId, at: 1, set });
 const sync = async (ops: Op[]) => (await (await w.call("POST", "/api/sync", { since: 0, catalogSince: 0, ops })).json()) as SyncResponse;
 const LIST = { title: "Up <next>", description: "", kind: "manual", filter: null, sort: null, shareId: "upnext000001", visibility: "link", position: "i", deleted: false } as const;
-let handle = "", steamId = "";
+let profileId = "", steamId = "";
 
 /** A signed-in user with the dev library (Portal 400, Portal 2 620, Half-Life 2 220, Terraria 105600, Stardew 413150). */
 beforeEach(async () => {
   steamId = `76561190${String(++n).padStart(9, "0")}`;
   await w.call("POST", "/api/auth/dev", { steamId });
   await w.call("POST", "/api/library/refresh");
-  handle = `player-${n}`;
+  profileId = (await me()).profileId;
 });
 
-const me = async () => (await (await w.call("GET", "/api/me")).json()) as { handle: string | null; profilePublic: boolean; showBacklog: boolean };
+const me = async () => (await (await w.call("GET", "/api/me")).json()) as { profileId: string; profilePublic: boolean; showBacklog: boolean };
 
-test("profile settings: a valid, unique handle; on needs one", async () => {
-  expect((await w.call("POST", "/api/profile", { public: true })).status).toBe(400); // no handle yet
-  expect((await w.call("POST", "/api/profile", { handle: "Bad Name" })).status).toBe(400);
-  expect((await w.call("POST", "/api/profile", { handle: "-x" })).status).toBe(400);
+test("LIST-14: profile settings: every user gets a random profile id; each setting changes alone", async () => {
+  expect(profileId).toMatch(/^[0-9a-z]{12}$/);
+  expect(await me()).toMatchObject({ profilePublic: false, showBacklog: false });
   expect((await w.call("POST", "/api/profile", { public: "yes" })).status).toBe(400);
-  expect((await w.call("POST", "/api/profile", { handle, public: true })).status).toBe(200);
-  expect(await me()).toMatchObject({ handle, profilePublic: true, showBacklog: false });
+  expect((await w.call("POST", "/api/profile", { public: true })).status).toBe(200);
+  expect(await me()).toMatchObject({ profileId, profilePublic: true, showBacklog: false });
   expect((await w.call("POST", "/api/profile", { showBacklog: true })).status).toBe(200);
-  expect(await me()).toMatchObject({ handle, profilePublic: true, showBacklog: true }); // each setting changes alone
+  expect(await me()).toMatchObject({ profileId, profilePublic: true, showBacklog: true });
 
-  const mine = handle;
   await w.call("POST", "/api/auth/dev", { steamId: "76561190999999999" });
-  const taken = await w.call("POST", "/api/profile", { handle: mine });
-  expect(taken.status).toBe(409);
-  expect(await taken.json()).toEqual({ error: "handle_taken" });
+  expect((await me()).profileId).not.toBe(profileId);
 });
 
 test("LIST-14: a public profile: lists marked for it with their size, and stats; off is 404", async () => {
@@ -52,25 +48,25 @@ test("LIST-14: a public profile: lists marked for it with their size, and stats;
     listOp("pl3", { ...LIST, visibility: "link", shareId: "linkonly0001" }),
     { id: `op-${++n}`, type: "game", appid: 400, at: 1, set: { status: "finished", my: { main: null, main_extra: 4, comp: null }, myKind: "exact" } },
   ]);
-  expect((await w.call("GET", `/api/u/${handle}`)).status).toBe(404); // no handle yet
-  await w.call("POST", "/api/profile", { handle, public: true });
+  expect((await w.call("GET", `/api/u/${profileId}`)).status).toBe(404); // off by default
+  await w.call("POST", "/api/profile", { public: true });
   w.signOut();
-  const p = (await (await w.call("GET", `/api/u/${handle}`)).json()) as Profile;
+  const p = (await (await w.call("GET", `/api/u/${profileId}`)).json()) as Profile;
   expect(p).toEqual({
-    handle, name: "Dev user", avatar: null, stats: { finished: 1, hoursCleared: 4 }, backlog: null,
+    id: profileId, name: "Dev user", avatar: null, stats: { finished: 1, hoursCleared: 4 }, backlog: null,
     lists: [
       { shareId: "onprofile002", title: "Up <next>", description: "", kind: "filter", games: 1, hours: 4, covers: [400] },
       { shareId: "onprofile001", title: "Up <next>", description: "", kind: "manual", games: 2, hours: 4, covers: [620, 400] },
     ],
   });
   // Shared lists link to a public profile
-  expect(((await (await w.call("GET", "/api/s/linkonly0001")).json()) as SharedList).owner.handle).toBe(handle);
-  expect(await (await w.call("GET", `/u/${handle}`)).text()).toContain("<title>Dev user on Backlog</title>");
+  expect(((await (await w.call("GET", "/api/s/linkonly0001")).json()) as SharedList).owner.profileId).toBe(profileId);
+  expect(await (await w.call("GET", `/u/${profileId}`)).text()).toContain("<title>Dev user on Backlog</title>");
 
   await w.call("POST", "/api/auth/dev", { steamId }); // signed in again
   await w.call("POST", "/api/profile", { public: false });
-  expect((await w.call("GET", `/api/u/${handle}`)).status).toBe(404);
-  expect(((await (await w.call("GET", "/api/s/linkonly0001")).json()) as SharedList).owner.handle).toBeNull();
+  expect((await w.call("GET", `/api/u/${profileId}`)).status).toBe(404);
+  expect(((await (await w.call("GET", "/api/s/linkonly0001")).json()) as SharedList).owner.profileId).toBeNull();
 });
 
 test("LIST-10 LIST-11: a shared list: games in order with lengths and status, nothing private; 304 until something changes", async () => {
@@ -84,7 +80,7 @@ test("LIST-10 LIST-11: a shared list: games in order with lengths and status, no
   const res = await w.call("GET", `/api/s/upnext000001`);
   expect(res.status).toBe(200);
   const data = (await res.json()) as SharedList;
-  expect(data.owner).toEqual({ name: "Dev user", avatar: null, handle: null });
+  expect(data.owner).toEqual({ name: "Dev user", avatar: null, profileId: null });
   expect(data.list).toEqual({ title: "Up <next>", description: "", kind: "manual", sort: null });
   expect(data.games.map(g => g.name)).toEqual(["Half-Life 2", "Portal"]);
   expect(data.games[1]).toMatchObject({ status: "finished", my: { main: 3, main_extra: 4, comp: null }, note: "", playtimeMin: 0, lastPlayedAt: null, finishedAt: null });
@@ -128,17 +124,17 @@ test("LIST-13: share pages get a title and a link preview, escaped", async () =>
 
 test("LIST-15: the whole backlog, when the profile shows it", async () => {
   await sync([{ id: `op-${++n}`, type: "game", appid: 400, at: 1, set: { status: "finished", note: "secret", my: { main: null, main_extra: 4, comp: null }, myKind: "exact" } }]);
-  await w.call("POST", "/api/profile", { handle, public: true });
-  expect((await w.call("GET", `/api/u/${handle}/backlog`)).status).toBe(404); // not shown by default
+  await w.call("POST", "/api/profile", { public: true });
+  expect((await w.call("GET", `/api/u/${profileId}/backlog`)).status).toBe(404); // not shown by default
   await w.call("POST", "/api/profile", { showBacklog: true });
   w.signOut();
-  const res = await w.call("GET", `/api/u/${handle}/backlog`);
+  const res = await w.call("GET", `/api/u/${profileId}/backlog`);
   const data = (await res.json()) as SharedList;
   expect(data.list.title).toBe("Backlog");
   expect(data.games.map(g => g.name)).toEqual(["Portal", "Half-Life 2", "Portal 2", "Stardew Valley", "Terraria"]); // shortest first, unknown after
   expect(JSON.stringify(data)).not.toContain("secret");
-  expect((await w.call("GET", `/api/u/${handle}/backlog`, undefined, { "if-none-match": res.headers.get("etag")! })).status).toBe(304);
-  const p = (await (await w.call("GET", `/api/u/${handle}`)).json()) as Profile;
+  expect((await w.call("GET", `/api/u/${profileId}/backlog`, undefined, { "if-none-match": res.headers.get("etag")! })).status).toBe(304);
+  const p = (await (await w.call("GET", `/api/u/${profileId}`)).json()) as Profile;
   expect(p.backlog).toEqual({ games: 4, hours: 9, covers: [220, 620, 413150, 105600] }); // Half-Life 2 got 9 h in an earlier test
-  expect(await (await w.call("GET", `/u/${handle}/backlog`)).text()).toContain("<title>Dev user's backlog</title>");
+  expect(await (await w.call("GET", `/u/${profileId}/backlog`)).text()).toContain("<title>Dev user's backlog</title>");
 });

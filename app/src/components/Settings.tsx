@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import { parseExport, parseLibrary, type ExportFile } from "@backlog/shared/files";
 import type { Measure } from "@backlog/shared/types";
-import { profilePath, suggestHandle } from "@backlog/shared/share";
+import { profilePath } from "@backlog/shared/share";
 import { account, deleteAccount, refreshLibrary, setProfile, signIn, signOut, type Me } from "../account.ts";
 import { navigate } from "../route.ts";
 import {
@@ -35,33 +35,21 @@ function Radio<T extends string>({ name, value, options, onChange, describedBy }
   );
 }
 
-/** The public profile at /u/<handle>: off by default; turning it on needs a username. */
+/** The public profile at /u/<profile id>: off by default. */
 function ProfileSettings({ me }: { me: Me }) {
-  const [handle, setHandle] = useState(me.handle ?? suggestHandle(me.name));
   const [error, setError] = useState<string | null>(null);
   const save = async (change: Parameters<typeof setProfile>[0]) => setError(await setProfile(change));
-  const typed = handle.trim().toLowerCase();
   return (
     <>
       <div class="option">
         <label class="check">
-          <input type="checkbox" checked={me.profilePublic} aria-describedby="profile-hint"
-            onChange={e => void save(e.currentTarget.checked ? { profilePublic: true, ...(typed !== me.handle ? { handle: typed } : {}) } : { profilePublic: false })} />
+          <input type="checkbox" checked={me.profilePublic} aria-describedby="profile-hint" onChange={e => void save({ profilePublic: e.currentTarget.checked })} />
           Public profile
         </label>
         <p class="hint" id="profile-hint">
           Your Steam name and avatar, games finished and hours cleared, and the lists you pick in their Share panel.
-          {me.profilePublic && me.handle && <> <a href={profilePath(me.handle)} onClick={e => { e.preventDefault(); settingsOpen.value = false; navigate(profilePath(me.handle!)); }}>View your profile →</a></>}
+          {me.profilePublic && me.profileId && <> <a href={profilePath(me.profileId)} onClick={e => { e.preventDefault(); settingsOpen.value = false; navigate(profilePath(me.profileId)); }}>View your profile →</a></>}
         </p>
-      </div>
-      <div class="option indented">
-        <form class="row-actions handle" onSubmit={e => { e.preventDefault(); void save({ handle: typed }); }}>
-          <label for="handle">Username</label>
-          <span class="prefix">{location.host}/u/</span>
-          <input id="handle" value={handle} maxLength={30} autoComplete="off" placeholder="your-name" aria-describedby="handle-hint" onInput={e => setHandle(e.currentTarget.value)} />
-          {me.handle && typed !== me.handle && <button type="submit" class="btn">Save</button>}
-        </form>
-        <p class="hint" id="handle-hint">Changing it breaks old profile links.</p>
         {error && <p class="error" role="alert">{error}</p>}
       </div>
       <div class="option">

@@ -9,7 +9,7 @@ import { sync } from "./sync.ts";
 import type { SyncRequest } from "@backlog/shared/sync";
 
 const me = (u: User) => ({
-  id: u.id, steamId: u.steam_id, handle: u.handle, name: u.display_name, avatar: u.avatar_url, librarySyncedAt: u.library_synced_at,
+  id: u.id, steamId: u.steam_id, profileId: u.profile_id, name: u.display_name, avatar: u.avatar_url, librarySyncedAt: u.library_synced_at,
   shareLengths: JSON.parse(u.settings_json).shareLengths !== false,
   profilePublic: u.profile_public === 1,
   showBacklog: JSON.parse(u.settings_json).showBacklog === true,
@@ -25,7 +25,7 @@ async function route(req: Request, env: Env, ctx: ExecutionContext, url: URL): P
 
   const shared = req.method === "GET" && url.pathname.match(/^\/api\/(?:s\/([^/]+)|u\/([^/]+)\/backlog)$/);
   if (shared) {
-    const r = shared[1] ? await sharedList(env, shared[1]) : await sharedBacklog(env, decodeURIComponent(shared[2]));
+    const r = shared[1] ? await sharedList(env, shared[1]) : await sharedBacklog(env, shared[2]);
     if (!r) throw new HttpError(404, "not_found");
     const headers = { etag: r.etag, "cache-control": "no-cache" };
     if (req.headers.get("if-none-match") === r.etag) return new Response(null, { status: 304, headers });
@@ -33,7 +33,7 @@ async function route(req: Request, env: Env, ctx: ExecutionContext, url: URL): P
   }
   const user = req.method === "GET" && url.pathname.match(/^\/api\/u\/([^/]+)$/);
   if (user) {
-    const p = await profile(env, decodeURIComponent(user[1]));
+    const p = await profile(env, user[1]);
     if (!p) throw new HttpError(404, "not_found");
     return json(p, { headers: { "cache-control": "no-cache" } });
   }

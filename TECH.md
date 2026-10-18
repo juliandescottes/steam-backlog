@@ -46,7 +46,7 @@ games        (appid PK, name, has_portrait_art, igdb_id,
 community_lengths (user_id, appid, kind /*typed|finished_playtime|endless*/,
               main, main_extra, comp, created_at, PK(user_id, appid, kind))
 
-users        (id PK, steam_id UNIQUE, handle UNIQUE NULL, display_name, avatar_url,
+users        (id PK, steam_id UNIQUE, profile_id UNIQUE, handle /*unused since 0006*/, display_name, avatar_url,
               profile_public, settings_json, library_synced_at, created_at)
 sessions     (id PK, user_id, expires_at)
 
@@ -79,7 +79,7 @@ user_rev     (user_id PK, rev)   -- last rev handed out
 
 **Rendering.** Cover grid with fixed-height cards (2:3 cover, fixed text block) and `loading="lazy"` images. Each band mounts only the rows within a screen of the viewport, with spacers for the rest: mounting all cards took ~450 ms at 3,000 games on an M1 Pro (profiled 2026-10-17), and `content-visibility` didn't help. Portrait art (`library_600x900.jpg`) with `header.jpg` fallback via `onerror`, as in the prototype; record the fallback in the catalog (`has_portrait_art`) so later loads skip the failing request.
 
-**Routing.** A small hand-written router (`app/src/route.ts`, no dependency): `/` library, `/l/:shareId` a list (the owner's page when the list is in this browser, the read-only shared page otherwise); `/l/<internal id>` and `/s/:shareId` (older addresses) redirect to it; later `/u/:handle`. The share routes are their own lazily loaded chunk, so viewers download little.
+**Routing.** A small hand-written router (`app/src/route.ts`, no dependency): `/` library, `/l/:shareId` a list (the owner's page when the list is in this browser, the read-only shared page otherwise); `/l/<internal id>` and `/s/:shareId` (older addresses) redirect to it; `/u/:profileId` a public profile. The share routes are their own lazily loaded chunk, so viewers download little.
 
 **Keyboard and palette.** A global key handler maps keys to commands, skipping text inputs. Grid focus moves by computing columns from the grid's measured width. The palette searches over games, views, lists and actions, with simple ranking (prefix > word start > substring).
 
@@ -115,7 +115,7 @@ The client's cursor carries a `schema` number (`app/src/account.ts`): when sync 
 3. Upsert the user, fetching the name and avatar via `ISteamUser/GetPlayerSummaries`. Create a session: random 32-byte ID in `sessions`, sent as an `HttpOnly; Secure; SameSite=Lax` cookie, valid 30 days and refreshed on use.
 4. Mutating endpoints also require an `X-Requested-With` header, which forms can't set (CSRF protection on top of SameSite).
 
-**Handles.** `/u/<handle>` needs a unique name. The first time a user shares something, prompt for a handle, suggesting their Steam vanity URL or persona name, slugified. It can be changed in Settings; old links break (acceptable for v1).
+**Profile ids.** `/u/<profile_id>`: 12 random base-36 characters, set when the account is made (migration 0006 gave existing users one). Replaced usernames on 2026-10-18: no conflicts or squatting to handle, and `/u/<username>` links stopped working.
 
 ## 7. Library import
 
@@ -171,10 +171,10 @@ The result carries its source and an approximate flag for the badge and detail p
 
 - **Manual lists** store items in `list_items`. **Filter lists** store `filter_json` + `sort` and have no items.
 - **Filter engine** lives in `shared/filter.ts`: one JSON format (status set, length range, played/never launched, added before/after, name contains) and one `evaluate(filter, games)` function. The client uses it for views and filter lists; the Worker uses the same code to compute filter lists for viewers.
-- Share links are `/l/<shareId>` (decided 2026-10-17; briefly `/s/`, still redirected: a handle and a slug were too many steps; the handle is only for the public profile). `GET /api/s/:shareId` (`worker/src/share.ts`) returns list metadata, the owner's display name and avatar, and the games as client `Game`s with notes, playtime and dates blanked. `private`, deleted and missing lists all return 404. Filter lists are computed on the server by Main + Extras (the owner's measure is a local setting).
+- Share links are `/l/<shareId>` (decided 2026-10-17; briefly `/s/`, still redirected: a handle and a slug were too many steps). `GET /api/s/:shareId` (`worker/src/share.ts`) returns list metadata, the owner's display name and avatar, and the games as client `Game`s with notes, playtime and dates blanked. `private`, deleted and missing lists all return 404. Filter lists are computed on the server by Main + Extras (the owner's measure is a local setting).
 - **Live updates:** the response carries an `ETag` from the owner's `rev`, the sum of the games' catalog `updated_at` and the game count. The viewer page re-fetches with `If-None-Match` when it regains focus and every 30 s while visible, so unchanged lists cost a 304.
 - **Link previews:** `/l/*` and `/s/*` run the Worker first (`run_worker_first`); it serves `index.html` with the `<title>` replaced (plain string replace, so tests run in Node), injecting `og:title`, `og:description` ("12 games · 48 h") and an `og:image` (the first cover), so links look good in chats.
-- `GET /api/u/:handle` returns the public profile (name, avatar, stats) and the lists marked `profile` with their size, hours and first covers, or 404 when the profile is off. `GET /api/u/:handle/backlog` returns the whole library as a `SharedList` (ETag like lists) when `settings_json.showBacklog` is on. `POST /api/profile { handle?, public?, showBacklog? }` sets them; turning it on needs a handle. Shared lists carry the owner's handle only when the profile is on.
+- `GET /api/u/:profileId` returns the public profile (name, avatar, stats) and the lists marked `profile` with their size, hours and first covers, or 404 when the profile is off. `GET /api/u/:profileId/backlog` returns the whole library as a `SharedList` (ETag like lists) when `settings_json.showBacklog` is on. `POST /api/profile { public?, showBacklog? }` sets them. Shared lists carry the owner's profile id only when the profile is on.
 
 ## 10. Export / import and account deletion
 
@@ -206,7 +206,7 @@ Each one ends with something usable.
 1. **Local app + statuses.** Workspace setup, Preact app with the prototype's look: bands, cover grid, detail panel, statuses with undo, filters/sort/search, export/import, the fill-in flow for missing lengths and lengths import. No backend yet: a dev script converts `tools/hltb_results.json` + the CSV into an export file to load the prototype library. Deployed to `baquelogue.com`.
 2. **Speed layer.** Keyboard navigation, bulk select, command palette, smart views, Now playing shelf, header progress.
 3. **Accounts, import, sync.** Worker + D1, Steam sign-in, library refresh, sync endpoint and outbox, IGDB enrichment cron, community lengths, triage prompt, account deletion.
-4. **Lists and sharing.** Manual and filter lists, handles, share pages with polling and link previews, public profile. (Copy to my backlog and Steam collections import were dropped.)
+4. **Lists and sharing.** Manual and filter lists, share pages with polling and link previews, public profile. (Copy to my backlog and Steam collections import were dropped.)
 
 ## 14. Risks and open points
 
