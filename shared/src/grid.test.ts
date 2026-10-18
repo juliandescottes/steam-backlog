@@ -5,7 +5,7 @@ import { move } from "./grid.ts";
 //                          4 5     |
 const shelves = [[1, 2, 3, 4, 5], [10, 11]];
 
-test("left and right follow reading order across shelves", () => {
+test("FIND-7: left and right follow reading order across shelves", () => {
   expect(move(shelves, 3, 2, "right")).toBe(3);
   expect(move(shelves, 3, 3, "right")).toBe(4);
   expect(move(shelves, 3, 5, "right")).toBe(10);
@@ -14,7 +14,7 @@ test("left and right follow reading order across shelves", () => {
   expect(move(shelves, 3, 11, "right")).toBe(11);
 });
 
-test("up and down keep the column, across shelves", () => {
+test("FIND-7: up and down keep the column, across shelves", () => {
   expect(move(shelves, 3, 2, "down")).toBe(5);
   expect(move(shelves, 3, 3, "down")).toBe(5); // partial row below: its last card
   expect(move(shelves, 3, 5, "down")).toBe(11);

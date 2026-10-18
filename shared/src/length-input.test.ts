@@ -6,7 +6,7 @@ const single = (s: string) => {
   return r?.kind === "single" ? r.hours : r;
 };
 
-describe("parseLengthInput", () => {
+describe("LEN-5 LEN-6: parseLengthInput", () => {
   it.each([
     ["12", 12], ["12.5", 12.5], ["12,5", 12.5], ["12½", 12.5], ["½", 0.5], ["12 ¼", 12.25],
     ["12h30", 12.5], ["12:45", 12.75], ["12 h", 12], ["3 hours", 3], ["45m", 0.75], ["45 mins", 0.75],

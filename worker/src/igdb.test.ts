@@ -100,7 +100,7 @@ test("does nothing without Twitch credentials", async () => {
   expect(calls).toEqual([]);
 });
 
-test("new games get lengths right after an import, and sync sends them", async () => {
+test("ONB-4: new games get lengths right after an import, and sync sends them", async () => {
   await w.env.DB.prepare("DELETE FROM games").run();
   stubApis([{ appid: 10, name: "Matched by Steam" }]);
   await w.call("POST", "/api/auth/dev", { steamId: "76561198000000100" });

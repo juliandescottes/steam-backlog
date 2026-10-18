@@ -59,12 +59,12 @@ test("ops set fields, and later syncs return only what changed", async () => {
   expect(undo.rev).toBeGreaterThan(r.rev);
 });
 
-test("several ops on one game in one request: the last one wins per field", async () => {
+test("SYNC-2: several ops on one game in one request: the last one wins per field", async () => {
   const r = await sync(0, [op(3, { status: "playing", statusAt: 1 }), op(3, { status: "dropped", statusAt: 2 }), op(3, { note: "meh" })]);
   expect(r.games.find(g => g.appid === 3)).toMatchObject({ status: "dropped", statusAt: 2, note: "meh" });
 });
 
-test("a retried op is not applied twice", async () => {
+test("SYNC-2: a retried op is not applied twice", async () => {
   const first = op(1, { status: "playing", statusAt: 1 }, "same-id");
   await sync(0, [first]);
   await sync(0, [op(1, { status: "finished", statusAt: 2, finishedAt: 2 })]);
@@ -94,7 +94,7 @@ test("catalog changes come back without a rev change", async () => {
   expect(next.games[0].igdb).toEqual({ main: 4, main_extra: 6, comp: null, count: 9 });
 });
 
-test("users only see and change their own games", async () => {
+test("SYNC-3: users only see and change their own games", async () => {
   await sync(0, [op(1, { note: "mine" })]);
   await w.call("POST", "/api/auth/dev", { steamId: "76561199999999999" });
   const other = await sync(0, [op(1, { note: "theirs" })]);
@@ -121,7 +121,7 @@ test("views: create, edit, delete; each change comes back once, with games in th
   expect((await sync(0)).views.map(v => [v.id, v.deleted])).toEqual([["v1", true]]);
 });
 
-test("another user can't touch a view by guessing its id; bad view ops are dropped", async () => {
+test("SYNC-3: another user can't touch a view by guessing its id; bad view ops are dropped", async () => {
   await sync(0, [viewOp("shared-id", { name: "Mine", filter: {}, sort: "name", position: "a", deleted: false })]);
   await w.call("POST", "/api/auth/dev", { steamId: `76561198${String(++n).padStart(9, "0")}` });
   const r = await sync(0, [
@@ -156,7 +156,7 @@ test("lists and their games: create, reorder, remove, delete, in one rev sequenc
   expect(deleted.lists).toEqual([expect.objectContaining({ id: "l1", deleted: true })]);
 });
 
-test("another user can't touch a list or add games to it, nor take its share id; bad list ops are dropped", async () => {
+test("SYNC-3: another user can't touch a list or add games to it, nor take its share id; bad list ops are dropped", async () => {
   await sync(0, [listOp("their-list", { ...NEW_LIST, shareId: "theirs000001" }), itemOp("their-list", 1, { position: "i", deleted: false })]);
   await w.call("POST", "/api/auth/dev", { steamId: `76561198${String(++n).padStart(9, "0")}` });
   const r = await sync(0, [

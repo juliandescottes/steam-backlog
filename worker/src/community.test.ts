@@ -24,14 +24,14 @@ async function set(appid: number, s: Partial<GameFields>): Promise<SyncResponse>
 const typed = (h: number) => ({ my: { main: null, main_extra: h, comp: null }, myKind: "exact" as const });
 const community = (r: SyncResponse, appid: number) => r.games.find(g => g.appid === appid)!.community;
 
-test("typed lengths from three users become the game's community length", async () => {
+test("LEN-15 LEN-16: typed lengths from three users become the game's community length", async () => {
   for (const h of [10, 12, 30]) { await newUser(); await set(620, typed(h)); }
   await newUser();
   const r: SyncResponse = await (await w.call("POST", "/api/sync", { since: 0, catalogSince: 0, ops: [] })).json();
   expect(community(r, 620)).toEqual({ main_extra: 12, count: 3, endlessCount: 0 });
 });
 
-test("rough guesses and imported lengths aren't shared", async () => {
+test("LEN-15: rough guesses and imported lengths aren't shared", async () => {
   await newUser();
   await set(620, { my: { main: null, main_extra: 6, comp: null }, myKind: "approx" });
   const r = await set(220, { my: { main: 8, main_extra: 9, comp: 20 }, myKind: "imported" });
@@ -39,7 +39,7 @@ test("rough guesses and imported lengths aren't shared", async () => {
   expect(community(r, 220)).toBeNull();
 });
 
-test("finishing a game shares its playtime; un-finishing takes it back", async () => {
+test("LEN-15: finishing a game shares its playtime; un-finishing takes it back", async () => {
   await newUser();
   expect(community(await set(400, { status: "finished", finishedAt: 1 }), 400)).toEqual({ main_extra: 3.25, count: 1, endlessCount: 0 });
   expect(community(await set(620, { status: "finished", finishedAt: 1 }), 620)).toBeNull(); // never launched
@@ -58,7 +58,7 @@ test("No ending counts separately", async () => {
   expect(community(await set(400, { my: null, myKind: "endless" }), 400)).toEqual({ main_extra: null, count: 0, endlessCount: 1 });
 });
 
-test("turning sharing off removes the user's entries, and on brings them back", async () => {
+test("LEN-15: turning sharing off removes the user's entries, and on brings them back", async () => {
   await newUser();
   expect(await (await w.call("GET", "/api/me")).json()).toMatchObject({ shareLengths: true });
   await set(620, typed(7));
@@ -82,7 +82,7 @@ test("median", () => {
   expect(median([10, 11, 12, 500])).toBe(11.5);
 });
 
-test("deleting an account removes all its data and its community entries", async () => {
+test("DATA-3: deleting an account removes all its data and its community entries", async () => {
   await newUser();
   await set(620, typed(40));
   const steamId = `765611900000${String(users).padStart(5, "0")}`;

@@ -4,8 +4,8 @@ const COUNT = Number(process.env.PERF_GAMES ?? 3000);
 const BUDGET_MS = 100;
 const CPU_SLOWDOWN = Number(process.env.CPU_SLOWDOWN ?? 4); // a mid-range phone, roughly
 
-// Timings suffer when other tests run in parallel
-test.describe.configure({ retries: 2 });
+// Timings depend on the machine and suffer when other tests run in parallel: `npm run perf` only
+const TIMED = !!process.env.PERF;
 
 /** A library shaped like the prototype's: ~38% without a length, a quarter with playtime. */
 function library() {
@@ -34,7 +34,8 @@ function timed(page: Page, action: string): Promise<number> {
   }, action);
 }
 
-test(`${COUNT.toLocaleString("en")} games, ${CPU_SLOWDOWN}x slower CPU: search, filter and status changes render within 100 ms`, async ({ page }) => {
+test(`PRIN-5: ${COUNT.toLocaleString("en")} games, ${CPU_SLOWDOWN}x slower CPU: search, filter and status changes render within 100 ms`, async ({ page }) => {
+  test.skip(!TIMED, "timings: npm run perf");
   await page.route("**/*steamstatic.com/**", r => r.abort());
   await page.goto("/");
   await page.setInputFiles("input[type=file]", { name: "library.json", mimeType: "application/json", buffer: Buffer.from(library()) });
@@ -79,7 +80,7 @@ test(`${COUNT.toLocaleString("en")} games, ${CPU_SLOWDOWN}x slower CPU: search, 
   for (const [name, ms] of Object.entries(results)) expect(ms, name).toBeLessThan(BUDGET_MS);
 });
 
-test("only cards near the screen are mounted, and they follow the scroll", async ({ page }) => {
+test("PRIN-1: only cards near the screen are mounted, and they follow the scroll", async ({ page }) => {
   await page.route("**/*steamstatic.com/**", r => r.abort());
   await page.goto("/");
   await page.setInputFiles("input[type=file]", { name: "library.json", mimeType: "application/json", buffer: Buffer.from(library()) });
@@ -95,4 +96,40 @@ test("only cards near the screen are mounted, and they follow the scroll", async
   await page.keyboard.press("End");
   await expect(unknown.locator(".game").last()).toBeInViewport();
   await expect(unknown.locator(".shelf-spacer")).toHaveCount(1); // only above
+});
+
+test("PRIN-1: a status change only renders and touches the changed card", async ({ page }) => {
+  await page.route("**/*steamstatic.com/**", r => r.abort());
+  await page.goto("/");
+  await page.setInputFiles("input[type=file]", { name: "library.json", mimeType: "application/json", buffer: Buffer.from(library()) });
+  await expect(page.locator("h1")).toContainText(`${COUNT.toLocaleString("en")} games`);
+  // One game Playing first, so the Now playing shelf exists and doesn't push the grid down
+  await page.locator(".bands .game button.cover").first().focus();
+  await page.keyboard.press("p");
+  await expect(page.getByRole("region", { name: "Now playing" })).toBeVisible();
+  const cover = page.locator(".bands .game button.cover").nth(1);
+  const appid = await cover.evaluate(el => el.closest<HTMLElement>(".game")!.dataset.appid);
+  await cover.focus();
+
+  // Watch the grid once art fallbacks (covers blocked above) have stopped changing it
+  await page.evaluate(async () => {
+    const w = window as any;
+    w.touched = new Set<string>();
+    let last = performance.now();
+    new MutationObserver(list => {
+      last = performance.now();
+      for (const m of list) {
+        const el = m.target instanceof Element ? m.target : m.target.parentElement;
+        w.touched.add(el?.closest<HTMLElement>(".game")?.dataset.appid ?? el?.className ?? "?");
+      }
+    }).observe(document.querySelector(".bands")!, { subtree: true, childList: true, attributes: true, characterData: true });
+    while (performance.now() - last < 500) await new Promise(r => setTimeout(r, 100));
+    w.touched.clear();
+    w.cardRenders.length = 0; // counted by main.tsx in dev
+  });
+  await page.keyboard.press("p");
+  await expect(page.locator(`.bands .game[data-appid="${appid}"] .status-chip`)).toHaveText("Playing");
+  await page.waitForTimeout(300);
+  expect(await page.evaluate(() => [...(window as any).touched])).toEqual([appid]);
+  expect(await page.evaluate(() => [...new Set((window as any).cardRenders.map(String))])).toEqual([appid]);
 });

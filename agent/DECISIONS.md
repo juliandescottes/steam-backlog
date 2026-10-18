@@ -16,10 +16,16 @@ Newest last. Don't reverse these without asking.
 - **Quick actions (P/F/D):** bottom-right column; hidden on touch screens.
 - **Hours display:** quarters under 3 h, whole hours above, no space before the unit (`1.75h`, `113h`). Stored to the quarter hour; detail panel shows the stored value.
 - **Approximate lengths:** no "~" on covers; dotted band edge plus a tooltip with the reason. Normal cursor.
-- **Windowed shelves:** bands mount only rows near the screen; cards have a fixed height. Perf budget checked at 4x CPU slowdown (`e2e/perf.spec.ts`).
+- **Windowed shelves:** bands mount only rows near the screen; cards have a fixed height. Perf budget checked at 4x CPU slowdown (`npm run perf`).
 - **Hosting:** one Worker with static assets (not Pages) at `baquelogue.com`; API joins it in M3. No `workers.dev` URL: local data is per origin.
 - **Milestone 3 before 2**, so others can use the live app.
 - **Sync ops carry field values**, not actions; last writer wins per field.
 - **First sign-in merges local data** into the account (owned games only); sign-out clears the browser.
 - **Share links are `/l/<random id>`**, one click to share; viewers see the Steam name. It is also the owner's list page address (owner view when the list is in the browser). The handle (`/u/<handle>`) is only for the public profile. A handle plus a slug per list was too many steps.
 - **Dropped from v1:** "Copy to my backlog" on shared lists, and Steam collections import. Not important enough (a patch of the copy feature was built and not committed).
+
+## 2026-10-18
+
+- **Spec as numbered rules**, each cited by a test title (`tools/spec.test.ts`). Why: guard against drift as fixes pile up. Rejected: a separate spec repo (spec, test and code must change in one commit), Gherkin (ceremony).
+- **Leaving Finished clears the finish date**; the date can be edited in the detail panel. Why: a game moved back to Playing shouldn't count as finished on a date.
+- **Perf tests check work, not time.** `npm run e2e` asserts what's mounted and rendered; the 100 ms budget runs in `npm run perf` only. Why: timings depend on the machine, so a slower one would fail with nothing wrong.

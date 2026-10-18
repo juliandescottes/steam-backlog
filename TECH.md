@@ -187,7 +187,7 @@ The result carries its source and an approximate flag for the badge and detail p
 - **Vitest** for `shared/` (filter engine, bands, rounding, length resolution and input parsing, export round-trip) and the client store (commands, undo, outbox merge).
 - **Worker tests** with `@cloudflare/vitest-pool-workers` against a local D1: sync semantics (idempotency, conflicts, `rev` ordering), share visibility, no notes leaking. Steam and IGDB calls stubbed.
 - **Playwright** for the main flows: status change + undo, bulk select, create and share a list, view it signed out.
-- A perf check in Playwright: load a 3,000-game fixture and assert filtering and a status change render within 100 ms.
+- Perf checks in Playwright on a 3,000-game fixture: in `npm run e2e`, only cards near the screen are mounted and a status change renders only that card (dev builds count card renders); timings within 100 ms at 4x CPU slowdown in `npm run perf` only, since they depend on the machine.
 
 ## 12. Deployment
 

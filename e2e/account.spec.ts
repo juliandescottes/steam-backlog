@@ -16,7 +16,7 @@ async function signIn(page: Page, id: string) {
 
 const card = (page: Page, name: string) => page.locator(".bands .game").filter({ has: page.locator(".name", { hasText: new RegExp(`^${name}$`) }) });
 
-test("sign in, import the Steam library, and see a change on another device", async ({ page, browser }) => {
+test("ONB-2 SYNC-1: sign in, import the Steam library, and see a change on another device", async ({ page, browser }) => {
   const id = steamId();
   await signIn(page, id);
   await expect(page.locator(".bands .game .name")).toHaveText(DEV_GAMES);
@@ -35,7 +35,7 @@ test("sign in, import the Steam library, and see a change on another device", as
   await other.close();
 });
 
-test("what was done before signing in comes along", async ({ page }) => {
+test("ONB-8: what was done before signing in comes along", async ({ page }) => {
   await page.route("**/*steamstatic.com/**", r => r.abort());
   await page.goto("/");
   const library = { format: "backlog-library", version: 1, games: [{ appid: 620, name: "Portal 2" }, { appid: 999999, name: "Not on Steam" }] };
@@ -68,7 +68,7 @@ test("what was done before signing in comes along", async ({ page }) => {
   await expect(view).toBeVisible();
 });
 
-test("sign out clears this browser", async ({ page }) => {
+test("ONB-9: sign out clears this browser", async ({ page }) => {
   await signIn(page, steamId());
   await expect(page.locator(".bands .game")).toHaveCount(5);
   await page.getByRole("button", { name: "Settings" }).click();
@@ -80,7 +80,7 @@ test("sign out clears this browser", async ({ page }) => {
   expect((await page.request.get("/api/me")).status()).toBe(401);
 });
 
-test("another account signing in on this browser gets its own library", async ({ page }) => {
+test("ONB-9: another account signing in on this browser gets its own library", async ({ page }) => {
   await signIn(page, steamId());
   await card(page, "Portal 2").locator("button.cover").focus();
   await page.keyboard.press("p");
@@ -106,7 +106,7 @@ test("another account signing in on this browser gets its own library", async ({
   await expect(page.locator(".bands .game .name")).toHaveText(DEV_GAMES);
 });
 
-test("deleting the account offers a backup, then removes everything", async ({ page }) => {
+test("DATA-3 PRIN-2: deleting the account offers a backup, then removes everything", async ({ page }) => {
   const id = steamId();
   await signIn(page, id);
   await expect(page.locator(".bands .game .name")).toHaveText(DEV_GAMES);
@@ -125,7 +125,7 @@ test("deleting the account offers a backup, then removes everything", async ({ p
   await expect(page.locator(".status-chip")).toHaveCount(0);
 });
 
-test("views sync between devices, deletes included", async ({ page, browser }) => {
+test("FIND-6 SYNC-1: views sync between devices, deletes included", async ({ page, browser }) => {
   const id = steamId();
   await signIn(page, id);
   await expect(page.locator(".bands .game .name")).toHaveText(DEV_GAMES);
@@ -151,7 +151,7 @@ test("views sync between devices, deletes included", async ({ page, browser }) =
   await other.close();
 });
 
-test("lists and their order sync between devices, and come along on first sign-in", async ({ page, browser }) => {
+test("LIST-8 ONB-8: lists and their order sync between devices, and come along on first sign-in", async ({ page, browser }) => {
   // Made before signing in
   await page.route("**/*steamstatic.com/**", r => r.abort());
   await page.goto("/");
@@ -195,7 +195,7 @@ test("lists and their order sync between devices, and come along on first sign-i
   await other.close();
 });
 
-test("share a list: one click for a link, viewers see it signed out, changes show up, private hides it", async ({ page, browser }) => {
+test("LIST-7 LIST-9 LIST-10 LIST-12: share a list: one click for a link, viewers see it signed out, changes show up, private hides it", async ({ page, browser }) => {
   const id = steamId();
   await signIn(page, id);
   await expect(page.locator(".bands .game .name")).toHaveText(DEV_GAMES);
@@ -257,7 +257,7 @@ test("share a list: one click for a link, viewers see it signed out, changes sho
   await other.close();
 });
 
-test("public profile: off until turned on with a username, shows the lists picked for it", async ({ page, browser }) => {
+test("LIST-14 LIST-15: public profile: off until turned on with a username, shows the lists picked for it", async ({ page, browser }) => {
   const id = steamId();
   await signIn(page, id);
   await expect(page.locator(".bands .game .name")).toHaveText(DEV_GAMES);
@@ -322,7 +322,7 @@ test("public profile: off until turned on with a username, shows the lists picke
   await expect(viewer.locator("h1")).toHaveText("Profile not found");
 });
 
-test("a browser that synced with older code, which skipped lists, gets them in full once", async ({ page }) => {
+test("LIST-8: a browser that synced with older code, which skipped lists, gets them in full once", async ({ page }) => {
   await signIn(page, steamId());
   await expect(page.locator(".bands .game .name")).toHaveText(DEV_GAMES);
   for (const name of ["Portal", "Terraria"]) await card(page, name).getByRole("checkbox").click();

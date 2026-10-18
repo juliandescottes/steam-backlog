@@ -22,7 +22,7 @@ const rows = async (steamId: string) => (await w.env.DB.prepare(
    FROM user_games ug JOIN games g USING (appid) JOIN users u ON u.id = ug.user_id WHERE u.steam_id = ? ORDER BY appid`,
 ).bind(steamId).all()).results;
 
-test("imports the library, then only bumps rows that changed", async () => {
+test("STATUS-1 ONB-6: imports the library as Backlog, then only bumps rows that changed", async () => {
   await w.call("POST", "/api/auth/dev", { steamId: "76561198000000010" });
   const steam = stubOwned({ games: [
     { appid: 10, name: "Counter-Strike", playtime_forever: 120, rtime_last_played: 1_600_000_000 },
@@ -68,7 +68,7 @@ test("keeps a known name when Steam has none (delisted apps)", async () => {
   expect((await rows("76561198000000012"))[0].name).toBe("Real Name");
 });
 
-test("a private profile is an error the client can explain", async () => {
+test("ONB-3: a private profile is an error the client can explain", async () => {
   await w.call("POST", "/api/auth/dev", { steamId: "76561198000000013" });
   stubOwned({});
   const res = await w.call("POST", "/api/library/refresh");

@@ -1,4 +1,4 @@
-import { render } from "preact";
+import { options, render } from "preact";
 import { lazy, Suspense } from "preact/compat";
 import { importing, initAccount } from "./account.ts";
 import { Detail } from "./components/Detail.tsx";
@@ -16,6 +16,18 @@ import { installKeys } from "./keys.ts";
 import { route } from "./route.ts";
 import { fillInQueue, games, listsOpen, viewing, load, loaded, openId, paletteOpen, pickerFor, settingsOpen, shortcutsOpen } from "./store.ts";
 import "./styles.css";
+
+// Dev only: which cards rendered, for e2e/perf.spec.ts
+if (import.meta.env.DEV) {
+  const w = window as unknown as { cardRenders: number[] };
+  w.cardRenders = [];
+  const diffed = options.diffed;
+  options.diffed = vnode => {
+    const props = vnode.props as { e?: { game: { appid: number } } };
+    if (typeof vnode.type === "function" && vnode.type.name === "Card" && props.e) w.cardRenders.push(props.e.game.appid);
+    diffed?.(vnode);
+  };
+}
 
 // Viewers of a shared list download this part only when they open one
 const SharedPage = lazy(() => import("./components/Shared.tsx").then(m => ({ default: m.SharedPage })));

@@ -7,7 +7,7 @@ import type { Game } from "./types.ts";
 const game = (over: Partial<Game> = {}): Game => ({ ...newGame({ appid: 10, name: "Test" }, 0), ...over });
 const igdb = (main_extra: number | null, count: number) => ({ main: null, main_extra, comp: null, count });
 
-describe("resolveLength", () => {
+describe("LEN-8 LEN-12 LEN-13 LEN-16 SET-2: resolveLength", () => {
   it("is unknown without data", () => {
     const r = resolveLength(game(), "main_extra");
     expect(r).toMatchObject({ hours: null, source: null, endless: false });
@@ -65,7 +65,7 @@ describe("resolveLength", () => {
   });
 });
 
-describe("bands and formatting", () => {
+describe("LIB-3 LIB-4: bands and formatting", () => {
   const band = (hours: number) => bandOf({ hours, lengths: null, source: "igdb", approx: false, endless: false }).id;
   it("places band edges in the longer band", () => {
     expect(band(2.99)).toBe("under-3");

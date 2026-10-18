@@ -1,101 +1,132 @@
 # Backlog tracker: user-facing spec
 
-What people see and do in the app. Decisions so far: four statuses, live curated lists that can be shared, Steam sign-in, Steam games only for v1. Technical design is a separate document.
+What people see and do in the app. Technical design is in `TECH.md`.
+
+Each rule has a bold ID like STATUS-4 and a test that cites it in its title, checked by `tools/spec.test.ts`. `(manual)`: checked by hand in the browser. `(planned)`: not built yet. Prose between rules is context, not contract.
 
 ## 1. Principles
-- **Instant.** Every action (status change, filter, sort, search) applies in under 100 ms with no spinner. Network sync happens in the background.
-- **No confirmation dialogs.** Destructive or bulk actions show an undo toast instead.
-- **Covers are the interface.** Box art grid, minimal chrome, no social features, no ads.
-- **Shortest-first.** The default view answers "what can I finish soon?"
+
+- **PRIN-1** Instant: actions apply with no spinner, and sync runs in the background. The work stays proportional to what's on screen, whatever the library size: only cards near the screen are mounted, and a status change renders only the changed card.
+- **PRIN-5** Speed target: on a 3,000-game library with a 4x slower CPU, search, filters and status changes render within 100 ms. Timings depend on the machine, so `npm run perf` reports them and they aren't part of `npm run e2e`. (manual)
+- **PRIN-2** No confirmation dialogs: destructive and bulk actions apply at once and show a toast with **Undo**. Exceptions: deleting the account or the local data asks first, and restoring a backup shows what it holds before applying.
+- **PRIN-3** Covers are the interface: box art grid, minimal chrome, no social features, no ads. (manual)
+- **PRIN-4** Shortest first: the library opens on the "To play" view (Backlog + Playing), grouped by length band, shortest first.
 
 ## 2. Sign-in and onboarding
-1. Landing page: one sentence of pitch, a sample screenshot, a **Sign in with Steam** button.
-2. After Steam sign-in, the app imports the library automatically (needs a public Steam profile; if it's private, show a short guide to making the game details public, then a Retry button).
-3. Import screen shows progress ("Fetching 1,204 games… matching lengths…") and lands on the grid as soon as the first data arrives; lengths fill in progressively.
-4. **Initial triage.** Games with playtime start as *Backlog* but get a "Played Xh" marker; a one-time prompt offers "Mark the N games you've played over 80% of their length as Finished?" (one click, undoable).
 
-Re-sync: a "Refresh library" action picks up newly bought games (they arrive as Backlog). It also runs automatically on sign-in at most once a day.
+- **ONB-1** The welcome page offers **Sign in with Steam**, or staying local by opening a library file or a backup.
+- **ONB-2** After Steam sign-in, the library is imported automatically.
+- **ONB-3** When the Steam profile's game details are private, the import says so, explains how to make them public, and offers Retry.
+- **ONB-4** Games without an IGDB length get one as soon as the server finds it after an import; sync brings it to the browser.
+- **ONB-5** Cards of played games show "Played Xh". Once, the app offers to mark Finished the games played for at least 80% of their length: one click, undoable, never asked again.
+- **ONB-6** Refresh library (Settings, palette) adds newly bought games as Backlog and keeps everything the user set.
+- **ONB-7** Signing in refreshes the library when the last import is more than a day old. (manual)
+- **ONB-8** On first sign-in, what was done in this browser (statuses, notes, lengths, views, lists) moves into the account, for owned games only.
+- **ONB-9** Signing out clears this browser. Another account signing in on the same browser gets only its own library.
 
 ## 3. Library view (home)
-- **Header:** "212 games · 3,140 h to clear", with a progress bar (finished hours / total hours).
-- **Now playing shelf:** horizontal row of games with status Playing, above the grid. Hidden when empty.
-- **Length bands:** like the prototype: stacked bar + legend; click a band to jump to it. Bands: <3, 3–6, 6–10, 10–20, 20–40, 40–80, 80+, No ending, Unknown.
-- **Cover card:** box art, hours badge (quarter hours under 3 h like `1.75h`, whole hours above, no space before the unit; colored by band), small status chip if not Backlog, played-hours marker if any. Hover/focus reveals quick actions (Playing / Finished / Dropped / Add to list).
-- **Click a cover** → detail panel (side sheet; on mobile, bottom sheet): name, art, length (Main / Main+Extras / Completionist when known), Steam playtime, status, lists it's in, personal note, links to Steam store and the length source page.
-- Games with no length data sit in the **Unknown** band. Filling them in is its own flow (§4).
+
+- **LIB-1** Header: "N games, H hours to clear" over Backlog + Playing, a link to fill in the games without a length, and a progress bar of finished hours over finished + remaining hours.
+- **LIB-2** Now playing shelf: a row of Playing games above the grid, most recently changed first, shown whatever the view's statuses, hidden when empty.
+- **LIB-3** Length bands: Under 3 h, 3–6, 6–10, 10–20, 20–40, 40–80, 80 h and up, No ending, Unknown. Sorted by length, games are grouped by band, with a stacked bar and a legend that link to each band.
+- **LIB-4** Hours badges show quarter hours under 3 h (`1.75h`), whole hours above (`113h`), no space before the unit, colored by band. Stored to the quarter hour.
+- **LIB-5** Approximate lengths have a dotted band edge and a tooltip with the reason; no "~" on covers.
+- **LIB-6** A card shows a status chip when not Backlog. Hover or focus reveals quick actions: P / F / D set Playing / Finished / Dropped, pressed again they go back to Backlog; + adds to a list.
+- **LIB-7** Quick actions are hidden on touch screens. (manual)
+- **LIB-8** Clicking a cover opens the detail panel: name, art, Steam and HowLongToBeat links, status, length with its source, Steam playtime, date added, finish date, lists, and a private note. Changes persist across reloads.
 
 ## 4. Missing lengths
-IGDB has no time for a large share of many libraries (38% of the prototype collection), so filling in lengths is a core flow, not an edge case. Goal: a few seconds per game.
 
-**Where it shows up**
-- The Unknown band header: "111 games without a length · **Fill in**". The header total notes it too ("3,140 h to clear + 111 unknown").
-- After the first import, if more than 10 games lack a length, onboarding offers "Fill in lengths" (skippable).
-- A built-in smart view "Needs a length", and a palette action "Fill in lengths".
+IGDB has no time for a large share of most libraries (38% of the prototype collection), so filling in lengths is a core flow. Goal: a few seconds per game.
 
-**Fill-in mode.** A focused queue, one game at a time:
-- Shows the cover, name, Steam playtime, a progress counter ("23 / 111"), and a focused hours input.
-- Shortcuts use Alt (⌥ on Mac), because the input itself takes digits and letters (`12h30`, `45m`).
-- **Look up** (`Alt+O`) opens the HowLongToBeat search for that name in a new tab. Coming back to the tab puts focus back in the input.
-- Type the hours and press `Enter` to save and move to the next game. Accepted forms: `12`, `12.5`, `12,5`, `12½`, `12h30`, `12:30`, `45m`. Stored rounded to 0.25 h.
-- **Paste a times block.** Pasting the times copied from a game page ("Main Story 8 Hours Main + Extras 12½ Hours Completionist 20 Hours") fills Main, Main + Extras and Completionist at once.
-- **Rough guess.** `Alt+1`–`Alt+7` pick a band (Under 3 h … 80 h and up). Stores the band's typical value, marked approximate (shown as "~6 h").
-- **No ending** (`Alt+N`): for sandbox, multiplayer and endless games (Gang Beasts, Wobbledogs). They move to the No ending band and leave the hours totals.
-- **Skip** (`Tab`): skipped games return at the end of the queue. `Esc` exits; progress is kept and each entry can be undone.
-- Order: games with Steam playtime first, then by name. Can also run on a selection (bulk select → "Fill in lengths").
-
-**Everywhere else**
-- In the Unknown band the hours badge shows "?". Clicking it opens a small inline editor with the same input, paste and look-up.
-- The detail panel can always edit the length, including overriding an IGDB time that looks wrong. It shows where the length comes from: IGDB (with the number of submissions), Community, Yours, or Approximate.
-- IGDB times with fewer than 3 submissions show as approximate ("~").
-- **Import lengths** (Settings): a JSON or CSV file of Steam app ID + hours, applied as your own lengths. This brings the prototype's HLTB data into your account.
-
-**Community lengths**
-- Lengths you type, and the Steam playtime of games you mark Finished, are shared anonymously to improve lengths for everyone. On by default; can be turned off in Settings. Rough guesses are never shared.
-- Once a game has 3 or more community entries, other users see their median, labeled Community.
+- **LEN-1** The Unknown band header shows its count and a **Fill in lengths** button; the header's "N without a length" link starts the same flow.
+- **LEN-2** A built-in "Needs a length" view lists open games without a length.
+- **LEN-3** After the first import, when more than 10 games lack a length, onboarding offers to fill them in. (planned)
+- **LEN-4** Fill-in mode shows one game at a time: cover, name, Steam playtime, a progress counter and a focused hours input. Played games come first, then by name. It also runs on a selection.
+- **LEN-5** The hours input accepts `12`, `12.5`, `12,5`, `12½`, `12h30`, `12:30`, `45m` and similar, and rounds to the quarter hour. `Enter` saves and moves to the next game.
+- **LEN-6** Pasting the times block from a game page (Main Story / Main + Extras / Completionist) fills all three measures at once.
+- **LEN-7** `Alt+1`–`Alt+7` store a rough guess: the band's typical value, marked approximate.
+- **LEN-8** `Alt+N` marks a game as having no ending: it moves to the No ending band and leaves the hours totals.
+- **LEN-9** `Alt+O` opens the HowLongToBeat search for the game in a new tab; coming back puts focus in the input. (manual)
+- **LEN-10** `Tab` skips; a skipped game comes back once, at the end. `Esc` exits; saved lengths stay.
+- **LEN-11** On a card in the Unknown band, the `?` badge opens an inline editor with the same input and paste.
+- **LEN-12** The user's own length wins over IGDB and community lengths. The detail panel edits it, can remove it, and names the source: IGDB (with the number of submissions), Community, Yours, or Approximate.
+- **LEN-13** IGDB times with fewer than 3 submissions are approximate.
+- **LEN-14** Import lengths (Settings): a JSON or CSV file of Steam app ID + hours becomes the user's own lengths.
+- **LEN-15** Lengths the user types, and the Steam playtime of games they finish, are shared anonymously with the community. On by default, off in Settings (which removes them). Rough guesses and imported lengths are never shared; un-finishing takes the playtime back.
+- **LEN-16** Once a game has 3 or more community entries, other users see their median, labeled Community.
 
 ## 5. Statuses
+
 Backlog (default) · Playing · Finished · Dropped.
-- Change from the card's quick actions, the detail panel, or a key: `b` backlog, `p` playing, `f` finished, `d` dropped.
-- Finishing a game records the date (shown in the detail panel, used for "Finished this year" views).
-- Every change shows a toast with **Undo** (also `Ctrl+Z`).
+
+- **STATUS-1** Games arrive as Backlog.
+- **STATUS-2** `b` / `p` / `f` / `d` on the focused card set Backlog / Playing / Finished / Dropped.
+- **STATUS-3** The card's quick actions and the detail panel set the status too.
+- **STATUS-4** Finishing records the date, shown in the detail panel and used by "Finished in…" views. Leaving Finished clears it; finishing again records a new one.
+- **STATUS-5** Every change shows a toast with **Undo**; `Ctrl/⌘+Z` does the same. Undo restores the previous status and finish date.
+- **STATUS-6** The detail panel can change the finish date of a finished game, with undo.
 
 ## 6. Finding and organizing
-- **Search-as-you-type** (`/` focuses it) over names across the whole library.
-- **Filters:** status (multi-select, default: Backlog + Playing), length range, played / never launched, date added (Steam does not expose purchase dates).
-- **Sort:** length (default, shortest first), name, date added, playtime, recently changed.
-- **Smart views:** a saved filter + sort with a name ("Under 5 h", "Never launched", "Finished in 2026"). A few are built in; users can save their own from the current filter state. Shown as tabs/chips under the header.
-- **Keyboard:** arrow keys move focus across the grid; `Enter` opens details; `Esc` closes. `?` shows the shortcut sheet.
-- **Bulk select:** click the checkbox on a card or `x` on the focused card; shift-click selects a range; `Ctrl+A` selects all visible. With a selection, status keys and "Add to list" apply to all, with one undo.
-- **Command palette** (`Ctrl+K`): jump to a game, a view or a list; run actions ("Mark selection finished", "Refresh library", "Export backup").
+
+- **FIND-1** Search as you type over names across the library; `/` focuses the search.
+- **FIND-2** Status chips filter the grid (default Backlog + Playing), and so does played / never launched.
+- **FIND-3** Other conditions a view sets (length range, finish dates, missing length) show as pills under the toolbar; removing a pill drops that condition.
+- **FIND-4** Length range and date added can be set from the toolbar. (planned)
+- **FIND-5** Sort by length (default, shortest first, unknown last), name, date added, playtime, or recently changed.
+- **FIND-6** Smart views: built-in "To play", "Under 5 h", "Never launched", "Needs a length", "Finished in <year>"; save the current filter and sort under a name; delete with undo. Shown as tabs under the header.
+- **FIND-7** Arrow keys move focus across the grid and between bands, scrolling to games far away; `Enter` opens details; `Esc` closes and returns focus to the card; `?` shows the shortcut sheet.
+- **FIND-8** Bulk select: the card's checkbox or `x`, shift-click for a range, `Ctrl/⌘+A` for all shown. While selecting, clicking a cover selects. Status keys and the selection bar apply to all with one undo, then the selection clears.
+- **FIND-9** Command palette (`Ctrl/⌘+K`): jump to a game, a view or a list, or run an action (statuses for the selection, sort, export, refresh, theme…).
 
 ## 7. Lists and sharing
-A **list** is a named, ordered collection of games with an optional description. Two kinds:
-- **Hand-picked:** you add games (from a card, the detail panel, a bulk selection, or the palette) and drag to reorder. Good for "Up next" or "Best short games I played".
-- **Filter-based:** made from a smart view; its contents update as your library changes ("My backlog under 5 h").
 
-Lists appear in a sidebar (drawer on mobile). Opening one shows the same grid UI scoped to that list.
+A list is a named, ordered collection of games with an optional description, hand-picked or filter-based.
 
-**Sharing**
-- Each list is **Private** by default. Toggle to **Shared (anyone with the link)** to get a link like `/u/<name>/l/<slug>`. Option to also show it on your public profile.
-- Shared lists are **live**: changes appear for viewers within seconds, no re-publish.
-- The viewer page is read-only, needs no sign-in, and shows the owner's name, list title and description, the cover grid with lengths and the owner's status chips, and the total hours. Viewers can filter/sort within the list.
-- **Public profile** `/u/<name>`: avatar, display name, optional summary stats (games finished, hours cleared), and the lists the owner chose to show. Optionally the whole backlog too (`/u/<name>/backlog`, read-only, filterable). Off by default.
-- Owner controls per list: rename, change slug, make private again (link stops working immediately), delete (with undo).
+- **LIST-1** The Lists button opens a drawer with the library, every list and its size, and a field to create one.
+- **LIST-2** Hand-picked lists: add games from a cover's +, `A`, the detail panel, a selection or the palette. The picker finds a list or creates one from the typed name. Games keep the order they were added in.
+- **LIST-3** Reorder a hand-picked list by dragging or `Alt+←/→`, with undo. Remove games from the selection bar or the detail panel.
+- **LIST-4** A list page shows title, description, size and hours, with its own status chips and sort ("List order" for hand-picked lists). Finished games stay in the list.
+- **LIST-5** A filter-based list is made from the current view and updates as the library changes.
+- **LIST-6** Rename and describe a list; delete it with undo.
+- **LIST-7** A list has one address, `/l/<share id>`: the owner's page in their browser, the shared page for others. Older `/l/<list id>` and `/s/<share id>` addresses redirect; an unknown one says "List not found".
+- **LIST-8** Lists, their games and order sync between devices.
+- **LIST-9** Sharing needs an account. A list is Private by default; "Anyone with the link" makes it public, with a copy-link button.
+- **LIST-10** The shared page is read-only and needs no sign-in: the owner's Steam name, title, description, games in order with lengths and the owner's statuses, and the total. Viewers filter by status and sort. Notes, playtime and dates never leave the owner's account.
+- **LIST-11** The shared page refreshes every 30 s while visible and when it comes back into view; an unchanged list costs a 304.
+- **LIST-12** Making a list private again, or deleting it, stops the link at once; viewers can't tell private from missing.
+- **LIST-13** Shared and profile pages have a title and a link preview.
+- **LIST-14** Public profile `/u/<username>`: off by default, needs a username (suggested from the Steam name). Shows the Steam name and avatar, optional stats (games finished, hours cleared) and the lists marked "Show on my public profile".
+- **LIST-15** Optionally the profile shows the whole library at `/u/<username>/backlog`: read-only, starting on Backlog + Playing. Turning the profile off hides both pages.
 
 ## 8. Data ownership
-- **Export:** JSON backup of statuses, notes, your lengths, lists and views (Settings and the palette).
-- **Import:** restore from that JSON (merge or replace, with a summary before applying).
-- **Delete account:** removes all server data; the export is offered first.
 
-## 9. Settings
-Theme (system / dark / light) · default length measure (Main / Main+Extras, default: Main+Extras) · Steam profile link · profile visibility · share my lengths with the community · import lengths · export/import · sign out · delete account.
+- **DATA-1** Export backup (Settings, palette): a JSON file of statuses and dates, notes, the user's lengths, views and lists.
+- **DATA-2** Restore backup shows a summary of the file, then merges it into the library or replaces it.
+- **DATA-3** Delete account offers a backup first, then removes all server data, community entries included. Signing in again starts empty.
+- **DATA-4** Without an account, "Delete local data" removes everything from this browser after asking.
 
-## 10. Platforms
-Desktop and mobile web (phone width ~400 px is a first-class layout). Works offline for your own library after first load; changes sync when back online. Shared list pages need a connection.
+## 9. Sync
 
-## 11. Out of scope for v1
-Non-Steam games and manual game entry, wishlist, On hold status, ratings/reviews, social feeds/follows/comments, editable collaborative lists, native apps, copying someone else's list, Steam collections import.
+- **SYNC-1** Signed in, changes show up on the user's other devices within seconds.
+- **SYNC-2** The last change to a field wins; a retried change is not applied twice.
+- **SYNC-3** Users only see and change their own games, views and lists.
 
-## Open questions
+## 10. Settings
 
-- Whether viewers of a shared list see the owner's per-game notes. Proposal: no, notes stay private.
+- **SET-1** Theme: system, dark or light. (manual)
+- **SET-2** Length measure for sorting and totals: Main + Extras (default) or Main story.
+- **SET-3** A link to the user's Steam profile. (planned)
+
+Settings also holds the account, public profile, community sharing, import lengths, backup and delete controls covered above.
+
+## 11. Platforms
+
+- **PLAT-1** Phone width (~400 px) is a first-class layout: no horizontal scrolling.
+- **PLAT-2** On phones: three cover columns, a toolbar that doesn't stick, the detail panel and Settings as bottom sheets, the Lists drawer full width. (manual)
+- **PLAT-3** After the first load, the own library works offline; changes made offline sync when back online. (planned)
+- **PLAT-4** Shared and profile pages need a connection and retry by themselves. (manual)
+
+## 12. Out of scope for v1
+
+Non-Steam games and manual game entry, wishlist, On hold status, ratings and reviews, social feeds, follows and comments, collaborative lists, native apps, copying someone else's list, Steam collections import.

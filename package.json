@@ -14,6 +14,7 @@
     "typecheck": "tsc -p shared && tsc -p app && tsc -p worker && tsc -p worker/tsconfig.test.json",
     "library": "node tools/make_library.ts",
     "e2e": "playwright test",
+    "perf": "PERF=1 playwright test e2e/perf.spec.ts",
     "deploy": "npm run build && wrangler deploy",
     "dev:api": "wrangler d1 migrations apply baquelogue --local && wrangler dev --port 8790 --inspector-port 9239 --local-upstream localhost:5190 --test-scheduled"
   },

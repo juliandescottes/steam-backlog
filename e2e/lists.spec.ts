@@ -21,7 +21,7 @@ async function savedItems(page: Page, n: number) {
   }))).toBe(n);
 }
 
-test("hand-picked list: create from a cover, add a selection, reorder, remove, survive a reload", async ({ page }) => {
+test("LIST-1 LIST-2 LIST-3 LIST-4: hand-picked list: create from a cover, add a selection, reorder, remove, survive a reload", async ({ page }) => {
   await openLibrary(page);
 
   // A new list from the + on a cover
@@ -80,7 +80,7 @@ test("hand-picked list: create from a cover, add a selection, reorder, remove, s
   await expect(detail.locator(".list-chip")).toHaveCount(0);
 });
 
-test("list from the current view updates with the library; rename and delete with undo", async ({ page }) => {
+test("LIST-5 LIST-6 PRIN-2: list from the current view updates with the library; rename and delete with undo", async ({ page }) => {
   await openLibrary(page);
   await page.getByRole("button", { name: "Under 5 h", exact: true }).click();
   await page.getByRole("button", { name: "Lists" }).click();
@@ -118,7 +118,7 @@ test("list from the current view updates with the library; rename and delete wit
   await expect(drawer.getByRole("link", { name: /Under five/ })).toContainText("auto · 2");
 });
 
-test("old /l/<id> addresses move to the list's link; a missing one says so", async ({ page }) => {
+test("LIST-7: old /l/<id> addresses move to the list's link; a missing one says so", async ({ page }) => {
   await openLibrary(page);
   await page.getByRole("button", { name: "Lists" }).click();
   await page.getByLabel("New list").fill("Old address");

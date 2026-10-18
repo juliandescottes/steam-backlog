@@ -22,6 +22,8 @@ Public profile: Settings → Public profile (off by default; username suggested 
 
 Production check (2026-10-17, 761-game library): callback 594 ms, import 5.3 s wall / 26 ms CPU, sync 8–14 ms CPU, cron 3–4.5 s wall / 10–14 ms CPU. All over the free plan's 10 ms CPU but none failed; watch `wrangler tail` for "exceeded CPU" (fix: Workers Paid, or paged sync and smaller batches).
 
+Spec guardrails (2026-10-18, uncommitted): `SPEC.md` rewritten as numbered rules matching what's built; every rule cited by a test title or marked `(manual)` / `(planned)`, checked by `tools/spec.test.ts` in `npm test`. Protocol in `CLAUDE.md`. Finish date now cleared when leaving Finished, and editable in the detail panel (STATUS-4, STATUS-6).
+
 ## Next: UX pass (asked 2026-10-18)
 
 1. Creating a list: an easy way to jump to it (a link, e.g. in the toast).

@@ -2,7 +2,7 @@ import { expect, test } from "vitest";
 import { normalizeName } from "./names.ts";
 import { matchScore, rank } from "./rank.ts";
 
-test("prefix beats word start beats substring", () => {
+test("FIND-9: prefix beats word start beats substring", () => {
   expect(matchScore("port", "portal 2")).toBe(3);
   expect(matchScore("life", "half life 2")).toBe(2);
   expect(matchScore("alf", "half life 2")).toBe(1);

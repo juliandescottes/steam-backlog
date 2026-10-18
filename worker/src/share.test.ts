@@ -47,7 +47,7 @@ test("profile settings: a valid, unique handle; on needs one", async () => {
   expect(await taken.json()).toEqual({ error: "handle_taken" });
 });
 
-test("a public profile: lists marked for it with their size, stats unless hidden; off is 404", async () => {
+test("LIST-14: a public profile: lists marked for it with their size, stats unless hidden; off is 404", async () => {
   await sync([
     listOp("pl1", { ...LIST, visibility: "profile", shareId: "onprofile001", position: "b" }),
     { id: `op-${++n}`, type: "item", listId: "pl1", appid: 620, at: 1, set: { position: "a", deleted: false } },
@@ -79,7 +79,7 @@ test("a public profile: lists marked for it with their size, stats unless hidden
   expect(((await (await w.call("GET", "/api/s/linkonly0001")).json()) as SharedList).owner.handle).toBeNull();
 });
 
-test("a shared list: games in order with lengths and status, nothing private; 304 until something changes", async () => {
+test("LIST-10 LIST-11: a shared list: games in order with lengths and status, nothing private; 304 until something changes", async () => {
   await sync([
     listOp("l1", LIST),
     { id: `op-${++n}`, type: "item", listId: "l1", appid: 220, at: 1, set: { position: "a", deleted: false } },
@@ -110,7 +110,7 @@ test("filter lists are computed for viewers", async () => {
   expect(data.games.map(g => g.name)).toEqual(["Portal 2", "Stardew Valley"]);
 });
 
-test("private, deleted and missing lists are all 404", async () => {
+test("LIST-12: private, deleted and missing lists are all 404", async () => {
   await sync([listOp("p1", { ...LIST, visibility: "private", shareId: "hidden000001" }), listOp("d1", { ...LIST, shareId: "gone00000001", deleted: true })]);
   for (const path of ["/api/s/hidden000001", "/api/s/gone00000001", "/api/s/nope00000001", "/api/s/not-an-id"]) {
     expect((await w.call("GET", path)).status).toBe(404);
@@ -122,7 +122,7 @@ test("private, deleted and missing lists are all 404", async () => {
   expect((await w.call("GET", "/api/s/second000001")).status).toBe(404);
 });
 
-test("share pages get a title and a link preview, escaped", async () => {
+test("LIST-13: share pages get a title and a link preview, escaped", async () => {
   await sync([listOp("l3", { ...LIST, shareId: "third0000001" }), { id: `op-${++n}`, type: "item", listId: "l3", appid: 620, at: 1, set: { position: "a", deleted: false } }]);
   const html = await (await w.call("GET", "/l/third0000001")).text();
   expect(html).toContain("<title>Up &lt;next&gt; · Dev user</title>");
@@ -132,7 +132,7 @@ test("share pages get a title and a link preview, escaped", async () => {
   expect(await (await w.call("GET", "/s/third0000001")).text()).toContain("og:title"); // older links
 });
 
-test("the whole backlog, when the profile shows it", async () => {
+test("LIST-15: the whole backlog, when the profile shows it", async () => {
   await sync([{ id: `op-${++n}`, type: "game", appid: 400, at: 1, set: { status: "finished", note: "secret", my: { main: null, main_extra: 4, comp: null }, myKind: "exact" } }]);
   await w.call("POST", "/api/profile", { handle, public: true });
   expect((await w.call("GET", `/api/u/${handle}/backlog`)).status).toBe(404); // not shown by default

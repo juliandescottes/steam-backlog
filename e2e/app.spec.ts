@@ -18,7 +18,7 @@ async function openLibrary(page: Page) {
 const card = (page: Page, name: string) => page.locator(".bands .game").filter({ has: page.locator(".name", { hasText: name }) });
 const band = (page: Page, id: string) => page.locator(`section[id="${id}"]`);
 
-test("opens a library file and groups games by length", async ({ page }) => {
+test("ONB-1 PRIN-4 LIB-1 LIB-3 LIB-5: opens a library file and groups games by length", async ({ page }) => {
   await openLibrary(page);
   await expect(page.locator("h1")).toHaveText(/6 games, 107 hours to clear/i);
   await expect(band(page, "under-3")).toContainText("Short One");
@@ -29,9 +29,10 @@ test("opens a library file and groups games by length", async ({ page }) => {
   await expect(longHaul).toHaveAttribute("title", "IGDB, only 1 submission");
   await expect(band(page, "unknown").locator(".game")).toHaveCount(3);
   await expect(card(page, "Sandbox & Friends")).toBeVisible(); // entity decoded
+  await expect(page.getByRole("navigation", { name: "Length bands" }).locator('.legend a[href="#unknown"]')).toContainText("Unknown 3");
 });
 
-test("quick status action, then undo from the toast", async ({ page }) => {
+test("STATUS-3 STATUS-5 LIB-6 PRIN-2: quick status action, then undo from the toast", async ({ page }) => {
   await openLibrary(page);
   await card(page, "Short One").hover();
   await card(page, "Short One").getByRole("button", { name: "Mark Finished" }).click();
@@ -39,9 +40,14 @@ test("quick status action, then undo from the toast", async ({ page }) => {
   await expect(page.locator(".toast")).toContainText("Short One → Finished");
   await page.locator(".toast").getByRole("button", { name: "Undo" }).click();
   await expect(card(page, "Short One")).toBeVisible();
+  // Pressed again, a quick action goes back to Backlog
+  await card(page, "Short One").getByRole("button", { name: "Mark Playing" }).click();
+  await expect(card(page, "Short One").locator(".status-chip")).toHaveText("Playing");
+  await card(page, "Short One").getByRole("button", { name: "Back to Backlog" }).click();
+  await expect(card(page, "Short One").locator(".status-chip")).toHaveCount(0);
 });
 
-test("status keys on a focused card, undo with Ctrl/Cmd+Z", async ({ page }) => {
+test("STATUS-2 STATUS-5: status keys on a focused card, undo with Ctrl/Cmd+Z", async ({ page }) => {
   await openLibrary(page);
   await card(page, "Mid Game").locator("button.cover").focus();
   await page.keyboard.press("p");
@@ -88,7 +94,7 @@ test("STATUS-4 STATUS-5 STATUS-6: finishing records the date, leaving Finished c
   await expect(finished).toHaveCount(0);
 });
 
-test("fill-in mode: typed time, rough guess, no ending", async ({ page }) => {
+test("LEN-1 LEN-4 LEN-5 LEN-7 LEN-8: fill-in mode: typed time, rough guess, no ending", async ({ page }) => {
   await openLibrary(page);
   await band(page, "unknown").getByRole("button", { name: "Fill in lengths" }).click();
   const dialog = page.getByRole("dialog", { name: "Fill in lengths" });
@@ -113,7 +119,7 @@ test("fill-in mode: typed time, rough guess, no ending", async ({ page }) => {
   await expect(band(page, "unknown")).toHaveCount(0);
 });
 
-test("fill-in mode: a skipped game comes back once", async ({ page }) => {
+test("LEN-1 LEN-10: fill-in mode: a skipped game comes back once", async ({ page }) => {
   await openLibrary(page);
   await page.getByRole("button", { name: "3 without a length" }).click();
   const title = page.getByRole("dialog").locator("h3");
@@ -127,7 +133,7 @@ test("fill-in mode: a skipped game comes back once", async ({ page }) => {
   await expect(page.getByRole("dialog")).toHaveCount(0);
 });
 
-test("paste a times block into the inline editor", async ({ page }) => {
+test("LEN-6 LEN-11: paste a times block into the inline editor", async ({ page }) => {
   await openLibrary(page);
   await card(page, "Mystery A").getByRole("button", { name: "Add a length for Mystery A" }).click();
   const input = page.getByRole("textbox", { name: "Hours for Mystery A" });
@@ -143,7 +149,7 @@ test("paste a times block into the inline editor", async ({ page }) => {
   await expect(card(page, "Mystery A").locator(".hrs")).toHaveText("8h"); // whole hours from 3h
 });
 
-test("detail panel edits status and survives a reload", async ({ page }) => {
+test("STATUS-3 LIB-8 LEN-12: detail panel edits status and survives a reload", async ({ page }) => {
   await openLibrary(page);
   await card(page, "Long Haul").locator("button.cover").click();
   const sheet = page.getByRole("dialog", { name: "Long Haul" });
@@ -160,7 +166,7 @@ test("detail panel edits status and survives a reload", async ({ page }) => {
   await expect(page.getByRole("dialog").getByRole("textbox")).toHaveValue("Start after the holidays");
 });
 
-test("import lengths from CSV and export a backup", async ({ page }) => {
+test("LEN-14 DATA-1: import lengths from CSV and export a backup", async ({ page }) => {
   await openLibrary(page);
   await page.getByRole("button", { name: "Settings" }).click();
   await page.locator("input[type=file][accept*=csv]").setInputFiles(LENGTHS);
@@ -175,14 +181,45 @@ test("import lengths from CSV and export a backup", async ({ page }) => {
   await expect(card(page, "Mystery A").locator(".hrs")).toHaveText("7h");
 });
 
-test("no horizontal scrolling at phone width", async ({ page }) => {
+test("DATA-2 DATA-4 ONB-1: restore a backup after a summary, delete local data, open a backup on the welcome page", async ({ page }) => {
+  await openLibrary(page);
+  await card(page, "Mid Game").locator("button.cover").focus();
+  await page.keyboard.press("p");
+  await page.getByRole("button", { name: "Settings" }).click();
+  const [download] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Export backup" }).click()]);
+  const backup = await download.path();
+  await page.keyboard.press("Escape");
+
+  await card(page, "Mid Game").locator("button.cover").focus();
+  await page.keyboard.press("d");
+  await expect(card(page, "Mid Game")).toHaveCount(0);
+  await page.getByRole("button", { name: "Settings" }).click();
+  const [chooser] = await Promise.all([page.waitForEvent("filechooser"), page.getByRole("button", { name: "Restore backup" }).click()]);
+  await chooser.setFiles(backup);
+  await expect(page.locator(".sheet .callout")).toContainText("6 games, 1 with a status");
+  await page.getByRole("button", { name: "Replace this library" }).click();
+  await expect(page.locator(".toast")).toContainText("Library replaced from backup");
+  await page.keyboard.press("Escape");
+  await expect(card(page, "Mid Game").locator(".status-chip")).toHaveText("Playing");
+
+  await page.getByRole("button", { name: "Settings" }).click();
+  await page.getByRole("button", { name: "Delete local data…" }).click();
+  await page.getByRole("button", { name: "Delete everything" }).click();
+  await expect(page.getByRole("button", { name: "Sign in with Steam" })).toBeVisible();
+
+  await page.setInputFiles("input[type=file]", backup);
+  await expect(page.locator("h1")).toHaveText(/^6 games/);
+  await expect(card(page, "Mid Game").locator(".status-chip")).toHaveText("Playing");
+});
+
+test("PLAT-1: no horizontal scrolling at phone width", async ({ page }) => {
   await page.setViewportSize({ width: 400, height: 800 });
   await openLibrary(page);
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBe(0);
 });
 
-test("offers once to finish games played past 80% of their length", async ({ page }) => {
+test("ONB-5: offers once to finish games played past 80% of their length", async ({ page }) => {
   await page.route("**/*steamstatic.com/**", r => r.abort());
   await page.goto("/");
   const library = JSON.parse(readFileSync(LIBRARY, "utf8"));
@@ -190,6 +227,7 @@ test("offers once to finish games played past 80% of their length", async ({ pag
   library.games[1].playtimeMin = 600; // Mid Game: 15h, not yet
   await page.setInputFiles("input[type=file]", { name: "library.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(library)) });
 
+  await expect(card(page, "Mid Game").locator(".sub")).toHaveText("Played 10h");
   const triage = page.getByRole("complementary", { name: "Finished games" });
   await expect(triage).toContainText("You've played 1 game for at least 80% of its length (Short One). Mark it Finished?");
   await triage.getByRole("button", { name: "Mark Finished" }).click();
@@ -209,7 +247,7 @@ test("offers once to finish games played past 80% of their length", async ({ pag
   await expect(triage).toHaveCount(0); // asked once
 });
 
-test("arrow keys move between games across bands; ? lists the shortcuts", async ({ page }) => {
+test("FIND-7 FIND-1: arrow keys move between games across bands; ? lists the shortcuts", async ({ page }) => {
   await openLibrary(page);
   const focused = () => page.evaluate(() => document.activeElement?.closest(".game")?.querySelector(".name")?.textContent);
   await page.keyboard.press("ArrowRight"); // lands on the first game on screen
@@ -232,9 +270,11 @@ test("arrow keys move between games across bands; ? lists the shortcuts", async 
   await expect(page.getByRole("dialog", { name: "Shortcuts" })).toContainText("Move between games");
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog", { name: "Shortcuts" })).toHaveCount(0);
+  await page.keyboard.press("/");
+  await expect(page.getByRole("searchbox", { name: "Search games by name" })).toBeFocused();
 });
 
-test("keyboard focus reaches games far down a long shelf", async ({ page }) => {
+test("FIND-7: keyboard focus reaches games far down a long shelf", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 700 });
   await page.route("**/*steamstatic.com/**", r => r.abort());
   await page.goto("/");
@@ -251,7 +291,7 @@ test("keyboard focus reaches games far down a long shelf", async ({ page }) => {
   expect(box!.y + box!.height).toBeLessThanOrEqual(700);
 });
 
-test("bulk select: click, shift-click a range, act on all with one undo", async ({ page }) => {
+test("FIND-8 PRIN-2 LIB-1: bulk select: click, shift-click a range, act on all with one undo", async ({ page }) => {
   await openLibrary(page);
   const bar = page.getByRole("toolbar", { name: "Selected games" });
   await card(page, "Short One").hover();
@@ -262,13 +302,14 @@ test("bulk select: click, shift-click a range, act on all with one undo", async 
 
   await page.keyboard.press("f");
   await expect(page.locator(".toast")).toContainText("3 games → Finished");
+  await expect(page.getByRole("progressbar", { name: "Hours cleared" })).toHaveAttribute("aria-valuenow", "100");
   await expect(bar).toHaveCount(0);
   await expect(page.locator(".bands .game")).toHaveCount(3);
   await page.locator(".toast").getByRole("button", { name: "Undo" }).click();
   await expect(page.locator(".bands .game")).toHaveCount(6);
 });
 
-test("bulk select from the keyboard", async ({ page }) => {
+test("FIND-8: bulk select from the keyboard", async ({ page }) => {
   await openLibrary(page);
   const bar = page.getByRole("toolbar", { name: "Selected games" });
   await page.keyboard.press(process.platform === "darwin" ? "Meta+a" : "Control+a");
@@ -289,7 +330,7 @@ test("bulk select from the keyboard", async ({ page }) => {
   await expect(page.locator(".toast")).toContainText("3 games → Playing");
 });
 
-test("command palette: jump to a game, run actions", async ({ page }) => {
+test("FIND-9 FIND-5 DATA-1: command palette: jump to a game, run actions", async ({ page }) => {
   await openLibrary(page);
   const mod = process.platform === "darwin" ? "Meta" : "Control";
   const palette = page.getByRole("dialog", { name: "Command palette" });
@@ -325,7 +366,7 @@ test("command palette: jump to a game, run actions", async ({ page }) => {
   await expect(palette).toHaveCount(0);
 });
 
-test("smart views: built-in ones, conditions as pills, save and delete your own", async ({ page }) => {
+test("FIND-6 FIND-3 FIND-2 LEN-2 PRIN-4: smart views: built-in ones, conditions as pills, save and delete your own", async ({ page }) => {
   await openLibrary(page);
   const views = page.getByRole("navigation", { name: "Views" });
   await expect(views.locator("[aria-current]")).toHaveText("To play");
@@ -362,7 +403,7 @@ test("smart views: built-in ones, conditions as pills, save and delete your own"
   await expect(views.getByRole("button", { name: "Unknown incl. dropped", exact: true })).toHaveCount(1);
 });
 
-test("Now playing shelf: Playing games, latest first, hidden when empty", async ({ page }) => {
+test("LIB-2: Now playing shelf: Playing games, latest first, hidden when empty", async ({ page }) => {
   await openLibrary(page);
   const shelf = page.getByRole("region", { name: "Now playing" });
   await expect(shelf).toHaveCount(0);

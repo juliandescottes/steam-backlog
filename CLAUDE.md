@@ -11,6 +11,7 @@ npm run dev        # app, http://localhost:5190
 npm run dev:api    # Worker + local D1 on 8790 (Vite proxies /api); dev sign-in, fake Steam library
 npm test           # vitest, shared/ and worker/
 npm run e2e        # playwright, installed Chrome; starts both servers
+npm run perf       # timing budget (machine-dependent, not in e2e)
 npm run typecheck
 npm run build
 npm run library    # tools/out/library.json + hltb_lengths.json from prototype data
@@ -24,6 +25,13 @@ npm run deploy     # build + wrangler deploy to baquelogue.com (ask first)
 - `worker/`: Cloudflare Worker: API in `src/`, D1 schema in `migrations/`. Account and sync client in `app/src/account.ts`.
 - `e2e/`: Playwright. Blocks Steam's CDN; fixtures in `e2e/fixtures/`.
 - `tools/`: prototype scripts, data, IGDB coverage check.
+
+## Spec rules
+
+- Rules in `SPEC.md` (`**STATUS-4** …`) are the contract. Code that disagrees with a rule is the bug.
+- A behavior change updates its rule in the same commit; say which rule IDs changed. Never weaken or drop a rule, or loosen an assertion, to make a test pass: ask.
+- Each rule needs a test with its ID in the title (`test("STATUS-4: …")`), or `(manual)` / `(planned)` in the rule. `tools/spec.test.ts` checks this in `npm test`.
+- New behavior gets a rule; building a `(planned)` rule drops the marker and adds its test.
 
 ## Conventions
 

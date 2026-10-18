@@ -18,7 +18,7 @@ describe("library file", () => {
   });
 });
 
-describe("lengths file", () => {
+describe("LEN-14: lengths file", () => {
   it("parses JSON", () => {
     const text = JSON.stringify({ format: "backlog-lengths", version: 1, lengths: [{ appid: 5, main: 1, main_extra: 2.1, completionist: null }, { appid: 6 }] });
     expect(parseLengths(text)).toEqual([{ appid: 5, lengths: { main: 1, main_extra: 2, comp: null } }]);
@@ -36,7 +36,7 @@ describe("lengths file", () => {
   });
 });
 
-describe("export", () => {
+describe("DATA-1: export", () => {
   it("round-trips the user's fields", () => {
     const g = { ...newGame({ appid: 7, name: "Seven" }, 1000), status: "finished" as const, finishedAt: 2000, note: "great",
       my: { main: null, main_extra: 3, comp: null }, myKind: "exact" as const };
@@ -68,7 +68,7 @@ describe("names", () => {
   it("normalizes for search", () => expect(normalizeName("Pokémon™: Édition — GOTY")).toBe("pokemon edition goty"));
 });
 
-describe("filter and sort", () => {
+describe("FIND-1 FIND-2 FIND-5: filter and sort", () => {
   const entry = (appid: number, name: string, hours: number | null, over = {}): Entry => {
     const game = { ...newGame({ appid, name, igdb: hours == null ? null : { main: null, main_extra: hours, comp: null, count: 9 } }, appid), ...over };
     return { game, len: resolveLength(game, "main_extra"), key: normalizeName(name) };
