@@ -208,10 +208,10 @@ test("LIST-7 LIST-9 LIST-10 LIST-12: share a list: one click for a link, viewers
   await page.getByRole("link", { name: "Lists", exact: true }).click();
   await page.getByRole("link", { name: /Valve classics/ }).click();
 
-  await page.getByRole("region", { name: "Sharing" }).getByRole("button", { name: "Share" }).click();
+  await page.getByRole("radio", { name: "Public" }).click();
   const link = page.getByRole("region", { name: "Sharing" }).getByRole("link");
   await expect(link).toHaveText(/^localhost:5180\/l\/[0-9a-z]{12}$/);
-  await expect(page.getByRole("region", { name: "Sharing" })).toContainText("Shared as Dev user.");
+  await expect(page.getByRole("region", { name: "Sharing" })).toContainText("This list is public: it shows up on your profile and anyone with the link can see it.");
   const path = new URL(await link.getAttribute("href")!).pathname;
   expect(new URL(page.url()).pathname).toBe(path); // the owner's page has the same address
 
@@ -239,7 +239,7 @@ test("LIST-7 LIST-9 LIST-10 LIST-12: share a list: one click for a link, viewers
   await viewer.getByRole("button", { name: "Finished", exact: true }).click();
   await expect(viewer.locator(".game .name")).toHaveText(["Half-Life 2"]);
 
-  await page.getByRole("button", { name: "Make private" }).click();
+  await page.getByRole("radio", { name: "Private" }).click();
   await expect(async () => {
     await viewer.reload();
     await expect(viewer.locator("h1")).toHaveText("List not found", { timeout: 1000 });
@@ -266,12 +266,10 @@ test("LIST-14 LIST-15: public profile: off until turned on, at a random address,
   await page.keyboard.press("Enter");
   await page.getByRole("link", { name: "Lists", exact: true }).click();
   await page.getByRole("link", { name: /Puzzles/ }).click();
-  await page.getByRole("region", { name: "Sharing" }).getByRole("button", { name: "Share" }).click();
-  await page.getByRole("checkbox", { name: /Show on my public profile/ }).check();
-  await expect(page.getByRole("region", { name: "Sharing" })).toContainText("it's off");
+  await page.getByRole("radio", { name: "Public" }).click();
 
-  // Turn the profile on from Settings: its address is a random id, nothing to choose
-  await page.getByRole("button", { name: "turn it on in Settings" }).click();
+  // Turn the profile on from Settings: its address is a random id, nothing to choose; public lists show on it
+  await page.getByRole("button", { name: "Settings" }).click();
   await page.getByRole("checkbox", { name: "Public profile", exact: true }).check();
   const href = await page.getByRole("link", { name: "View your profile →" }).getAttribute("href");
   expect(href).toMatch(/^\/u\/[0-9a-z]{12}$/);

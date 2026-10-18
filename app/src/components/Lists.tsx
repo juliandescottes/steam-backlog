@@ -223,58 +223,50 @@ export function ListHeader({ list: l }: { list: List }) {
   return (
     <header class="top">
       <TopNav />
-      <InPlace tag="h1" value={l.title} label="List name" maxLength={80} onSave={title => title && updateList(l.id, { title })} />
+      <InPlace tag="h1" class="list-title" value={l.title} label="List name" maxLength={80} onSave={title => title && updateList(l.id, { title })} />
       <InPlace tag="p" class="lede" value={l.description} label="Description" placeholder="Add a description" maxLength={1000} multiline
         onSave={description => updateList(l.id, { description })} />
-      <div class="list-meta-row">
-        <p class="list-meta">
-          {count(all.length, "game")} · {count(hours, "hour")}{finished > 0 && ` · ${finished} finished`}
-          {l.kind === "filter" && <span> · updates with your library</span>}
-        </p>
-        <button type="button" class="btn" onClick={() => deleteList(l.id)}>Delete list</button>
-      </div>
+      <p class="list-meta">
+        {count(all.length, "game")} · {count(hours, "hour")}{finished > 0 && ` · ${finished} finished`}
+        {l.kind === "filter" && <span> · updates with your library</span>}
+      </p>
       <Sharing list={l} />
+      <div class="action">
+        <button type="button" class="btn" onClick={() => deleteList(l.id)} aria-describedby="delete-list-hint">Delete list</button>
+        <p class="hint" id="delete-list-hint">Removes the list, not its games. You can undo it right after.</p>
+      </div>
     </header>
   );
 }
 
-/** Always shown on the owner's list page. Sharing needs an account: the server serves the page. Viewers see the owner's Steam name. */
+/**
+ * Always shown on the owner's list page: its visibility, Private or Public (anyone with the link).
+ * Sharing needs an account: the server serves the page. Viewers see the owner's Steam name.
+ */
 function Sharing({ list: l }: { list: List }) {
   const me = account.value;
-  const shared = l.visibility !== "private";
-  const what = "Viewers see the games, their lengths and your statuses. Notes, playtime and dates stay private.";
-  if (!me || !shared) {
-    return (
-      <section class="callout share" aria-label="Sharing">
-        <div class="share-row">
-          <p><b>Private</b> · only you can see this list.</p>
-          {me
-            ? <button type="button" class="btn primary" onClick={() => setListVisibility(l.id, "link")}>Share</button>
-            : <button type="button" class="btn primary" onClick={signIn}>Sign in with Steam to share</button>}
-        </div>
-        <p class="hint">{me ? what : "Sharing needs an account, so the link keeps working when this browser is closed."}</p>
-      </section>
-    );
-  }
+  const shared = !!me && l.visibility !== "private";
   const url = `${location.origin}${sharePath(l.shareId)}`;
   return (
-    <section class="callout share" aria-label="Sharing">
-      <div class="share-row">
-        <p><b>Shared</b> · anyone with the link can see it.</p>
-        <button type="button" class="btn" onClick={() => setListVisibility(l.id, "private")}>Make private</button>
+    <section class="share" aria-label="Sharing">
+      <div class="action">
+        <div class="segmented" role="radiogroup" aria-label="Visibility" aria-describedby="visibility-hint">
+          <button type="button" role="radio" aria-checked={!shared} onClick={() => setListVisibility(l.id, "private")}>Private</button>
+          <button type="button" role="radio" aria-checked={shared} disabled={!me} onClick={() => setListVisibility(l.id, "link")}>Public</button>
+        </div>
+        <p class="hint" id="visibility-hint">
+          {shared ? <>This list is <b>public</b>: it shows up on your profile and anyone with the link can see it.</> : <>This list is <b>private</b>: only you can see it.</>}
+          {!me && <> Making it public needs an account. <button type="button" class="link" onClick={signIn}>Sign in with Steam</button></>}
+        </p>
       </div>
-      <p class="share-link">
-        <a href={url} target="_blank" rel="noopener">{url.replace(/^https?:\/\//, "")}</a>
-        <button type="button" class="btn" onClick={() => navigator.clipboard.writeText(url).then(() => showToast("Link copied"), () => showToast("Couldn't copy the link"))}>
-          Copy link
-        </button>
-      </p>
-      <label class="check">
-        <input type="checkbox" checked={l.visibility === "profile"} onChange={e => setListVisibility(l.id, e.currentTarget.checked ? "profile" : "link")} />
-        Show on my public profile
-        {!me.profilePublic && <> (it's off: <button type="button" class="link" onClick={() => (settingsOpen.value = true)}>turn it on in Settings</button>)</>}
-      </label>
-      <p class="hint">Shared as {me.name}. Changes show up for viewers within seconds. {what}</p>
+      {shared && (
+        <p class="share-link">
+          <a href={url} target="_blank" rel="noopener">{url.replace(/^https?:\/\//, "")}</a>
+          <button type="button" class="btn" onClick={() => navigator.clipboard.writeText(url).then(() => showToast("Link copied"), () => showToast("Couldn't copy the link"))}>
+            Copy link
+          </button>
+        </p>
+      )}
     </section>
   );
 }

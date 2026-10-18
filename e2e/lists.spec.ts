@@ -49,10 +49,11 @@ test("LIST-1 LIST-2 LIST-3 LIST-4 LIST-9: hand-picked list: create from a cover,
   await expect(open).toHaveCount(0);
   await expect(page.locator("h1")).toHaveText("Up next");
   await expect(page.locator(".list-meta")).toHaveText("3 games · 107 hours");
-  // Signed out: the sharing section says so and offers to sign in
+  // Signed out: Private, and Public needs an account
   const sharing = page.getByRole("region", { name: "Sharing" });
-  await expect(sharing).toContainText("Private · only you can see this list.");
-  await expect(sharing.getByRole("button", { name: "Sign in with Steam to share" })).toBeVisible();
+  await expect(sharing.getByRole("radio", { name: "Private" })).toHaveAttribute("aria-checked", "true");
+  await expect(sharing.getByRole("radio", { name: "Public" })).toBeDisabled();
+  await expect(sharing.getByRole("button", { name: "Sign in with Steam" })).toBeVisible();
   await expect(names(page)).toHaveText(["Mid Game", "Short One", "Long Haul"]);
 
   // Drag Long Haul to the front, then Alt+→ moves Mid Game one step right

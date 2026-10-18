@@ -90,12 +90,12 @@ A list is a named, ordered collection of games with an optional description, han
 - **LIST-6** Title and description are edited in place (a pen next to each; Enter saves, Escape cancels, nothing moves). Delete a list with undo.
 - **LIST-7** A list has one address, `/l/<share id>`: the owner's page in their browser, the shared page for others. Older `/l/<list id>` and `/s/<share id>` addresses redirect; an unknown one says "List not found".
 - **LIST-8** Lists, their games and order sync between devices.
-- **LIST-9** A sharing section is always shown on the owner's list page. Sharing needs an account. A list is Private by default; "Share" makes it visible to anyone with the link, with a copy-link button; "Make private" undoes it.
+- **LIST-9** The owner's list page always shows its Visibility: Private (the default) or Public, visible to anyone with the link, with a copy-link button. Public needs an account.
 - **LIST-10** The shared page is read-only and needs no sign-in: the owner's Steam name, title, description, games in order with lengths and the owner's statuses, and the total. Viewers filter by status and sort. Notes, playtime and dates never leave the owner's account.
 - **LIST-11** The shared page refreshes every 30 s while visible and when it comes back into view; an unchanged list costs a 304.
 - **LIST-12** Making a list private again, or deleting it, stops the link at once; viewers can't tell private from missing.
 - **LIST-13** Shared and profile pages have a title and a link preview.
-- **LIST-14** Public profile `/u/<profile id>`: off by default; the address is a random id, nothing to choose. Shows the Steam name and avatar, stats (games finished, hours cleared) and the lists marked "Show on my public profile".
+- **LIST-14** Public profile `/u/<profile id>`: off by default; the address is a random id, nothing to choose. Shows the Steam name and avatar, stats (games finished, hours cleared) and the user's public lists.
 - **LIST-15** Optionally the profile shows the whole library at `/u/<profile id>/backlog`: read-only, starting on Backlog + Playing. Turning the profile off hides both pages.
 
 ## 8. Data ownership

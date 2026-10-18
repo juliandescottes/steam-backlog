@@ -45,7 +45,7 @@ kbd { padding: 1px 5px; border: 1px solid var(--line); border-bottom-width: 2px;
 .btn.risky { justify-self: start; border-color: color-mix(in srgb, var(--danger) 60%, transparent); color: var(--danger); font-weight: 600; }
 .btn.risky:hover { border-color: var(--danger); }
 .link { background: none; border: 0; padding: 0; color: var(--accent); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
-.hint { color: var(--muted); font-size: 13px; margin: 0; }
+.hint { color: var(--muted); font-size: 14px; margin: 0; }
 .check { display: flex; align-items: center; gap: 8px; margin: 12px 0 4px; }
 .check input { margin: 0; accent-color: var(--accent); }
 .error { color: var(--danger); margin: 0; }
@@ -61,6 +61,7 @@ header.top { display: grid; gap: 14px; }
 .eyebrow { font: 700 12px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
 h1 { font: 800 clamp(40px, 7vw, 76px)/.9 var(--display); letter-spacing: .01em; margin: 0; text-wrap: balance; text-transform: uppercase; }
 h1 em { font-style: normal; color: var(--accent); }
+h1.list-title { font-size: clamp(28px, 4.9vw, 53px); } /* 70% of a page title */
 .lede { color: var(--muted); max-width: 70ch; margin: 0; }
 a.eyebrow { text-decoration: none; }
 a.eyebrow:hover { color: var(--fg); }
@@ -74,11 +75,15 @@ h1.in-place .pen { vertical-align: .15em; }
 p.in-place { white-space: pre-line; }
 .in-place textarea { display: block; width: 100%; margin: 0; padding: 0; border: 0; border-radius: 0; background: none; resize: none; overflow: hidden;
   font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; outline: none; box-shadow: 0 2px 0 var(--accent); }
-.list-meta-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
-.callout.share { max-width: 640px; }
-.share-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
-.share-link { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0; }
-.share-link a { font: 500 14px/1.3 var(--mono); color: var(--fg); overflow-wrap: anywhere; }
+.share { display: grid; gap: 8px; }
+.share p { margin: 0; }
+/* A control with its description on the same line */
+.action { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+.action .hint { flex: 1 1 240px; }
+.share .hint b { color: var(--fg); }
+/* The link of a public list: indented under the toggle it belongs to */
+.share-link { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0; padding: 4px 0 4px 14px; border-left: 2px solid var(--line); }
+.share-link a { font-size: 14px; color: var(--fg); overflow-wrap: anywhere; }
 .eyebrow.owner { display: flex; align-items: center; gap: 8px; width: fit-content; }
 .check:has(input:disabled) { color: var(--muted); }
 /* A setting with its description underneath */
@@ -271,7 +276,8 @@ section.band { display: grid; gap: 14px; scroll-margin-top: 72px; }
 .len-table dd, .facts dd { margin: 0; font: 700 14px/1.3 var(--mono); }
 .facts .day { padding: 0; border: 0; border-bottom: 1px dashed var(--line); border-radius: 0; background: none; color: inherit; font: inherit; }
 .segmented { display: flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; width: fit-content; max-width: 100%; }
-.segmented button { padding: 8px 14px; border: 0; border-right: 1px solid var(--line); background: transparent; color: var(--muted); cursor: pointer; }
+.segmented button { padding: 8px 14px; border: 0; border-right: 1px solid var(--line); background: transparent; color: var(--muted); cursor: pointer;
+  font-size: 14px; line-height: 1.1; } /* as tall as a .btn */
 .segmented button:last-child { border-right: 0; }
 .segmented button[aria-pressed="true"], .segmented button[aria-checked="true"] { background: var(--accent); color: var(--on-accent); font-weight: 700; }
 textarea { width: 100%; padding: 10px 12px; border-radius: 6px; border: 1px solid var(--line); background: var(--bg); resize: vertical; }

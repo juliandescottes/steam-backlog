@@ -39,13 +39,14 @@ test("LIST-14: profile settings: every user gets a random profile id; each setti
   expect((await me()).profileId).not.toBe(profileId);
 });
 
-test("LIST-14: a public profile: lists marked for it with their size, and stats; off is 404", async () => {
+test("LIST-14: a public profile: every public list with its size, and stats; off is 404", async () => {
   await sync([
     listOp("pl1", { ...LIST, visibility: "profile", shareId: "onprofile001", position: "b" }),
     { id: `op-${++n}`, type: "item", listId: "pl1", appid: 620, at: 1, set: { position: "a", deleted: false } },
     { id: `op-${++n}`, type: "item", listId: "pl1", appid: 400, at: 1, set: { position: "b", deleted: false } },
     listOp("pl2", { ...LIST, kind: "filter", filter: { statuses: ["finished"] }, sort: "name", visibility: "profile", shareId: "onprofile002", position: "a" }),
     listOp("pl3", { ...LIST, visibility: "link", shareId: "linkonly0001" }),
+    listOp("pl4", { ...LIST, visibility: "private", shareId: "private00001", position: "c" }),
     { id: `op-${++n}`, type: "game", appid: 400, at: 1, set: { status: "finished", my: { main: null, main_extra: 4, comp: null }, myKind: "exact" } },
   ]);
   expect((await w.call("GET", `/api/u/${profileId}`)).status).toBe(404); // off by default
@@ -57,6 +58,7 @@ test("LIST-14: a public profile: lists marked for it with their size, and stats;
     lists: [
       { shareId: "onprofile002", title: "Up <next>", description: "", kind: "filter", games: 1, hours: 4, covers: [400] },
       { shareId: "onprofile001", title: "Up <next>", description: "", kind: "manual", games: 2, hours: 4, covers: [620, 400] },
+      { shareId: "linkonly0001", title: "Up <next>", description: "", kind: "manual", games: 0, hours: 0, covers: [] },
     ],
   });
   // Shared lists link to a public profile
