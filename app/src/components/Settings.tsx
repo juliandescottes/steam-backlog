@@ -23,9 +23,11 @@ function FilePick({ label, accept, onFile }: { label: string; accept: string; on
   );
 }
 
-function Radio<T extends string>({ name, value, options, onChange }: { name: string; value: T; options: [T, string][]; onChange: (v: T) => void }) {
+function Radio<T extends string>({ name, value, options, onChange, describedBy }: {
+  name: string; value: T; options: [T, string][]; onChange: (v: T) => void; describedBy?: string;
+}) {
   return (
-    <div class="segmented" role="radiogroup" aria-label={name}>
+    <div class="segmented" role="radiogroup" aria-label={name} aria-describedby={describedBy}>
       {options.map(([v, label]) => (
         <button type="button" key={v} role="radio" aria-checked={value === v} onClick={() => onChange(v)}>{label}</button>
       ))}
@@ -121,20 +123,29 @@ export function Settings() {
 
         <section class="detail-section">
           <h3>Display</h3>
-          <div class="setting">
-            <span>Theme</span>
-            <Radio<Theme> name="Theme" value={s.theme} onChange={theme => updateSettings({ theme })}
-              options={[["system", "System"], ["dark", "Dark"], ["light", "Light"]]} />
+          <div class="option indented">
+            <div class="setting">
+              <span>Theme</span>
+              <Radio<Theme> name="Theme" value={s.theme} onChange={theme => updateSettings({ theme })} describedBy="theme-hint"
+                options={[["system", "System"], ["dark", "Dark"], ["light", "Light"]]} />
+            </div>
+            <p class="hint" id="theme-hint">System follows your device's light or dark mode.</p>
           </div>
-          <div class="setting">
-            <span>Sort and total by</span>
-            <Radio<Measure> name="Length measure" value={s.measure} onChange={measure => updateSettings({ measure })}
-              options={[["main_extra", "Main + Extras"], ["main", "Main story"]]} />
+          <div class="option indented">
+            <div class="setting">
+              <span>Sort and total by</span>
+              <Radio<Measure> name="Length measure" value={s.measure} onChange={measure => updateSettings({ measure })} describedBy="measure-hint"
+                options={[["main_extra", "Main + Extras"], ["main", "Main story"]]} />
+            </div>
+            <p class="hint" id="measure-hint">Which length orders games and adds up to your hours. Main + Extras is the main story plus the side content most players do.</p>
           </div>
-          <label class="check">
-            <input type="checkbox" checked={s.nowPlaying} onChange={e => updateSettings({ nowPlaying: e.currentTarget.checked })} />
-            Now playing shelf: Playing games in a row above the grid
-          </label>
+          <div class="option">
+            <label class="check">
+              <input type="checkbox" checked={s.nowPlaying} aria-describedby="now-playing-hint" onChange={e => updateSettings({ nowPlaying: e.currentTarget.checked })} />
+              Now playing shelf
+            </label>
+            <p class="hint" id="now-playing-hint">Your Playing games in a row above the grid, whatever the view.</p>
+          </div>
         </section>
 
         {!account.value && (
