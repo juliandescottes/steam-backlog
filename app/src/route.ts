@@ -3,14 +3,15 @@ import { SHARE_ID } from "@backlog/shared/lists";
 import { sharePath } from "@backlog/shared/share";
 
 /**
- * The page shown: the library, or a list at /l/<shareId>: the owner's list page when the list is in this browser,
+ * The page shown: the library, the user's lists at /lists, or a list at /l/<shareId>: the owner's list page when the list is in this browser,
  * the read-only shared page otherwise; or a public profile at /u/<profile id>, with the whole backlog at /u/<profile id>/backlog. /l/<internal id> and /s/<shareId> are
  * older addresses (TECH.md §4).
  */
-export type Route = { page: "library" } | { page: "list"; shareId: string } | { page: "oldList"; id: string } | { page: "profile"; id: string }
+export type Route = { page: "library" } | { page: "lists" } | { page: "list"; shareId: string } | { page: "oldList"; id: string } | { page: "profile"; id: string }
   | { page: "backlog"; id: string };
 
 function parse(path: string): Route {
+  if (/^\/lists\/?$/.test(path)) return { page: "lists" };
   const u = path.match(/^\/u\/([^/]+)(\/backlog)?\/?$/);
   if (u) return { page: u[2] ? "backlog" : "profile", id: decodeURIComponent(u[1]) };
   const m = path.match(/^\/[ls]\/([^/]+)\/?$/);
@@ -21,6 +22,8 @@ function parse(path: string): Route {
 
 // Links from before lists moved to /l/
 if (/^\/s\//.test(location.pathname)) history.replaceState(null, "", location.pathname.replace(/^\/s\//, "/l/"));
+
+export const LISTS_PATH = "/lists";
 
 export const route = signal<Route>(parse(location.pathname));
 

@@ -1,7 +1,7 @@
 import { move, type Direction } from "@backlog/shared/grid";
 import type { Status } from "@backlog/shared/types";
 import {
-  canReorder, clearSelection, currentList, editingId, fillInQueue, focusTarget, games, listsOpen, moveInList, openId, paletteOpen, pickerFor,
+  canReorder, clearSelection, currentList, editingId, fillInQueue, focusTarget, games, moveInList, openId, paletteOpen, pickerFor,
   selectAll, selection, setStatus, settingsOpen, shelves, shortcutsOpen, toggleSelected, undo, viewing, visible,
 } from "./store.ts";
 import { inTextField } from "./util.ts";
@@ -56,13 +56,12 @@ export function installKeys() {
       else if (editingId.value != null) editingId.value = null;
       else if (openId.value != null) openId.value = null;
       else if (settingsOpen.value) settingsOpen.value = false;
-      else if (listsOpen.value) listsOpen.value = false;
       else if (selection.value.size) clearSelection();
       return;
     }
     if (inTextField(e)) return;
     if (mod && !e.shiftKey && e.key.toLowerCase() === "z") { e.preventDefault(); undo(); return; }
-    const inPanel = openId.value != null || settingsOpen.value || shortcutsOpen.value || paletteOpen.value || listsOpen.value || !!pickerFor.value;
+    const inPanel = openId.value != null || settingsOpen.value || shortcutsOpen.value || paletteOpen.value || !!pickerFor.value;
     if (mod && !e.shiftKey && e.key.toLowerCase() === "a" && !inPanel) { e.preventDefault(); selectAll(); return; }
     // Alt+←/→ moves the focused game within a hand-picked list
     if (e.altKey && !mod && (e.key === "ArrowLeft" || e.key === "ArrowRight") && canReorder.value && !inPanel) {

@@ -4,12 +4,12 @@ import { STATUSES, STATUS_LABEL, type Status } from "@backlog/shared/types";
 import type { Signal } from "@preact/signals";
 import { route } from "../route.ts";
 import {
-  canReorder, currentList, dismissTriage, editingId, finishPlayed, listItems, listSort, listStatuses, listsOpen, moveInList, nowPlaying, played, query,
-  selection, settings, settingsOpen, shelves, sortKey, sorting, startFillIn, statuses, totals, triageCandidates, triaged, visible, type ListSort,
+  canReorder, currentList, dismissTriage, editingId, finishPlayed, listItems, listSort, listStatuses, moveInList, nowPlaying, played, query,
+  selection, settings, shelves, sortKey, sorting, startFillIn, statuses, totals, triageCandidates, triaged, visible, type ListSort,
 } from "../store.ts";
 import { count, thousands } from "../util.ts";
 import { Card } from "./Card.tsx";
-import { ListHeader, MissingList } from "./Lists.tsx";
+import { ListHeader, MissingList, TopNav } from "./Lists.tsx";
 import { Shelf } from "./Shelf.tsx";
 import { ConditionPills, ViewTabs } from "./Views.tsx";
 
@@ -23,13 +23,7 @@ function Header() {
   const done = t.finishedHours + t.leftHours > 0 ? t.finishedHours / (t.finishedHours + t.leftHours) : 0;
   return (
     <header class="top">
-      <div class="eyebrow-row">
-        <div class="eyebrow">Backlog</div>
-        <div class="row-actions">
-          <button type="button" class="btn ghost" onClick={() => (listsOpen.value = true)}>Lists</button>
-          <button type="button" class="btn ghost" onClick={() => (settingsOpen.value = true)}>Settings</button>
-        </div>
-      </div>
+      <TopNav />
       <h1>{count(t.left, "game")}, <em>{count(t.leftHours, "hour")}</em> to clear</h1>
       <p class="lede">
         Shortest first, {MEASURE_TEXT[settings.value.measure]}.

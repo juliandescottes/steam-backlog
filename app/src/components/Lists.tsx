@@ -4,12 +4,13 @@ import { rank } from "@backlog/shared/rank";
 import type { List } from "@backlog/shared/lists";
 import { sharePath } from "@backlog/shared/share";
 import { account, signIn } from "../account.ts";
-import { listPath, navigate, route } from "../route.ts";
+import { LISTS_PATH, listPath, navigate, route } from "../route.ts";
 import {
-  createList, currentList, deleteList, listEntries, listItems, listsOpen, pickerFor, setListVisibility, settingsOpen, showToast, sortedLists,
+  activeView, createList, currentList, deleteList, listEntries, listItems, pickerFor, setListVisibility, settingsOpen, showToast, sortedLists,
   toggleInList, updateList,
 } from "../store.ts";
 import { count } from "../util.ts";
+import { MiniCovers } from "./MiniCovers.tsx";
 
 /** A link that opens in the app, or in a new tab with a modifier key. */
 function Link({ href, onNavigate, ...props }: { href: string; onNavigate?: () => void; class?: string; children: any; "aria-current"?: "page" }) {
@@ -23,60 +24,78 @@ function Link({ href, onNavigate, ...props }: { href: string; onNavigate?: () =>
   );
 }
 
-const size = (l: List) => (l.kind === "manual" ? listItems.value.get(l.id)?.size ?? 0 : listEntries(l).length);
+/** The top of the user's own pages: the two of them, Backlog and Lists, on the left; Settings on the right. */
+export function TopNav() {
+  const p = route.value.page;
+  const inLists = p === "lists" || currentList.value != null;
+  return (
+    <div class="eyebrow-row">
+      <nav class="top-nav" aria-label="Pages">
+        <Link href="/" class={`eyebrow${p === "library" ? " active" : ""}`} aria-current={p === "library" ? "page" : undefined}>Backlog</Link>
+        <Link href={LISTS_PATH} class={`eyebrow${inLists ? " active" : ""}`} aria-current={p === "lists" ? "page" : undefined}>Lists</Link>
+      </nav>
+      <button type="button" class="btn ghost" onClick={() => (settingsOpen.value = true)}>Settings</button>
+    </div>
+  );
+}
 
-/** The user's lists (SPEC §7): a drawer from the left, on every screen size. */
-export function ListsDrawer() {
+/** The user's lists (LIST-1): one card each, with a field to create one. */
+export function ListsPage() {
+  const all = sortedLists.value;
+  return (
+    <div class="wrap">
+      <header class="top">
+        <TopNav />
+        <h1>{all.length ? count(all.length, "list") : "Lists"}</h1>
+        <p class="lede">Hand-picked games in your own order, or a view of your library that keeps itself up to date. Share any of them with a link.</p>
+      </header>
+      <NewList />
+      {all.length > 0
+        ? <main class="profile-lists">{all.map(l => <ListCard key={l.id} list={l} />)}</main>
+        : <p class="hint">Add games from a cover (the + button or <kbd>A</kbd>), the detail panel, or a selection.</p>}
+    </div>
+  );
+}
+
+function ListCard({ list: l }: { list: List }) {
+  const games = listEntries(l);
+  const hours = games.reduce((s, e) => s + (e.len.hours ?? 0), 0);
+  return (
+    <Link href={listPath(l)} class="profile-list">
+      <MiniCovers covers={games.slice(0, 4).map(e => e.game.appid)} />
+      <span class="profile-list-text">
+        <b>{l.title}</b>
+        <span class="list-meta">
+          {count(games.length, "game")} · {count(hours, "hour")}{l.kind === "filter" ? " · auto" : ""}{l.visibility !== "private" ? " · shared" : ""}
+        </span>
+        {l.description && <span class="hint">{l.description}</span>}
+      </span>
+    </Link>
+  );
+}
+
+/** A name, and for a list that follows the library, the Backlog's current view as it is now. */
+function NewList() {
   const [name, setName] = useState("");
   const [fromView, setFromView] = useState(false);
-  const close = () => (listsOpen.value = false);
-  const input = useRef<HTMLInputElement>(null);
-  // Not on touch screens, where it would bring up the keyboard over the lists
-  useLayoutEffect(() => { if (matchMedia("(pointer: fine)").matches) input.current?.focus(); }, []);
-  const r = route.value;
-  const onLibrary = r.page === "library";
-
+  const view = activeView.value;
   const create = (e: Event) => {
     e.preventDefault();
     if (!name.trim()) return;
-    const l = createList(name.trim(), onLibrary && fromView ? "filter" : "manual");
-    close();
-    navigate(listPath(l));
+    navigate(listPath(createList(name.trim(), fromView ? "filter" : "manual")));
   };
-
   return (
-    <div class="sheet-backdrop" onClick={ev => ev.target === ev.currentTarget && close()}>
-      <div class="sheet drawer" role="dialog" aria-modal="true" aria-labelledby="lists-title">
-        <button type="button" class="btn ghost close" onClick={close} aria-label="Close">✕</button>
-        <h2 id="lists-title">Lists</h2>
-        <nav aria-label="Your lists">
-          <ul class="list-nav">
-            <li><Link href="/" onNavigate={close} aria-current={onLibrary ? "page" : undefined}>Backlog <span>all games</span></Link></li>
-            {sortedLists.value.map(l => (
-              <li key={l.id}>
-                <Link href={listPath(l)} onNavigate={close} aria-current={currentList.value?.id === l.id ? "page" : undefined}>
-                  {l.title} <span>{l.kind === "filter" ? "auto · " : ""}{size(l)}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-        <form class="new-list" onSubmit={create}>
-          <label for="new-list">New list</label>
-          <div class="row-actions">
-            <input ref={input} id="new-list" value={name} maxLength={80} placeholder="Up next, Best short games…" onInput={e => setName(e.currentTarget.value)} />
-            <button type="submit" class="btn primary" disabled={!name.trim()}>Create</button>
-          </div>
-          {onLibrary && (
-            <label class="check">
-              <input type="checkbox" checked={fromView} onChange={e => setFromView(e.currentTarget.checked)} />
-              Games of the current view, updated as your library changes
-            </label>
-          )}
-          {!sortedLists.value.length && <p class="hint">Add games from a cover (the + button or <kbd>A</kbd>), the detail panel, or a selection.</p>}
-        </form>
+    <form class="new-list" onSubmit={create}>
+      <label for="new-list">New list</label>
+      <div class="row-actions">
+        <input id="new-list" value={name} maxLength={80} placeholder="Up next, Best short games…" onInput={e => setName(e.currentTarget.value)} />
+        <button type="submit" class="btn primary" disabled={!name.trim()}>Create</button>
       </div>
-    </div>
+      <label class="check">
+        <input type="checkbox" checked={fromView} onChange={e => setFromView(e.currentTarget.checked)} />
+        From the Backlog's current view{view ? ` (${view.name})` : ""}, updated as your library changes
+      </label>
+    </form>
   );
 }
 
@@ -203,13 +222,7 @@ export function ListHeader({ list: l }: { list: List }) {
 
   return (
     <header class="top">
-      <div class="eyebrow-row">
-        <Link href="/" class="eyebrow back">← Backlog</Link>
-        <div class="row-actions">
-          <button type="button" class="btn ghost" onClick={() => (listsOpen.value = true)}>Lists</button>
-          <button type="button" class="btn ghost" onClick={() => (settingsOpen.value = true)}>Settings</button>
-        </div>
-      </div>
+      <TopNav />
       <InPlace tag="h1" value={l.title} label="List name" maxLength={80} onSave={title => title && updateList(l.id, { title })} />
       <InPlace tag="p" class="lede" value={l.description} label="Description" placeholder="Add a description" maxLength={1000} multiline
         onSave={description => updateList(l.id, { description })} />

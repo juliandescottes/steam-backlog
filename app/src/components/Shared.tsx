@@ -7,8 +7,9 @@ import { backlogPath, profilePath, sharePath, type Profile, type SharedList } fr
 import { STATUSES, STATUS_LABEL, type Status } from "@backlog/shared/types";
 import { navigate } from "../route.ts";
 import { settings } from "../store.ts";
-import { count, portraitUrl, steamUrl } from "../util.ts";
+import { count, steamUrl } from "../util.ts";
 import { Art } from "./Art.tsx";
+import { MiniCovers } from "./MiniCovers.tsx";
 
 const POLL_MS = 30_000;
 type State<T> = { kind: "loading" } | { kind: "missing" } | { kind: "offline" } | { kind: "ok"; data: T };
@@ -188,14 +189,6 @@ export function SharedPage({ src, whole = false }: { src: string; whole?: boolea
       </main>
       <Footer />
     </div>
-  );
-}
-
-function MiniCovers({ covers }: { covers: number[] }) {
-  return (
-    <span class="mini-covers">
-      {[0, 1, 2, 3].map(i => <span key={i}>{covers[i] != null && <img src={portraitUrl(covers[i])} alt="" loading="lazy" onError={e => e.currentTarget.remove()} />}</span>)}
-    </span>
   );
 }
 

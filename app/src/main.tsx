@@ -5,7 +5,7 @@ import { Detail } from "./components/Detail.tsx";
 import { FillIn } from "./components/FillIn.tsx";
 import { Import } from "./components/Import.tsx";
 import { Library } from "./components/Library.tsx";
-import { ListPicker, ListsDrawer } from "./components/Lists.tsx";
+import { ListPicker, ListsPage } from "./components/Lists.tsx";
 import { Palette } from "./components/Palette.tsx";
 import { SelectionBar } from "./components/SelectionBar.tsx";
 import { Settings } from "./components/Settings.tsx";
@@ -14,7 +14,7 @@ import { Toast } from "./components/Toast.tsx";
 import { Welcome } from "./components/Welcome.tsx";
 import { installKeys } from "./keys.ts";
 import { route } from "./route.ts";
-import { fillInQueue, games, listsOpen, viewing, load, loaded, openId, paletteOpen, pickerFor, settingsOpen, shortcutsOpen } from "./store.ts";
+import { fillInQueue, games, viewing, load, loaded, openId, paletteOpen, pickerFor, settingsOpen, shortcutsOpen } from "./store.ts";
 import "./styles.css";
 
 // Dev only: which cards rendered, for e2e/perf.spec.ts
@@ -50,12 +50,11 @@ function App() {
   }
   return (
     <>
-      {importing.value ? <Import /> : games.value.size ? <Library /> : <Welcome />}
+      {importing.value ? <Import /> : !games.value.size ? <Welcome /> : r.page === "lists" ? <ListsPage /> : <Library />}
       {openId.value != null && <Detail />}
       {settingsOpen.value && <Settings />}
       {fillInQueue.value && <FillIn />}
       {shortcutsOpen.value && <Shortcuts />}
-      {listsOpen.value && <ListsDrawer />}
       {pickerFor.value && <ListPicker />}
       {paletteOpen.value && !importing.value && games.value.size > 0 && <Palette />}
       <div class="dock">

@@ -54,6 +54,10 @@ kbd { padding: 1px 5px; border: 1px solid var(--line); border-bottom-width: 2px;
 /* Header */
 header.top { display: grid; gap: 14px; }
 .eyebrow-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+/* Backlog and Lists, the user's two pages */
+.top-nav { display: flex; gap: 20px; }
+.top-nav a { padding-block: 4px; border-bottom: 2px solid transparent; }
+.top-nav a.active { color: var(--fg); border-bottom-color: var(--accent); }
 .eyebrow { font: 700 12px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
 h1 { font: 800 clamp(40px, 7vw, 76px)/.9 var(--display); letter-spacing: .01em; margin: 0; text-wrap: balance; text-transform: uppercase; }
 h1 em { font-style: normal; color: var(--accent); }
@@ -237,19 +241,12 @@ section.band { display: grid; gap: 14px; scroll-margin-top: 72px; }
 @media (max-width: 600px) {
   .sheet { top: auto; max-height: 88vh; width: 100%; border-radius: 14px 14px 0 0; }
 }
-/* Lists drawer: same sheet from the left */
-.sheet.drawer { left: 0; right: auto; width: min(380px, 100%); }
-@media (max-width: 600px) { .sheet.drawer { width: 100%; } }
 /* Settings: sections divided by a line */
 .settings > section + section { border-top: 1px solid var(--line); padding-top: 20px; }
 .settings > section h3 { color: var(--fg); }
 .settings .setting { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; }
-.list-nav { list-style: none; margin: 0 -10px; padding: 0; display: grid; gap: 2px; }
-.list-nav a { display: flex; justify-content: space-between; gap: 12px; padding: 9px 10px; border-radius: 6px; color: var(--fg); text-decoration: none; font-weight: 600; }
-.list-nav a span { flex: none; font: 500 12.5px/1.4 var(--mono); color: var(--muted); }
-.list-nav a:hover { background: var(--surface-2); }
-.list-nav a[aria-current="page"] { background: var(--surface-2); box-shadow: inset 3px 0 0 var(--accent); }
-.new-list { display: grid; gap: 8px; border-top: 1px solid var(--line); padding-top: 18px; }
+/* Lists page */
+.new-list { display: grid; gap: 8px; max-width: 640px; }
 .new-list > label:not(.check) { font-weight: 700; }
 .new-list input:not([type]) { flex: 1; min-width: 0; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); font-size: 15px; }
 .new-list .row-actions { flex-wrap: nowrap; }

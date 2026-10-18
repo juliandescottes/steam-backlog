@@ -43,8 +43,8 @@ test("LIST-1 LIST-2 LIST-3 LIST-4 LIST-9: hand-picked list: create from a cover,
   expect(href).toMatch(/^\/l\/[0-9a-z]{12}$/);
 
   // The list page, in the order games were added; the toast no longer links to it
-  await page.getByRole("button", { name: "Lists" }).click();
-  await page.getByRole("dialog", { name: "Lists" }).getByRole("link", { name: /Up next/ }).click();
+  await page.getByRole("link", { name: "Lists", exact: true }).click();
+  await page.getByRole("main").getByRole("link", { name: /Up next/ }).click();
   await expect(page).toHaveURL(href!);
   await expect(open).toHaveCount(0);
   await expect(page.locator("h1")).toHaveText("Up next");
@@ -91,17 +91,18 @@ test("LIST-1 LIST-2 LIST-3 LIST-4 LIST-9: hand-picked list: create from a cover,
 test("LIST-5 LIST-6 PRIN-2: list from the current view updates with the library; rename and delete with undo", async ({ page }) => {
   await openLibrary(page);
   await page.getByRole("button", { name: "Under 5 h", exact: true }).click();
-  await page.getByRole("button", { name: "Lists" }).click();
-  const drawer = page.getByRole("dialog", { name: "Lists" });
-  await drawer.getByLabel("New list").fill("Quick ones");
-  await drawer.getByRole("checkbox").check();
-  await drawer.getByRole("button", { name: "Create" }).click();
+  await page.getByRole("link", { name: "Lists", exact: true }).click();
+  await expect(page).toHaveURL(/\/lists$/);
+  await expect(page.getByRole("link", { name: "Lists", exact: true })).toHaveAttribute("aria-current", "page");
+  await page.getByLabel("New list").fill("Quick ones");
+  await page.getByRole("checkbox", { name: /From the Backlog's current view \(Under 5 h\)/ }).check();
+  await page.getByRole("button", { name: "Create" }).click();
   await expect(page.locator("h1")).toHaveText("Quick ones");
   await expect(page.locator(".list-meta")).toContainText("1 game · 2 hours · updates with your library");
   await expect(names(page)).toHaveText(["Short One"]);
 
   // A length typed in the library puts a game in the list
-  await page.getByRole("link", { name: "← Backlog" }).click();
+  await page.getByRole("link", { name: "Backlog", exact: true }).click();
   await expect(page.getByRole("button", { name: "Under 5 h", exact: true })).toHaveAttribute("aria-current", "true"); // the library keeps its view
   await page.getByRole("button", { name: "To play" }).click();
   await card(page, "Mystery A").getByRole("button", { name: "Add a length for Mystery A" }).click();
@@ -132,13 +133,14 @@ test("LIST-5 LIST-6 PRIN-2: list from the current view updates with the library;
   await expect(page).toHaveURL(/\/$/);
   await expect(page.locator(".toast")).toContainText('List "Under five" deleted');
   await page.locator(".toast").getByRole("button", { name: "Undo" }).click();
-  await page.getByRole("button", { name: "Lists" }).click();
-  await expect(drawer.getByRole("link", { name: /Under five/ })).toContainText("auto · 2");
+  await page.getByRole("link", { name: "Lists", exact: true }).click();
+  await expect(page.getByRole("main").getByRole("link", { name: /Under five/ })).toContainText("2 games");
+  await expect(page.getByRole("main").getByRole("link", { name: /Under five/ })).toContainText("auto");
 });
 
 test("LIST-7: old /l/<id> addresses move to the list's link; a missing one says so", async ({ page }) => {
   await openLibrary(page);
-  await page.getByRole("button", { name: "Lists" }).click();
+  await page.getByRole("link", { name: "Lists", exact: true }).click();
   await page.getByLabel("New list").fill("Old address");
   await page.getByRole("button", { name: "Create" }).click();
   const id = await page.evaluate(() => new Promise<string>(resolve => {

@@ -82,7 +82,7 @@ Backlog (default) · Playing · Finished · Dropped.
 
 A list is a named, ordered collection of games with an optional description, hand-picked or filter-based.
 
-- **LIST-1** The Lists button opens a drawer with the library, every list and its size, and a field to create one.
+- **LIST-1** Backlog and Lists are the user's two pages, linked at the top left of each. The Lists page (`/lists`) shows every list as a card (first covers, size, hours, auto or shared) and a field to create one, empty or from the Backlog's current view.
 - **LIST-2** Hand-picked lists: add games from a cover's +, `A`, the detail panel, a selection or the palette. The picker finds a list or creates one from the typed name; the toast links to the list. Games keep the order they were added in.
 - **LIST-3** Reorder a hand-picked list by dragging or `Alt+←/→`, with undo. Remove games from the selection bar or the detail panel.
 - **LIST-4** A list page shows title, description, size and hours, with its own status chips and sort ("List order" for hand-picked lists). Finished games stay in the list.
@@ -122,7 +122,7 @@ Settings also holds the account, public profile, backup and delete controls cove
 ## 11. Platforms
 
 - **PLAT-1** Phone width (~400 px) is a first-class layout: no horizontal scrolling.
-- **PLAT-2** On phones: three cover columns, a toolbar that doesn't stick, the detail panel and Settings as bottom sheets, the Lists drawer full width. (manual)
+- **PLAT-2** On phones: three cover columns, a toolbar that doesn't stick, the detail panel and Settings as bottom sheets, list cards in one column. (manual)
 - **PLAT-3** After the first load, the own library works offline; changes made offline sync when back online. (planned)
 - **PLAT-4** Shared and profile pages need a connection and retry by themselves. (manual)
 

@@ -156,7 +156,7 @@ test("LIST-8 ONB-8: lists and their order sync between devices, and come along o
   await page.route("**/*steamstatic.com/**", r => r.abort());
   await page.goto("/");
   await page.setInputFiles("input[type=file]", "e2e/fixtures/library.json");
-  await page.getByRole("button", { name: "Lists" }).click();
+  await page.getByRole("link", { name: "Lists", exact: true }).click();
   await page.getByLabel("New list").fill("Weekend");
   await page.getByRole("button", { name: "Create" }).click();
   await expect(page.locator("h1")).toHaveText("Weekend");
@@ -173,15 +173,15 @@ test("LIST-8 ONB-8: lists and their order sync between devices, and come along o
   const other = await browser.newPage();
   await expect(async () => {
     await signIn(other, id);
-    await other.getByRole("button", { name: "Lists" }).click();
-    await other.getByRole("dialog", { name: "Lists" }).getByRole("link", { name: /Weekend/ }).click({ timeout: 1000 });
+    await other.getByRole("link", { name: "Lists", exact: true }).click();
+    await other.getByRole("main").getByRole("link", { name: /Weekend/ }).click({ timeout: 1000 });
     await expect(other.locator(".bands .game .name")).toHaveText(["Portal", "Terraria"], { timeout: 1000 });
   }).toPass({ timeout: 10_000 });
   await card(other, "Terraria").dragTo(card(other, "Portal"), { targetPosition: { x: 5, y: 60 } });
   await expect(other.locator(".bands .game .name")).toHaveText(["Terraria", "Portal"]);
 
-  await page.getByRole("button", { name: "Lists" }).click();
-  await page.getByRole("dialog", { name: "Lists" }).getByRole("link", { name: /Weekend/ }).click();
+  await page.getByRole("link", { name: "Lists", exact: true }).click();
+  await page.getByRole("main").getByRole("link", { name: /Weekend/ }).click();
   await expect(async () => {
     await page.reload();
     await expect(page.locator(".bands .game .name")).toHaveText(["Terraria", "Portal"], { timeout: 1000 });
@@ -205,7 +205,7 @@ test("LIST-7 LIST-9 LIST-10 LIST-12: share a list: one click for a link, viewers
   await page.keyboard.press("a");
   await page.getByRole("combobox", { name: "Find or create a list" }).fill("Valve classics");
   await page.keyboard.press("Enter");
-  await page.getByRole("button", { name: "Lists" }).click();
+  await page.getByRole("link", { name: "Lists", exact: true }).click();
   await page.getByRole("link", { name: /Valve classics/ }).click();
 
   await page.getByRole("region", { name: "Sharing" }).getByRole("button", { name: "Share" }).click();
@@ -264,7 +264,7 @@ test("LIST-14 LIST-15: public profile: off until turned on, at a random address,
   await card(page, "Portal").getByRole("button", { name: "Add Portal to a list" }).click();
   await page.getByRole("combobox", { name: "Find or create a list" }).fill("Puzzles");
   await page.keyboard.press("Enter");
-  await page.getByRole("button", { name: "Lists" }).click();
+  await page.getByRole("link", { name: "Lists", exact: true }).click();
   await page.getByRole("link", { name: /Puzzles/ }).click();
   await page.getByRole("region", { name: "Sharing" }).getByRole("button", { name: "Share" }).click();
   await page.getByRole("checkbox", { name: /Show on my public profile/ }).check();
@@ -294,7 +294,7 @@ test("LIST-14 LIST-15: public profile: off until turned on, at a random address,
   await expect(viewer.getByRole("link", { name: /^Backlog/ })).toHaveCount(0);
   await page.getByRole("checkbox", { name: "Show my whole backlog" }).check();
   await page.locator(".sheet .close").click();
-  await page.getByRole("link", { name: "← Backlog" }).click();
+  await page.getByRole("link", { name: "Backlog", exact: true }).click();
   await card(page, "Portal 2").hover(); // finished: hidden at first on the backlog page, like the owner's own view
   await card(page, "Portal 2").getByRole("button", { name: "Mark Finished" }).click();
   await page.getByRole("button", { name: "Settings" }).click();
@@ -337,7 +337,7 @@ test("LIST-8: a browser that synced with older code, which skipped lists, gets t
     c.onsuccess = () => m.put({ since: c.result.since, catalogSince: c.result.catalogSince }, "cursor");
     tx.oncomplete = () => r(null); }; })`);
   await page.reload();
-  await page.getByRole("button", { name: "Lists" }).click();
+  await page.getByRole("link", { name: "Lists", exact: true }).click();
   await page.getByRole("link", { name: /Skipped/ }).click();
   await expect(page.locator(".bands .game .name")).toHaveText(["Portal", "Terraria"]);
 });
