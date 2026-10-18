@@ -14,7 +14,7 @@ npm run e2e        # playwright, installed Chrome; starts both servers
 npm run perf       # timing budget (machine-dependent, not in e2e)
 npm run typecheck
 npm run build
-npm run library    # tools/out/library.json + hltb_lengths.json from prototype data
+npm run library    # tools/out/library.json from prototype data
 npm run deploy     # build + wrangler deploy to baquelogue.com (ask first)
 ```
 

@@ -1,6 +1,6 @@
 import { batch, computed, effect, signal } from "@preact/signals";
 import { BANDS, bandOf, formatHours, type Band } from "@backlog/shared/bands";
-import { makeExport, newGame, type ExportFile, type LengthsEntry, type LibraryGame } from "@backlog/shared/files";
+import { makeExport, newGame, type ExportFile, type LibraryGame } from "@backlog/shared/files";
 import { compare, matches, type Entry, type Filter, type SortKey } from "@backlog/shared/filter";
 import { resolveLength } from "@backlog/shared/lengths";
 import { after, between, newShareId, type List, type ListItem, type ListKind, type Visibility } from "@backlog/shared/lists";
@@ -606,13 +606,6 @@ export function setMyLength(appid: number, my: Lengths | null, kind: LenKind | n
 /** A single typed value applies to the current measure. */
 export function lengthsFor(hours: number): Lengths {
   return settings.value.measure === "main" ? { main: hours, main_extra: null, comp: null } : { main: null, main_extra: hours, comp: null };
-}
-
-export function importLengths(list: LengthsEntry[]): { applied: number; unknownGames: number } {
-  const known = list.filter(l => games.value.has(l.appid));
-  const lengths = new Map(known.map(l => [l.appid, l.lengths]));
-  run(`Imported ${known.length} lengths`, patches([...lengths.keys()], g => ({ my: lengths.get(g.appid)!, myKind: "imported" })));
-  return { applied: known.length, unknownGames: list.length - known.length };
 }
 
 // ---- Silent updates (no undo) ----

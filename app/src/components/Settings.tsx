@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "preact/hooks";
-import { parseExport, parseLengths, parseLibrary, type ExportFile } from "@backlog/shared/files";
+import { parseExport, parseLibrary, type ExportFile } from "@backlog/shared/files";
 import type { Measure } from "@backlog/shared/types";
 import { profilePath, suggestHandle } from "@backlog/shared/share";
 import { account, deleteAccount, refreshLibrary, setProfile, signIn, signOut, type Me } from "../account.ts";
 import { navigate } from "../route.ts";
 import {
-  deleteEverything, exportBackup, games, importLengths, mergeLibrary, restoreBackup, settings, settingsOpen, showToast, updateSettings, type Theme,
+  deleteEverything, exportBackup, games, mergeLibrary, restoreBackup, settings, settingsOpen, showToast, updateSettings, type Theme,
 } from "../store.ts";
 import { count, readFile } from "../util.ts";
 
@@ -130,20 +130,17 @@ export function Settings() {
             options={[["main_extra", "Main + Extras"], ["main", "Main story"]]} />
         </section>
 
-        <section class="detail-section">
-          <h3>Library</h3>
-          <p class="row-actions">
-            {!account.value && <FilePick label="Open library file" accept=".json,application/json" onFile={guard(text => {
-              const r = mergeLibrary(parseLibrary(text));
-              showToast(`${count(r.added, "game")} added, ${r.updated} updated`);
-            })} />}
-            <FilePick label="Import lengths" accept=".json,.csv,application/json,text/csv" onFile={guard(text => {
-              const r = importLengths(parseLengths(text));
-              if (r.unknownGames) showToast(`Imported ${r.applied} lengths (${r.unknownGames} for games not in your library)`, true);
-            })} />
-          </p>
-          <p class="hint">Lengths files: JSON (<code>backlog-lengths</code>) or CSV with an <code>appid</code> column and <code>hours</code> or <code>main</code>, <code>main_extra</code>, <code>completionist</code>. They become your own lengths.</p>
-        </section>
+        {!account.value && (
+          <section class="detail-section">
+            <h3>Library</h3>
+            <p class="row-actions">
+              <FilePick label="Open library file" accept=".json,application/json" onFile={guard(text => {
+                const r = mergeLibrary(parseLibrary(text));
+                showToast(`${count(r.added, "game")} added, ${r.updated} updated`);
+              })} />
+            </p>
+          </section>
+        )}
 
         <section class="detail-section">
           <h3>Backup</h3>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FileFormatError, makeExport, newGame, parseExport, parseLengths, parseLibrary } from "./files.ts";
+import { FileFormatError, makeExport, newGame, parseExport, parseLibrary } from "./files.ts";
 import { compare, matches, type Entry } from "./filter.ts";
 import { resolveLength } from "./lengths.ts";
 import { decodeEntities, normalizeName } from "./names.ts";
@@ -15,24 +15,6 @@ describe("library file", () => {
   it("rejects other JSON", () => {
     expect(() => parseLibrary("{}")).toThrow(FileFormatError);
     expect(() => parseLibrary("nope")).toThrow(FileFormatError);
-  });
-});
-
-describe("LEN-14: lengths file", () => {
-  it("parses JSON", () => {
-    const text = JSON.stringify({ format: "backlog-lengths", version: 1, lengths: [{ appid: 5, main: 1, main_extra: 2.1, completionist: null }, { appid: 6 }] });
-    expect(parseLengths(text)).toEqual([{ appid: 5, lengths: { main: 1, main_extra: 2, comp: null } }]);
-  });
-  it("parses CSV with an hours column", () => {
-    expect(parseLengths("appid,hours\n10,\"12,5\"\n11,\n")).toEqual([{ appid: 10, lengths: { main: null, main_extra: 12.5, comp: null } }]);
-  });
-  it("parses CSV with separate measures", () => {
-    expect(parseLengths("steam_appid,main,main_extra,completionist\r\n10,1,2,3")).toEqual([
-      { appid: 10, lengths: { main: 1, main_extra: 2, comp: 3 } },
-    ]);
-  });
-  it("needs an appid column", () => {
-    expect(() => parseLengths("name,hours\nx,1")).toThrow(FileFormatError);
   });
 });
 

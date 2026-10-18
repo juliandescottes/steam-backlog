@@ -11,7 +11,8 @@ Newest last. Don't reverse these without asking.
 - **Stack:** TypeScript, Preact + Vite, Cloudflare Workers + D1.
 - **Covers** load from Steam's CDN; no image hosting.
 - **"Date added"** instead of purchase date (Steam doesn't expose it).
-- **Lengths:** IGDB (~62% coverage), `version_parent` fallback only, plus fill-in flow and user lengths. No HLTB scraping in the product; personal HLTB data comes in as the user's own lengths.
+- **Lengths:** IGDB (~62% coverage), `version_parent` fallback only, plus fill-in flow and user lengths. No HLTB scraping in the product.
+- **Import lengths removed** (2026-10-18): nobody would use it. Lengths imported before keep `myKind: "imported"`.
 - **Community lengths off** (2026-10-18): a tool for the user and a few friends, not another source of truth; too few users to reach 3 entries anyway. Code kept behind `COMMUNITY_LENGTHS`, checkbox removed.
 - **Fill-in shortcuts use Alt** (`Alt+1–7`, `Alt+N`, `Alt+O`): the input takes digits and letters.
 - **Quick actions (P/F/D):** bottom-right column; hidden on touch screens.

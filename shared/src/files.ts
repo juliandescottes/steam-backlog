@@ -1,7 +1,6 @@
 /*
  * File formats the app reads and writes:
  * - backlog-library: a game library (what Steam import + IGDB will provide in milestone 3; made by tools/make_library.ts for now)
- * - backlog-lengths: lengths to apply as the user's own (JSON, or CSV with appid + hours columns)
  * - backlog-export: a backup of the user's own data
  */
 import { roundHours } from "./bands.ts";
@@ -20,9 +19,6 @@ export type LibraryGame = {
   igdb?: (Lengths & { count: number | null }) | null;
 };
 export type LibraryFile = { format: "backlog-library"; version: 1; games: LibraryGame[] };
-
-export type LengthsEntry = { appid: number; lengths: Lengths };
-export type LengthsFile = { format: "backlog-lengths"; version: 1; lengths: { appid: number; main?: number | null; main_extra?: number | null; completionist?: number | null }[] };
 
 export type ExportGame = Pick<Game, "appid" | "name" | "status" | "statusAt" | "finishedAt" | "note" | "my" | "myKind" | "playtimeMin" | "addedAt">;
 export type ExportFile = {
@@ -73,32 +69,6 @@ export function parseLibrary(text: string): LibraryGame[] {
     igdb: g.igdb ? { main: hours(g.igdb.main), main_extra: hours(g.igdb.main_extra), comp: hours(g.igdb.comp), count: num(g.igdb.count) } : null,
   }));
 }
-
-/** JSON lengths file, or CSV with an appid column and either hours or main / main_extra / completionist. */
-export function parseLengths(text: string): LengthsEntry[] {
-  const trimmed = text.replace(/^\uFEFF/, "").trim();
-  const rows: Record<string, unknown>[] = trimmed.startsWith("{") ? lengthsJson(trimmed) : parseCsv(trimmed);
-  const out: LengthsEntry[] = [];
-  for (const r of rows) {
-    const lengths = {
-      main: hours(numberish(r.main)),
-      main_extra: hours(numberish(r.main_extra ?? r.hours)),
-      comp: hours(numberish(r.completionist ?? r.comp)),
-    };
-    if (lengths.main ?? lengths.main_extra ?? lengths.comp) out.push({ appid: appidOf(r.appid ?? r.steam_appid), lengths });
-  }
-  return out;
-}
-
-function lengthsJson(text: string): Record<string, unknown>[] {
-  const d = json(text);
-  if (d?.format !== "backlog-lengths" || d.version !== 1 || !Array.isArray(d.lengths)) {
-    throw new FileFormatError("Not a lengths file (expected format \"backlog-lengths\", version 1)");
-  }
-  return d.lengths;
-}
-
-const numberish = (v: unknown) => (typeof v === "string" && v.trim() ? Number(v.replace(",", ".")) : v);
 
 /** Rows of a CSV with a header line; column names are lowercased. */
 export function parseCsv(text: string): Record<string, string>[] {
