@@ -187,7 +187,7 @@ export function Settings() {
                       <button type="button" class="btn ghost" onClick={() => setConfirmDelete(false)}>Keep it</button>
                     </p>
                   </div>
-                : <button type="button" class="btn ghost" onClick={() => setConfirmDelete(true)}>Delete account…</button>}
+                : <button type="button" class="btn risky" onClick={() => setConfirmDelete(true)}>Delete account…</button>}
             </section>
           : <section class="detail-section">
               <h3>Local data</h3>
@@ -197,7 +197,7 @@ export function Settings() {
                     <button type="button" class="btn danger" onClick={() => void deleteEverything()}>Delete everything</button>
                     <button type="button" class="btn ghost" onClick={() => setConfirmDelete(false)}>Keep it</button>
                   </p>
-                : <button type="button" class="btn ghost" onClick={() => setConfirmDelete(true)}>Delete local data…</button>}
+                : <button type="button" class="btn risky" onClick={() => setConfirmDelete(true)}>Delete local data…</button>}
             </section>}
       </div>
     </div>
