@@ -7,15 +7,15 @@ import type { Game } from "./types.ts";
  * owner's status, never notes, playtime or dates: those are blanked out.
  */
 export type SharedList = {
-  /** `handle` only when the owner's public profile is on, to link to it. */
-  owner: { name: string; avatar: string | null; handle: string | null };
+  /** `profileId` only when the owner's public profile is on, to link to it. */
+  owner: { name: string; avatar: string | null; profileId: string | null };
   list: { title: string; description: string; kind: ListKind; sort: SortKey | null };
   games: Game[];
 };
 
-/** A public profile (GET /api/u/:handle): the lists the owner chose to show, with their size. */
+/** A public profile (GET /api/u/:profileId): the lists the owner chose to show, with their size. */
 export type Profile = {
-  handle: string;
+  id: string;
   name: string;
   avatar: string | null;
   stats: { finished: number; hoursCleared: number };
@@ -24,17 +24,7 @@ export type Profile = {
   lists: { shareId: string; title: string; description: string; kind: ListKind; games: number; hours: number; covers: number[] }[];
 };
 
-/** 2 to 30 lowercase letters, digits and inner dashes: the public username in /u/<handle> (profiles). */
-export const HANDLE = /^[a-z0-9](?:[a-z0-9-]{0,28}[a-z0-9])$/;
-
-/** A handle to suggest from a Steam name, or "" when nothing usable is left. */
-export function suggestHandle(name: string): string {
-  const h = name.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 30).replace(/-+$/, "");
-  return HANDLE.test(h) ? h : "";
-}
-
 /** A list's address, for its owner and for viewers. */
 export const sharePath = (shareId: string) => `/l/${shareId}`;
-export const profilePath = (handle: string) => `/u/${handle}`;
-export const backlogPath = (handle: string) => `/u/${handle}/backlog`;
+export const profilePath = (id: string) => `/u/${id}`;
+export const backlogPath = (id: string) => `/u/${id}/backlog`;

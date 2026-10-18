@@ -68,11 +68,6 @@ a.eyebrow:hover { color: var(--fg); }
 .share-link { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0; }
 .share-link a { font: 500 14px/1.3 var(--mono); color: var(--fg); overflow-wrap: anywhere; }
 .eyebrow.owner { display: flex; align-items: center; gap: 8px; width: fit-content; }
-.handle { flex-wrap: nowrap; min-width: 0; } /* a grid item: without this the input's natural width widens the column */
-.handle label { margin-right: 4px; }
-@media (max-width: 480px) { .handle { flex-wrap: wrap; } .handle label { flex-basis: 100%; } .handle input { flex-basis: 6em; } }
-.handle .prefix { font: 500 14px/1 var(--mono); color: var(--muted); }
-.handle input { flex: 1; min-width: 0; padding: 7px 9px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); font: 500 14px/1 var(--mono); }
 .check:has(input:disabled) { color: var(--muted); }
 /* A setting with its description underneath */
 .option { display: grid; gap: 4px; min-width: 0; }

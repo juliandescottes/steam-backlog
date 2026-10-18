@@ -1,3 +1,4 @@
+import { newShareId } from "@backlog/shared/lists";
 import { cookie, HttpError, randomId, sha256 } from "./http.ts";
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -7,7 +8,7 @@ const COOKIE = "sid";
 export type User = {
   id: string;
   steam_id: string;
-  handle: string | null;
+  profile_id: string;
   display_name: string;
   avatar_url: string | null;
   library_synced_at: number | null;
@@ -37,7 +38,7 @@ export async function currentUser(req: Request, env: Env, now = Date.now()): Pro
   if (!token) return null;
   const id = await sha256(token);
   const row = await env.DB.prepare(
-    `SELECT u.id, u.steam_id, u.handle, u.display_name, u.avatar_url, u.library_synced_at, u.settings_json, u.profile_public, s.expires_at
+    `SELECT u.id, u.steam_id, u.profile_id, u.display_name, u.avatar_url, u.library_synced_at, u.settings_json, u.profile_public, s.expires_at
      FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.id = ? AND s.expires_at > ?`,
   ).bind(id, now).first<User & { expires_at: number }>();
   if (!row) return null;
@@ -72,8 +73,8 @@ export async function upsertUser(env: Env, steamId: string, profile: Profile | n
   }
   const id = randomId();
   await env.DB.batch([
-    env.DB.prepare("INSERT INTO users (id, steam_id, display_name, avatar_url, created_at) VALUES (?, ?, ?, ?, ?)")
-      .bind(id, steamId, profile?.name ?? `Steam user ${steamId}`, profile?.avatar ?? null, now),
+    env.DB.prepare("INSERT INTO users (id, steam_id, profile_id, display_name, avatar_url, created_at) VALUES (?, ?, ?, ?, ?, ?)")
+      .bind(id, steamId, newShareId(), profile?.name ?? `Steam user ${steamId}`, profile?.avatar ?? null, now),
     env.DB.prepare("INSERT INTO user_rev (user_id, rev) VALUES (?, 0)").bind(id),
   ]);
   return id;

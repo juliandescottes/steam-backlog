@@ -95,8 +95,8 @@ A list is a named, ordered collection of games with an optional description, han
 - **LIST-11** The shared page refreshes every 30 s while visible and when it comes back into view; an unchanged list costs a 304.
 - **LIST-12** Making a list private again, or deleting it, stops the link at once; viewers can't tell private from missing.
 - **LIST-13** Shared and profile pages have a title and a link preview.
-- **LIST-14** Public profile `/u/<username>`: off by default, needs a username (suggested from the Steam name). Shows the Steam name and avatar, stats (games finished, hours cleared) and the lists marked "Show on my public profile".
-- **LIST-15** Optionally the profile shows the whole library at `/u/<username>/backlog`: read-only, starting on Backlog + Playing. Turning the profile off hides both pages.
+- **LIST-14** Public profile `/u/<profile id>`: off by default; the address is a random id, nothing to choose. Shows the Steam name and avatar, stats (games finished, hours cleared) and the lists marked "Show on my public profile".
+- **LIST-15** Optionally the profile shows the whole library at `/u/<profile id>/backlog`: read-only, starting on Backlog + Playing. Turning the profile off hides both pages.
 
 ## 8. Data ownership
 

@@ -257,7 +257,7 @@ test("LIST-7 LIST-9 LIST-10 LIST-12: share a list: one click for a link, viewers
   await other.close();
 });
 
-test("LIST-14 LIST-15: public profile: off until turned on with a username, shows the lists picked for it", async ({ page, browser }) => {
+test("LIST-14 LIST-15: public profile: off until turned on, at a random address, shows the lists picked for it", async ({ page, browser }) => {
   const id = steamId();
   await signIn(page, id);
   await expect(page.locator(".bands .game .name")).toHaveText(DEV_GAMES);
@@ -272,18 +272,16 @@ test("LIST-14 LIST-15: public profile: off until turned on with a username, show
   await page.getByRole("checkbox", { name: /Show on my public profile/ }).check();
   await expect(page.getByRole("region", { name: "Sharing" })).toContainText("it's off");
 
-  // Turn the profile on from Settings, with a username
+  // Turn the profile on from Settings: its address is a random id, nothing to choose
   await page.getByRole("button", { name: "turn it on in Settings" }).click();
-  const handle = `p${id.slice(-9)}`;
-  await expect(page.getByLabel("Username")).toHaveValue("dev-user");
-  await page.getByLabel("Username").fill(handle);
   await page.getByRole("checkbox", { name: "Public profile", exact: true }).check();
-  await expect(page.getByRole("link", { name: "View your profile →" })).toBeVisible();
+  const href = await page.getByRole("link", { name: "View your profile →" }).getAttribute("href");
+  expect(href).toMatch(/^\/u\/[0-9a-z]{12}$/);
 
   const viewer = await (await browser.newContext()).newPage();
   await viewer.route("**/*steamstatic.com/**", r => r.abort());
   await expect(async () => {
-    await viewer.goto(`/u/${handle}`);
+    await viewer.goto(href!);
     await expect(viewer.locator("h1")).toHaveText("Dev user", { timeout: 1000 });
     await expect(viewer.locator(".profile-list")).toHaveCount(1, { timeout: 1000 });
   }).toPass({ timeout: 10_000 });
@@ -292,7 +290,7 @@ test("LIST-14 LIST-15: public profile: off until turned on with a username, show
   await viewer.locator(".profile-list").click();
   await expect(viewer.locator("h1")).toHaveText("Puzzles");
   await viewer.getByRole("link", { name: "Dev user's list" }).click(); // back to the profile
-  await expect(viewer).toHaveURL(new RegExp(`/u/${handle}$`));
+  await expect(viewer).toHaveURL(new RegExp(`${href}$`));
 
   // The whole backlog, once shown
   await expect(viewer.getByRole("link", { name: /^Backlog/ })).toHaveCount(0);
@@ -303,7 +301,7 @@ test("LIST-14 LIST-15: public profile: off until turned on with a username, show
   await card(page, "Portal 2").getByRole("button", { name: "Mark Finished" }).click();
   await page.getByRole("button", { name: "Settings" }).click();
   await expect(async () => {
-    await viewer.goto(`/u/${handle}`);
+    await viewer.goto(href!);
     await viewer.getByRole("link", { name: /^Backlog/ }).click({ timeout: 1000 });
     await expect(viewer.locator(".game")).toHaveCount(4, { timeout: 1000 });
   }).toPass({ timeout: 10_000 });
@@ -318,7 +316,7 @@ test("LIST-14 LIST-15: public profile: off until turned on with a username, show
     await viewer.reload();
     await expect(viewer.locator("h1")).toHaveText("Backlog not found", { timeout: 1000 });
   }).toPass({ timeout: 10_000 });
-  await viewer.goto(`/u/${handle}`);
+  await viewer.goto(href!);
   await expect(viewer.locator("h1")).toHaveText("Profile not found");
 });
 
