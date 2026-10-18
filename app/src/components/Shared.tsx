@@ -85,7 +85,7 @@ export function ProfilePage({ handle }: { handle: string }) {
         <div>
           <div class="eyebrow">Backlog of</div>
           <h1>{p.name}</h1>
-          {p.stats && <p class="list-meta">{count(p.stats.finished, "game")} finished · {count(p.stats.hoursCleared, "hour")} cleared</p>}
+          <p class="list-meta">{count(p.stats.finished, "game")} finished · {count(p.stats.hoursCleared, "hour")} cleared</p>
         </div>
       </header>
       <main class="profile-lists">

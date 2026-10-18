@@ -9,24 +9,22 @@ import { communityOn } from "./community.ts";
 import { HttpError } from "./http.ts";
 import { GAME_COLUMNS, toGame, type Row } from "./sync.ts";
 
-export type ProfileSettings = { handle?: unknown; public?: unknown; showStats?: unknown; showBacklog?: unknown };
+export type ProfileSettings = { handle?: unknown; public?: unknown; showBacklog?: unknown };
 
 /**
  * Public profile settings: the handle (public username; another user's is refused), whether the profile
- * is on (needs a handle), and whether it shows stats.
+ * is on (needs a handle), and whether it shows the whole backlog.
  */
 export async function setProfile(env: Env, userId: string, s: ProfileSettings) {
   if (s.handle !== undefined && (typeof s.handle !== "string" || !HANDLE.test(s.handle))) throw new HttpError(400, "bad_handle");
-  if ([s.public, s.showStats, s.showBacklog].some(v => v !== undefined && typeof v !== "boolean")) throw new HttpError(400, "bad_request");
+  if ([s.public, s.showBacklog].some(v => v !== undefined && typeof v !== "boolean")) throw new HttpError(400, "bad_request");
   const flag = (v: unknown) => (v === undefined ? null : String(v));
   try {
     const r = await env.DB.prepare(
       `UPDATE users SET handle = coalesce(?2, handle), profile_public = coalesce(?3, profile_public),
-         settings_json = CASE WHEN ?5 IS NULL THEN s.v ELSE json_set(s.v, '$.showBacklog', json(?5)) END
-       FROM (SELECT CASE WHEN ?4 IS NULL THEN settings_json ELSE json_set(settings_json, '$.showStats', json(?4)) END AS v
-             FROM users WHERE id = ?1) s
+         settings_json = CASE WHEN ?4 IS NULL THEN settings_json ELSE json_set(settings_json, '$.showBacklog', json(?4)) END
        WHERE id = ?1 AND (coalesce(?3, profile_public) = 0 OR coalesce(?2, handle) IS NOT NULL)`,
-    ).bind(userId, s.handle ?? null, s.public === undefined ? null : Number(s.public), flag(s.showStats), flag(s.showBacklog)).run();
+    ).bind(userId, s.handle ?? null, s.public === undefined ? null : Number(s.public), flag(s.showBacklog)).run();
     if (!r.meta.changes) throw new HttpError(400, "handle_required");
   } catch (e) {
     if (String(e).includes("UNIQUE")) throw new HttpError(409, "handle_taken");
@@ -112,7 +110,7 @@ export async function profile(env: Env, handle: string): Promise<Profile | null>
   type Row2 = { id: string; share_id: string; title: string; description: string; kind: ListKind; filter_json: string | null; sort: SortKey | null };
   return {
     handle, name: u.display_name, avatar: u.avatar_url,
-    stats: settings.showStats === false ? null : { finished: finished.length, hoursCleared: hoursOf(finished) },
+    stats: { finished: finished.length, hoursCleared: hoursOf(finished) },
     backlog: settings.showBacklog ? { games: open.length, hours: hoursOf(open), covers: open.slice(0, 4).map(e => e.game.appid) } : null,
     lists: (lists.results as Row2[]).map(l => {
       const appids = l.kind === "manual"
@@ -173,7 +171,7 @@ async function preview(env: Env, path: string): Promise<{ title: string; descrip
   if (!p) return null;
   return {
     title: `${p.name} on Backlog`,
-    description: [plural(p.lists.length, "list"), p.stats && `${p.stats.finished} finished`].filter(Boolean).join(" · "),
+    description: [plural(p.lists.length, "list"), `${p.stats.finished} finished`].join(" · "),
     image: p.lists[0]?.covers[0] ?? null,
   };
 }
