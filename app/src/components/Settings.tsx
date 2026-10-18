@@ -120,9 +120,13 @@ export function Settings() {
         )}
 
         <section class="detail-section">
-          <h3>Theme</h3>
+          <h3>Display</h3>
           <Radio<Theme> name="Theme" value={s.theme} onChange={theme => updateSettings({ theme })}
             options={[["system", "System"], ["dark", "Dark"], ["light", "Light"]]} />
+          <label class="check">
+            <input type="checkbox" checked={s.nowPlaying} onChange={e => updateSettings({ nowPlaying: e.currentTarget.checked })} />
+            Now playing shelf: Playing games in a row above the grid
+          </label>
         </section>
 
         <section class="detail-section">

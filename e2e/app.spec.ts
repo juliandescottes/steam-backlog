@@ -403,15 +403,18 @@ test("FIND-6 FIND-3 FIND-2 LEN-2 PRIN-4: smart views: built-in ones, conditions 
   await expect(views.getByRole("button", { name: "Unknown incl. dropped", exact: true })).toHaveCount(1);
 });
 
-test("LIB-2: Now playing shelf: Playing games, latest first, hidden when empty", async ({ page }) => {
+test("LIB-2: Now playing shelf: off by default; Playing games, latest first, hidden when empty", async ({ page }) => {
   await openLibrary(page);
   const shelf = page.getByRole("region", { name: "Now playing" });
-  await expect(shelf).toHaveCount(0);
-
   for (const name of ["Short One", "Mid Game"]) {
     await card(page, name).locator("button.cover").focus();
     await page.keyboard.press("p");
   }
+  await expect(shelf).toHaveCount(0);
+
+  await page.getByRole("button", { name: "Settings" }).click();
+  await page.getByRole("checkbox", { name: /Now playing shelf/ }).check();
+  await page.keyboard.press("Escape");
   await expect(shelf.locator(".game .name")).toHaveText(["Mid Game", "Short One"]);
 
   // Still shown when the view hides Playing games

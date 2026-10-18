@@ -13,8 +13,8 @@ import { listPath, navigate, route } from "./route.ts";
 import { date, download } from "./util.ts";
 
 export type Theme = "system" | "dark" | "light";
-export type Settings = { theme: Theme; measure: Measure };
-const DEFAULT_SETTINGS: Settings = { theme: "system", measure: "main_extra" };
+export type Settings = { theme: Theme; measure: Measure; nowPlaying: boolean };
+const DEFAULT_SETTINGS: Settings = { theme: "system", measure: "main_extra", nowPlaying: false };
 
 // ---- Data ----
 
