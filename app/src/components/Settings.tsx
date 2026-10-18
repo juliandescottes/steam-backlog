@@ -84,7 +84,7 @@ export function Settings() {
 
   return (
     <div class="sheet-backdrop" onClick={ev => ev.target === ev.currentTarget && (settingsOpen.value = false)}>
-      <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+      <div class="sheet settings" role="dialog" aria-modal="true" aria-labelledby="settings-title">
         <button ref={close} type="button" class="btn ghost close" onClick={() => (settingsOpen.value = false)} aria-label="Close">✕</button>
         <h2 id="settings-title">Settings</h2>
 
