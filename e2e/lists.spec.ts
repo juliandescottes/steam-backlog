@@ -21,7 +21,7 @@ async function savedItems(page: Page, n: number) {
   }))).toBe(n);
 }
 
-test("LIST-1 LIST-2 LIST-3 LIST-4: hand-picked list: create from a cover, add a selection, open it from the toast, reorder, remove, survive a reload", async ({ page }) => {
+test("LIST-1 LIST-2 LIST-3 LIST-4 LIST-9: hand-picked list: create from a cover, add a selection, open it from the toast, reorder, remove, survive a reload", async ({ page }) => {
   await openLibrary(page);
 
   // A new list from the + on a cover
@@ -49,6 +49,10 @@ test("LIST-1 LIST-2 LIST-3 LIST-4: hand-picked list: create from a cover, add a 
   await expect(open).toHaveCount(0);
   await expect(page.locator("h1")).toHaveText("Up next");
   await expect(page.locator(".list-meta")).toHaveText("3 games · 107 hours");
+  // Signed out: the sharing section says so and offers to sign in
+  const sharing = page.getByRole("region", { name: "Sharing" });
+  await expect(sharing).toContainText("Private · only you can see this list.");
+  await expect(sharing.getByRole("button", { name: "Sign in with Steam to share" })).toBeVisible();
   await expect(names(page)).toHaveText(["Mid Game", "Short One", "Long Haul"]);
 
   // Drag Long Haul to the front, then Alt+→ moves Mid Game one step right
@@ -107,11 +111,21 @@ test("LIST-5 LIST-6 PRIN-2: list from the current view updates with the library;
   await expect(page.locator("h1")).toHaveText("Quick ones");
   await expect(names(page)).toHaveText(["Short One", "Mystery A"]);
 
-  await page.getByRole("button", { name: "Rename" }).click();
+  // Title and description edited in place: Enter saves, Escape cancels, no layout shift
+  const meta = await page.locator(".list-meta").boundingBox();
+  await page.getByRole("button", { name: "Edit list name" }).click();
+  await expect(page.getByLabel("List name")).toBeFocused();
+  expect(await page.locator(".list-meta").boundingBox()).toEqual(meta);
+  await page.getByLabel("List name").fill("Not this");
+  await page.keyboard.press("Escape");
+  await expect(page.locator("h1")).toHaveText("Quick ones");
+  await page.getByRole("button", { name: "Edit list name" }).click();
   await page.getByLabel("List name").fill("Under five");
-  await page.getByLabel("Description").fill("For weeknights");
-  await page.getByRole("button", { name: "Save" }).click();
+  await page.keyboard.press("Enter");
   await expect(page.locator("h1")).toHaveText("Under five");
+  await page.getByRole("button", { name: "Edit description" }).click();
+  await page.getByLabel("Description").fill("For weeknights");
+  await page.keyboard.press("Enter");
   await expect(page.locator(".lede")).toHaveText("For weeknights");
 
   await page.getByRole("button", { name: "Delete list" }).click();

@@ -61,10 +61,18 @@ h1 em { font-style: normal; color: var(--accent); }
 a.eyebrow { text-decoration: none; }
 a.eyebrow:hover { color: var(--fg); }
 .list-meta { margin: 0; font: 500 13px/1.4 var(--mono); color: var(--muted); }
-.list-form { display: grid; gap: 8px; max-width: 640px; }
-.list-form input, .list-form textarea { padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); font: inherit; }
-.list-form input { font: 800 clamp(28px, 5vw, 48px)/1 var(--display); text-transform: uppercase; }
+/* Edited in place: the field takes the text's exact box, only an underline shows it's editable */
+.in-place .pen { display: inline-flex; vertical-align: middle; margin: -6px 0 -6px .25em; padding: 6px; border: 0; border-radius: 6px; background: none;
+  color: var(--muted); cursor: pointer; }
+h1.in-place .pen { vertical-align: .15em; }
+.in-place .pen:hover { color: var(--fg); background: var(--surface-2); }
+.in-place-empty { padding: 0; border: 0; background: none; font: inherit; color: var(--muted); font-style: italic; cursor: pointer; }
+p.in-place { white-space: pre-line; }
+.in-place textarea { display: block; width: 100%; margin: 0; padding: 0; border: 0; border-radius: 0; background: none; resize: none; overflow: hidden;
+  font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; outline: none; box-shadow: 0 2px 0 var(--accent); }
+.list-meta-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
 .callout.share { max-width: 640px; }
+.share-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
 .share-link { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0; }
 .share-link a { font: 500 14px/1.3 var(--mono); color: var(--fg); overflow-wrap: anywhere; }
 .eyebrow.owner { display: flex; align-items: center; gap: 8px; width: fit-content; }

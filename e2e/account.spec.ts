@@ -208,8 +208,7 @@ test("LIST-7 LIST-9 LIST-10 LIST-12: share a list: one click for a link, viewers
   await page.getByRole("button", { name: "Lists" }).click();
   await page.getByRole("link", { name: /Valve classics/ }).click();
 
-  await page.getByRole("button", { name: "Share" }).click();
-  await page.getByRole("radio", { name: "Anyone with the link" }).click();
+  await page.getByRole("region", { name: "Sharing" }).getByRole("button", { name: "Share" }).click();
   const link = page.getByRole("region", { name: "Sharing" }).getByRole("link");
   await expect(link).toHaveText(/^localhost:5180\/l\/[0-9a-z]{12}$/);
   await expect(page.getByRole("region", { name: "Sharing" })).toContainText("Shared as Dev user.");
@@ -240,7 +239,7 @@ test("LIST-7 LIST-9 LIST-10 LIST-12: share a list: one click for a link, viewers
   await viewer.getByRole("button", { name: "Finished", exact: true }).click();
   await expect(viewer.locator(".game .name")).toHaveText(["Half-Life 2"]);
 
-  await page.getByRole("radio", { name: "Private" }).click();
+  await page.getByRole("button", { name: "Make private" }).click();
   await expect(async () => {
     await viewer.reload();
     await expect(viewer.locator("h1")).toHaveText("List not found", { timeout: 1000 });
@@ -252,7 +251,7 @@ test("LIST-7 LIST-9 LIST-10 LIST-12: share a list: one click for a link, viewers
   await signIn(other, id);
   await expect(async () => {
     await other.goto(path);
-    await expect(other.getByRole("button", { name: "Rename" })).toBeVisible({ timeout: 1000 });
+    await expect(other.getByRole("button", { name: "Edit list name" })).toBeVisible({ timeout: 1000 });
   }).toPass({ timeout: 10_000 });
   await other.close();
 });
@@ -267,8 +266,7 @@ test("LIST-14 LIST-15: public profile: off until turned on, at a random address,
   await page.keyboard.press("Enter");
   await page.getByRole("button", { name: "Lists" }).click();
   await page.getByRole("link", { name: /Puzzles/ }).click();
-  await page.getByRole("button", { name: "Share" }).click();
-  await page.getByRole("radio", { name: "Anyone with the link" }).click();
+  await page.getByRole("region", { name: "Sharing" }).getByRole("button", { name: "Share" }).click();
   await page.getByRole("checkbox", { name: /Show on my public profile/ }).check();
   await expect(page.getByRole("region", { name: "Sharing" })).toContainText("it's off");
 

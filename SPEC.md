@@ -87,10 +87,10 @@ A list is a named, ordered collection of games with an optional description, han
 - **LIST-3** Reorder a hand-picked list by dragging or `Alt+←/→`, with undo. Remove games from the selection bar or the detail panel.
 - **LIST-4** A list page shows title, description, size and hours, with its own status chips and sort ("List order" for hand-picked lists). Finished games stay in the list.
 - **LIST-5** A filter-based list is made from the current view and updates as the library changes.
-- **LIST-6** Rename and describe a list; delete it with undo.
+- **LIST-6** Title and description are edited in place (a pen next to each; Enter saves, Escape cancels, nothing moves). Delete a list with undo.
 - **LIST-7** A list has one address, `/l/<share id>`: the owner's page in their browser, the shared page for others. Older `/l/<list id>` and `/s/<share id>` addresses redirect; an unknown one says "List not found".
 - **LIST-8** Lists, their games and order sync between devices.
-- **LIST-9** Sharing needs an account. A list is Private by default; "Anyone with the link" makes it public, with a copy-link button.
+- **LIST-9** A sharing section is always shown on the owner's list page. Sharing needs an account. A list is Private by default; "Share" makes it visible to anyone with the link, with a copy-link button; "Make private" undoes it.
 - **LIST-10** The shared page is read-only and needs no sign-in: the owner's Steam name, title, description, games in order with lengths and the owner's statuses, and the total. Viewers filter by status and sort. Notes, playtime and dates never leave the owner's account.
 - **LIST-11** The shared page refreshes every 30 s while visible and when it comes back into view; an unchanged list costs a 304.
 - **LIST-12** Making a list private again, or deleting it, stops the link at once; viewers can't tell private from missing.

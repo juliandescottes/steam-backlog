@@ -138,10 +138,65 @@ export function ListPicker() {
   );
 }
 
-/** Top of a list page: title, description, totals, and the owner's controls. */
+const Pen = () => (
+  <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
+    <path d="M10.5 2.5l3 3L5 14H2v-3z" /><path d="M9 4l3 3" />
+  </svg>
+);
+
+/** Text with a pen next to it that turns into a field of the same size: Enter or leaving it saves, Escape cancels. */
+function InPlace({ tag: Tag, class: cls, value, label, placeholder, maxLength, multiline, onSave }: {
+  tag: "h1" | "p"; class?: string; value: string; label: string; placeholder?: string; maxLength: number; multiline?: boolean;
+  onSave: (value: string) => void;
+}) {
+  const [draft, setDraft] = useState<string | null>(null);
+  const field = useRef<HTMLTextAreaElement>(null);
+  const closed = useRef(false);
+  // Whole lines of the text's own line height: scrollHeight alone runs taller than a tight heading
+  const fit = (f: HTMLTextAreaElement) => {
+    f.style.height = "auto";
+    const line = parseFloat(getComputedStyle(f).lineHeight);
+    f.style.height = line ? `${Math.max(1, Math.round(f.scrollHeight / line)) * line}px` : `${f.scrollHeight}px`;
+  };
+  useLayoutEffect(() => {
+    const f = field.current;
+    if (!f) return;
+    fit(f);
+    f.focus();
+    f.select();
+  }, [draft !== null]);
+  const close = (save: boolean) => {
+    if (closed.current) return; // blur follows Enter and Escape
+    closed.current = true;
+    if (save && draft !== null && draft.trim() !== value) onSave(draft.trim());
+    setDraft(null);
+  };
+  const open = () => { closed.current = false; setDraft(value); };
+
+  const classes = [cls, "in-place"].filter(Boolean).join(" ");
+  if (draft !== null) {
+    return (
+      <Tag class={`${classes} editing`}>
+        <textarea ref={field} rows={1} value={draft} maxLength={maxLength} aria-label={label} placeholder={placeholder}
+          onInput={e => { setDraft(e.currentTarget.value); fit(e.currentTarget); }}
+          onKeyDown={e => {
+            if (e.key === "Enter" && !(multiline && e.shiftKey)) { e.preventDefault(); close(true); }
+            else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); close(false); }
+          }}
+          onBlur={() => close(true)} />
+      </Tag>
+    );
+  }
+  return (
+    <Tag class={classes}>
+      {value || <button type="button" class="in-place-empty" onClick={open}>{placeholder}</button>}
+      <button type="button" class="pen" aria-label={`Edit ${label.toLowerCase()}`} title={`Edit ${label.toLowerCase()}`} onClick={open}><Pen /></button>
+    </Tag>
+  );
+}
+
+/** Top of a list page: title and description edited in place, totals, sharing. */
 export function ListHeader({ list: l }: { list: List }) {
-  const [editing, setEditing] = useState(false);
-  const [sharing, setSharing] = useState(false);
   const all = listEntries(l);
   const hours = all.reduce((s, e) => s + (e.len.hours ?? 0), 0);
   const finished = all.filter(e => e.game.status === "finished").length;
@@ -155,93 +210,59 @@ export function ListHeader({ list: l }: { list: List }) {
           <button type="button" class="btn ghost" onClick={() => (settingsOpen.value = true)}>Settings</button>
         </div>
       </div>
-      {editing
-        ? <ListForm list={l} onDone={() => setEditing(false)} />
-        : <>
-            <h1>{l.title}</h1>
-            {l.description && <p class="lede">{l.description}</p>}
-          </>}
-      <p class="list-meta">
-        {count(all.length, "game")} · {count(hours, "hour")}{finished > 0 && ` · ${finished} finished`}
-        {l.kind === "filter" && <span> · updates with your library</span>}
-      </p>
-      {!editing && (
-        <p class="row-actions">
-          <button type="button" class="btn" onClick={() => setEditing(true)}>Rename</button>
-          <button type="button" class="btn" aria-expanded={sharing} onClick={() => setSharing(!sharing)}>
-            {l.visibility === "private" ? "Share" : "Shared ✓"}
-          </button>
-          <button type="button" class="btn ghost" onClick={() => deleteList(l.id)}>Delete list</button>
+      <InPlace tag="h1" value={l.title} label="List name" maxLength={80} onSave={title => title && updateList(l.id, { title })} />
+      <InPlace tag="p" class="lede" value={l.description} label="Description" placeholder="Add a description" maxLength={1000} multiline
+        onSave={description => updateList(l.id, { description })} />
+      <div class="list-meta-row">
+        <p class="list-meta">
+          {count(all.length, "game")} · {count(hours, "hour")}{finished > 0 && ` · ${finished} finished`}
+          {l.kind === "filter" && <span> · updates with your library</span>}
         </p>
-      )}
-      {sharing && !editing && <SharePanel list={l} />}
+        <button type="button" class="btn" onClick={() => deleteList(l.id)}>Delete list</button>
+      </div>
+      <Sharing list={l} />
     </header>
   );
 }
 
-/** Sharing needs an account: the server serves the page. Viewers see the owner's Steam name. */
-function SharePanel({ list: l }: { list: List }) {
+/** Always shown on the owner's list page. Sharing needs an account: the server serves the page. Viewers see the owner's Steam name. */
+function Sharing({ list: l }: { list: List }) {
   const me = account.value;
-  if (!me) {
+  const shared = l.visibility !== "private";
+  const what = "Viewers see the games, their lengths and your statuses. Notes, playtime and dates stay private.";
+  if (!me || !shared) {
     return (
-      <div class="callout share" role="region" aria-label="Sharing">
-        <p>Sharing needs an account, so the link keeps working when this browser is closed.</p>
-        <p class="row-actions"><button type="button" class="btn primary" onClick={signIn}>Sign in with Steam</button></p>
-      </div>
+      <section class="callout share" aria-label="Sharing">
+        <div class="share-row">
+          <p><b>Private</b> · only you can see this list.</p>
+          {me
+            ? <button type="button" class="btn primary" onClick={() => setListVisibility(l.id, "link")}>Share</button>
+            : <button type="button" class="btn primary" onClick={signIn}>Sign in with Steam to share</button>}
+        </div>
+        <p class="hint">{me ? what : "Sharing needs an account, so the link keeps working when this browser is closed."}</p>
+      </section>
     );
   }
   const url = `${location.origin}${sharePath(l.shareId)}`;
-  const shared = l.visibility !== "private";
   return (
-    <div class="callout share" role="region" aria-label="Sharing">
-      <div class="segmented" role="radiogroup" aria-label="Who can see this list">
-        <button type="button" role="radio" aria-checked={!shared} onClick={() => setListVisibility(l.id, "private")}>Private</button>
-        <button type="button" role="radio" aria-checked={shared} onClick={() => setListVisibility(l.id, "link")}>Anyone with the link</button>
+    <section class="callout share" aria-label="Sharing">
+      <div class="share-row">
+        <p><b>Shared</b> · anyone with the link can see it.</p>
+        <button type="button" class="btn" onClick={() => setListVisibility(l.id, "private")}>Make private</button>
       </div>
-      {shared && <>
-        <p class="share-link">
-          <a href={url} target="_blank" rel="noopener">{url.replace(/^https?:\/\//, "")}</a>
-          <button type="button" class="btn" onClick={() => navigator.clipboard.writeText(url).then(() => showToast("Link copied"), () => showToast("Couldn't copy the link"))}>
-            Copy link
-          </button>
-        </p>
-        <label class="check">
-          <input type="checkbox" checked={l.visibility === "profile"} onChange={e => setListVisibility(l.id, e.currentTarget.checked ? "profile" : "link")} />
-          Show on my public profile
-          {!me.profilePublic && <> (it's off: <button type="button" class="link" onClick={() => (settingsOpen.value = true)}>turn it on in Settings</button>)</>}
-        </label>
-      </>}
-      <p class="hint">
-        {shared ? `Shared as ${me.name}. Changes show up for viewers within seconds. ` : ""}
-        Viewers see the games, their lengths and your statuses. Notes, playtime and dates stay private.
+      <p class="share-link">
+        <a href={url} target="_blank" rel="noopener">{url.replace(/^https?:\/\//, "")}</a>
+        <button type="button" class="btn" onClick={() => navigator.clipboard.writeText(url).then(() => showToast("Link copied"), () => showToast("Couldn't copy the link"))}>
+          Copy link
+        </button>
       </p>
-    </div>
-  );
-}
-
-function ListForm({ list: l, onDone }: { list: List; onDone: () => void }) {
-  const [title, setTitle] = useState(l.title);
-  const [description, setDescription] = useState(l.description);
-  const input = useRef<HTMLInputElement>(null);
-  useLayoutEffect(() => input.current?.select(), []);
-  const save = (e: Event) => {
-    e.preventDefault();
-    const change: Partial<Pick<List, "title" | "description">> = {};
-    if (title.trim() && title.trim() !== l.title) change.title = title.trim();
-    if (description.trim() !== l.description) change.description = description.trim();
-    if (Object.keys(change).length) updateList(l.id, change);
-    onDone();
-  };
-  return (
-    <form class="list-form" onSubmit={save} onKeyDown={e => { if (e.key === "Escape") { e.stopPropagation(); onDone(); } }}>
-      <input ref={input} value={title} maxLength={80} aria-label="List name" onInput={e => setTitle(e.currentTarget.value)} />
-      <textarea rows={2} value={description} maxLength={1000} placeholder="Description (optional)" aria-label="Description"
-        onInput={e => setDescription(e.currentTarget.value)} />
-      <p class="row-actions">
-        <button type="submit" class="btn primary">Save</button>
-        <button type="button" class="btn ghost" onClick={onDone}>Cancel</button>
-      </p>
-    </form>
+      <label class="check">
+        <input type="checkbox" checked={l.visibility === "profile"} onChange={e => setListVisibility(l.id, e.currentTarget.checked ? "profile" : "link")} />
+        Show on my public profile
+        {!me.profilePublic && <> (it's off: <button type="button" class="link" onClick={() => (settingsOpen.value = true)}>turn it on in Settings</button>)</>}
+      </label>
+      <p class="hint">Shared as {me.name}. Changes show up for viewers within seconds. {what}</p>
+    </section>
   );
 }
 
