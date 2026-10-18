@@ -109,25 +109,27 @@ export function Settings() {
 
         {account.value && (
           <section class="detail-section">
-            <h3>Public profile</h3>
+            <h3>Sharing</h3>
             <ProfileSettings me={account.value} />
           </section>
         )}
 
         <section class="detail-section">
           <h3>Display</h3>
-          <Radio<Theme> name="Theme" value={s.theme} onChange={theme => updateSettings({ theme })}
-            options={[["system", "System"], ["dark", "Dark"], ["light", "Light"]]} />
+          <div class="setting">
+            <span>Theme</span>
+            <Radio<Theme> name="Theme" value={s.theme} onChange={theme => updateSettings({ theme })}
+              options={[["system", "System"], ["dark", "Dark"], ["light", "Light"]]} />
+          </div>
+          <div class="setting">
+            <span>Sort and total by</span>
+            <Radio<Measure> name="Length measure" value={s.measure} onChange={measure => updateSettings({ measure })}
+              options={[["main_extra", "Main + Extras"], ["main", "Main story"]]} />
+          </div>
           <label class="check">
             <input type="checkbox" checked={s.nowPlaying} onChange={e => updateSettings({ nowPlaying: e.currentTarget.checked })} />
             Now playing shelf: Playing games in a row above the grid
           </label>
-        </section>
-
-        <section class="detail-section">
-          <h3>Sort and total by</h3>
-          <Radio<Measure> name="Length measure" value={s.measure} onChange={measure => updateSettings({ measure })}
-            options={[["main_extra", "Main + Extras"], ["main", "Main story"]]} />
         </section>
 
         {!account.value && (
