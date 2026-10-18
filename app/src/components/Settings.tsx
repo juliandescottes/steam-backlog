@@ -103,15 +103,19 @@ export function Settings() {
                   {account.value.avatar && <img src={account.value.avatar} alt="" width={32} height={32} />}
                   <span>Signed in as <b>{account.value.name}</b>. Changes sync to your other devices.</span>
                 </p>
-                <p class="row-actions">
-                  <button type="button" class="btn" onClick={() => void refreshLibrary()}>Refresh library</button>
-                  <button type="button" class="btn ghost" onClick={() => void signOut()}>Sign out</button>
-                </p>
+                <div class="option indented">
+                  <p class="row-actions"><button type="button" class="btn" onClick={() => void refreshLibrary()} aria-describedby="refresh-hint">Refresh library</button></p>
+                  <p class="hint" id="refresh-hint">Adds games you bought since and updates playtimes from Steam. Happens once a day on its own.</p>
+                </div>
+                <div class="option indented">
+                  <p class="row-actions"><button type="button" class="btn" onClick={() => void signOut()} aria-describedby="sign-out-hint">Sign out</button></p>
+                  <p class="hint" id="sign-out-hint">Removes your games from this browser. They stay in your account.</p>
+                </div>
               </>
-            : <>
-                <p class="row-actions"><button type="button" class="btn primary" onClick={signIn}>Sign in with Steam</button></p>
-                <p class="hint">Imports your Steam library and syncs across devices. What you've done in this browser comes along.</p>
-              </>}
+            : <div class="option indented">
+                <p class="row-actions"><button type="button" class="btn primary" onClick={signIn} aria-describedby="sign-in-hint">Sign in with Steam</button></p>
+                <p class="hint" id="sign-in-hint">Imports your Steam library and syncs across devices. What you've done in this browser comes along.</p>
+              </div>}
         </section>
 
         {account.value && (
