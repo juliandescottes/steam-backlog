@@ -26,7 +26,7 @@ Each rule has a bold ID like STATUS-4 and a test that cites it in its title, che
 
 ## 3. Library view (home)
 
-- **LIB-1** Header: "N games, H hours to clear" over Backlog + Playing, a link to fill in the games without a length, and a progress bar of finished hours over finished + remaining hours.
+- **LIB-1** Header: "N games, H hours to clear" over Backlog + Playing, a link to fill in the games without a length, and the games finished with the share of hours cleared (finished hours over finished + remaining).
 - **LIB-2** Now playing shelf, off by default (Settings): a row of Playing games above the grid, most recently changed first, shown whatever the view's statuses, hidden when empty.
 - **LIB-3** Length bands: Under 3 h, 3–6, 6–10, 10–20, 20–40, 40–80, 80 h and up, No ending, Unknown. Sorted by length, games are grouped by band, with a stacked bar and a legend that link to each band.
 - **LIB-4** Hours badges show quarter hours under 3 h (`1.75h`), whole hours above (`113h`), no space before the unit, colored by band. Stored to the quarter hour.
@@ -82,20 +82,20 @@ Backlog (default) · Playing · Finished · Dropped.
 
 A list is a named, ordered collection of games with an optional description, hand-picked or filter-based.
 
-- **LIST-1** The Lists button opens a drawer with the library, every list and its size, and a field to create one.
+- **LIST-1** Backlog and Lists are the user's two pages, linked at the top left of each. The Lists page (`/lists`) shows every list as a card (first covers, size, hours, auto or shared) and a field to create one, empty or from the Backlog's current view.
 - **LIST-2** Hand-picked lists: add games from a cover's +, `A`, the detail panel, a selection or the palette. The picker finds a list or creates one from the typed name; the toast links to the list. Games keep the order they were added in.
 - **LIST-3** Reorder a hand-picked list by dragging or `Alt+←/→`, with undo. Remove games from the selection bar or the detail panel.
 - **LIST-4** A list page shows title, description, size and hours, with its own status chips and sort ("List order" for hand-picked lists). Finished games stay in the list.
 - **LIST-5** A filter-based list is made from the current view and updates as the library changes.
-- **LIST-6** Rename and describe a list; delete it with undo.
+- **LIST-6** Title and description are edited in place (a pen next to each; Enter saves, Escape cancels, nothing moves). Delete a list with undo.
 - **LIST-7** A list has one address, `/l/<share id>`: the owner's page in their browser, the shared page for others. Older `/l/<list id>` and `/s/<share id>` addresses redirect; an unknown one says "List not found".
 - **LIST-8** Lists, their games and order sync between devices.
-- **LIST-9** Sharing needs an account. A list is Private by default; "Anyone with the link" makes it public, with a copy-link button.
+- **LIST-9** The owner's list page always shows its Visibility: Private (the default) or Public, visible to anyone with the link, with a copy-link button. Public needs an account.
 - **LIST-10** The shared page is read-only and needs no sign-in: the owner's Steam name, title, description, games in order with lengths and the owner's statuses, and the total. Viewers filter by status and sort. Notes, playtime and dates never leave the owner's account.
 - **LIST-11** The shared page refreshes every 30 s while visible and when it comes back into view; an unchanged list costs a 304.
 - **LIST-12** Making a list private again, or deleting it, stops the link at once; viewers can't tell private from missing.
 - **LIST-13** Shared and profile pages have a title and a link preview.
-- **LIST-14** Public profile `/u/<profile id>`: off by default; the address is a random id, nothing to choose. Shows the Steam name and avatar, stats (games finished, hours cleared) and the lists marked "Show on my public profile".
+- **LIST-14** Public profile `/u/<profile id>`: off by default; the address is a random id, nothing to choose. Shows the Steam name and avatar, stats (games finished, hours cleared) and the user's public lists.
 - **LIST-15** Optionally the profile shows the whole library at `/u/<profile id>/backlog`: read-only, starting on Backlog + Playing. Turning the profile off hides both pages.
 
 ## 8. Data ownership
@@ -122,7 +122,7 @@ Settings also holds the account, public profile, backup and delete controls cove
 ## 11. Platforms
 
 - **PLAT-1** Phone width (~400 px) is a first-class layout: no horizontal scrolling.
-- **PLAT-2** On phones: three cover columns, a toolbar that doesn't stick, the detail panel and Settings as bottom sheets, the Lists drawer full width. (manual)
+- **PLAT-2** On phones: three cover columns, a toolbar that doesn't stick, the detail panel and Settings as bottom sheets, list cards in one column. (manual)
 - **PLAT-3** After the first load, the own library works offline; changes made offline sync when back online. (planned)
 - **PLAT-4** Shared and profile pages need a connection and retry by themselves. (manual)
 

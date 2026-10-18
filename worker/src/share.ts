@@ -81,12 +81,12 @@ export async function profile(env: Env, id: string): Promise<Profile | null> {
   const [lists, rows, items] = await env.DB.batch<any>([
     env.DB.prepare(
       `SELECT id, share_id, title, description, kind, filter_json, sort FROM lists
-       WHERE user_id = ? AND visibility = 'profile' AND deleted = 0 ORDER BY position`,
+       WHERE user_id = ? AND visibility != 'private' AND deleted = 0 ORDER BY position`,
     ).bind(u.id),
     env.DB.prepare(`SELECT ${GAME_COLUMNS} FROM user_games ug JOIN games g USING (appid) WHERE ug.user_id = ?`).bind(u.id),
     env.DB.prepare(
       `SELECT li.list_id, li.appid FROM list_items li JOIN lists l ON l.id = li.list_id
-       WHERE l.user_id = ? AND l.visibility = 'profile' AND l.deleted = 0 AND li.deleted = 0 ORDER BY li.position`,
+       WHERE l.user_id = ? AND l.visibility != 'private' AND l.deleted = 0 AND li.deleted = 0 ORDER BY li.position`,
     ).bind(u.id),
   ]);
   const all = (rows.results as Row[]).map(r => entry(toGame(r, communityOn(env))));

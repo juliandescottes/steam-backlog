@@ -21,7 +21,7 @@ async function savedItems(page: Page, n: number) {
   }))).toBe(n);
 }
 
-test("LIST-1 LIST-2 LIST-3 LIST-4: hand-picked list: create from a cover, add a selection, open it from the toast, reorder, remove, survive a reload", async ({ page }) => {
+test("LIST-1 LIST-2 LIST-3 LIST-4 LIST-9: hand-picked list: create from a cover, add a selection, open it from the toast, reorder, remove, survive a reload", async ({ page }) => {
   await openLibrary(page);
 
   // A new list from the + on a cover
@@ -43,12 +43,17 @@ test("LIST-1 LIST-2 LIST-3 LIST-4: hand-picked list: create from a cover, add a 
   expect(href).toMatch(/^\/l\/[0-9a-z]{12}$/);
 
   // The list page, in the order games were added; the toast no longer links to it
-  await page.getByRole("button", { name: "Lists" }).click();
-  await page.getByRole("dialog", { name: "Lists" }).getByRole("link", { name: /Up next/ }).click();
+  await page.getByRole("link", { name: "Lists", exact: true }).click();
+  await page.getByRole("main").getByRole("link", { name: /Up next/ }).click();
   await expect(page).toHaveURL(href!);
   await expect(open).toHaveCount(0);
   await expect(page.locator("h1")).toHaveText("Up next");
   await expect(page.locator(".list-meta")).toHaveText("3 games · 107 hours");
+  // Signed out: Private, and Public needs an account
+  const sharing = page.getByRole("region", { name: "Sharing" });
+  await expect(sharing.getByRole("radio", { name: "Private" })).toHaveAttribute("aria-checked", "true");
+  await expect(sharing.getByRole("radio", { name: "Public" })).toBeDisabled();
+  await expect(sharing.getByRole("button", { name: "Sign in with Steam" })).toBeVisible();
   await expect(names(page)).toHaveText(["Mid Game", "Short One", "Long Haul"]);
 
   // Drag Long Haul to the front, then Alt+→ moves Mid Game one step right
@@ -87,17 +92,18 @@ test("LIST-1 LIST-2 LIST-3 LIST-4: hand-picked list: create from a cover, add a 
 test("LIST-5 LIST-6 PRIN-2: list from the current view updates with the library; rename and delete with undo", async ({ page }) => {
   await openLibrary(page);
   await page.getByRole("button", { name: "Under 5 h", exact: true }).click();
-  await page.getByRole("button", { name: "Lists" }).click();
-  const drawer = page.getByRole("dialog", { name: "Lists" });
-  await drawer.getByLabel("New list").fill("Quick ones");
-  await drawer.getByRole("checkbox").check();
-  await drawer.getByRole("button", { name: "Create" }).click();
+  await page.getByRole("link", { name: "Lists", exact: true }).click();
+  await expect(page).toHaveURL(/\/lists$/);
+  await expect(page.getByRole("link", { name: "Lists", exact: true })).toHaveAttribute("aria-current", "page");
+  await page.getByLabel("New list").fill("Quick ones");
+  await page.getByRole("checkbox", { name: /From the Backlog's current view \(Under 5 h\)/ }).check();
+  await page.getByRole("button", { name: "Create" }).click();
   await expect(page.locator("h1")).toHaveText("Quick ones");
   await expect(page.locator(".list-meta")).toContainText("1 game · 2 hours · updates with your library");
   await expect(names(page)).toHaveText(["Short One"]);
 
   // A length typed in the library puts a game in the list
-  await page.getByRole("link", { name: "← Backlog" }).click();
+  await page.getByRole("link", { name: "Backlog", exact: true }).click();
   await expect(page.getByRole("button", { name: "Under 5 h", exact: true })).toHaveAttribute("aria-current", "true"); // the library keeps its view
   await page.getByRole("button", { name: "To play" }).click();
   await card(page, "Mystery A").getByRole("button", { name: "Add a length for Mystery A" }).click();
@@ -107,24 +113,35 @@ test("LIST-5 LIST-6 PRIN-2: list from the current view updates with the library;
   await expect(page.locator("h1")).toHaveText("Quick ones");
   await expect(names(page)).toHaveText(["Short One", "Mystery A"]);
 
-  await page.getByRole("button", { name: "Rename" }).click();
+  // Title and description edited in place: Enter saves, Escape cancels, no layout shift
+  const meta = await page.locator(".list-meta").boundingBox();
+  await page.getByRole("button", { name: "Edit list name" }).click();
+  await expect(page.getByLabel("List name")).toBeFocused();
+  expect(await page.locator(".list-meta").boundingBox()).toEqual(meta);
+  await page.getByLabel("List name").fill("Not this");
+  await page.keyboard.press("Escape");
+  await expect(page.locator("h1")).toHaveText("Quick ones");
+  await page.getByRole("button", { name: "Edit list name" }).click();
   await page.getByLabel("List name").fill("Under five");
-  await page.getByLabel("Description").fill("For weeknights");
-  await page.getByRole("button", { name: "Save" }).click();
+  await page.keyboard.press("Enter");
   await expect(page.locator("h1")).toHaveText("Under five");
+  await page.getByRole("button", { name: "Edit description" }).click();
+  await page.getByLabel("Description").fill("For weeknights");
+  await page.keyboard.press("Enter");
   await expect(page.locator(".lede")).toHaveText("For weeknights");
 
   await page.getByRole("button", { name: "Delete list" }).click();
   await expect(page).toHaveURL(/\/$/);
   await expect(page.locator(".toast")).toContainText('List "Under five" deleted');
   await page.locator(".toast").getByRole("button", { name: "Undo" }).click();
-  await page.getByRole("button", { name: "Lists" }).click();
-  await expect(drawer.getByRole("link", { name: /Under five/ })).toContainText("auto · 2");
+  await page.getByRole("link", { name: "Lists", exact: true }).click();
+  await expect(page.getByRole("main").getByRole("link", { name: /Under five/ })).toContainText("2 games");
+  await expect(page.getByRole("main").getByRole("link", { name: /Under five/ })).toContainText("auto");
 });
 
 test("LIST-7: old /l/<id> addresses move to the list's link; a missing one says so", async ({ page }) => {
   await openLibrary(page);
-  await page.getByRole("button", { name: "Lists" }).click();
+  await page.getByRole("link", { name: "Lists", exact: true }).click();
   await page.getByLabel("New list").fill("Old address");
   await page.getByRole("button", { name: "Create" }).click();
   const id = await page.evaluate(() => new Promise<string>(resolve => {

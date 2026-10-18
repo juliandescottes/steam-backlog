@@ -4,12 +4,13 @@ import { rank } from "@backlog/shared/rank";
 import type { List } from "@backlog/shared/lists";
 import { sharePath } from "@backlog/shared/share";
 import { account, signIn } from "../account.ts";
-import { listPath, navigate, route } from "../route.ts";
+import { LISTS_PATH, listPath, navigate, route } from "../route.ts";
 import {
-  createList, currentList, deleteList, listEntries, listItems, listsOpen, pickerFor, setListVisibility, settingsOpen, showToast, sortedLists,
+  activeView, createList, currentList, deleteList, listEntries, listItems, pickerFor, setListVisibility, settingsOpen, showToast, sortedLists,
   toggleInList, updateList,
 } from "../store.ts";
 import { count } from "../util.ts";
+import { MiniCovers } from "./MiniCovers.tsx";
 
 /** A link that opens in the app, or in a new tab with a modifier key. */
 function Link({ href, onNavigate, ...props }: { href: string; onNavigate?: () => void; class?: string; children: any; "aria-current"?: "page" }) {
@@ -23,60 +24,78 @@ function Link({ href, onNavigate, ...props }: { href: string; onNavigate?: () =>
   );
 }
 
-const size = (l: List) => (l.kind === "manual" ? listItems.value.get(l.id)?.size ?? 0 : listEntries(l).length);
+/** The top of the user's own pages: the two of them, Backlog and Lists, on the left; Settings on the right. */
+export function TopNav() {
+  const p = route.value.page;
+  const inLists = p === "lists" || currentList.value != null;
+  return (
+    <div class="eyebrow-row">
+      <nav class="top-nav" aria-label="Pages">
+        <Link href="/" class={`eyebrow${p === "library" ? " active" : ""}`} aria-current={p === "library" ? "page" : undefined}>Backlog</Link>
+        <Link href={LISTS_PATH} class={`eyebrow${inLists ? " active" : ""}`} aria-current={p === "lists" ? "page" : undefined}>Lists</Link>
+      </nav>
+      <button type="button" class="btn ghost" onClick={() => (settingsOpen.value = true)}>Settings</button>
+    </div>
+  );
+}
 
-/** The user's lists (SPEC §7): a drawer from the left, on every screen size. */
-export function ListsDrawer() {
+/** The user's lists (LIST-1): one card each, with a field to create one. */
+export function ListsPage() {
+  const all = sortedLists.value;
+  return (
+    <div class="wrap">
+      <header class="top">
+        <TopNav />
+        <h1>{all.length ? count(all.length, "list") : "Lists"}</h1>
+        <p class="lede">Hand-picked games in your own order, or a view of your library that keeps itself up to date. Share any of them with a link.</p>
+      </header>
+      <NewList />
+      {all.length > 0
+        ? <main class="profile-lists">{all.map(l => <ListCard key={l.id} list={l} />)}</main>
+        : <p class="hint">Add games from a cover (the + button or <kbd>A</kbd>), the detail panel, or a selection.</p>}
+    </div>
+  );
+}
+
+function ListCard({ list: l }: { list: List }) {
+  const games = listEntries(l);
+  const hours = games.reduce((s, e) => s + (e.len.hours ?? 0), 0);
+  return (
+    <Link href={listPath(l)} class="profile-list">
+      <MiniCovers covers={games.slice(0, 4).map(e => e.game.appid)} />
+      <span class="profile-list-text">
+        <b>{l.title}</b>
+        <span class="list-meta">
+          {count(games.length, "game")} · {count(hours, "hour")}{l.kind === "filter" ? " · auto" : ""}{l.visibility !== "private" ? " · shared" : ""}
+        </span>
+        {l.description && <span class="hint">{l.description}</span>}
+      </span>
+    </Link>
+  );
+}
+
+/** A name, and for a list that follows the library, the Backlog's current view as it is now. */
+function NewList() {
   const [name, setName] = useState("");
   const [fromView, setFromView] = useState(false);
-  const close = () => (listsOpen.value = false);
-  const input = useRef<HTMLInputElement>(null);
-  // Not on touch screens, where it would bring up the keyboard over the lists
-  useLayoutEffect(() => { if (matchMedia("(pointer: fine)").matches) input.current?.focus(); }, []);
-  const r = route.value;
-  const onLibrary = r.page === "library";
-
+  const view = activeView.value;
   const create = (e: Event) => {
     e.preventDefault();
     if (!name.trim()) return;
-    const l = createList(name.trim(), onLibrary && fromView ? "filter" : "manual");
-    close();
-    navigate(listPath(l));
+    navigate(listPath(createList(name.trim(), fromView ? "filter" : "manual")));
   };
-
   return (
-    <div class="sheet-backdrop" onClick={ev => ev.target === ev.currentTarget && close()}>
-      <div class="sheet drawer" role="dialog" aria-modal="true" aria-labelledby="lists-title">
-        <button type="button" class="btn ghost close" onClick={close} aria-label="Close">✕</button>
-        <h2 id="lists-title">Lists</h2>
-        <nav aria-label="Your lists">
-          <ul class="list-nav">
-            <li><Link href="/" onNavigate={close} aria-current={onLibrary ? "page" : undefined}>Backlog <span>all games</span></Link></li>
-            {sortedLists.value.map(l => (
-              <li key={l.id}>
-                <Link href={listPath(l)} onNavigate={close} aria-current={currentList.value?.id === l.id ? "page" : undefined}>
-                  {l.title} <span>{l.kind === "filter" ? "auto · " : ""}{size(l)}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-        <form class="new-list" onSubmit={create}>
-          <label for="new-list">New list</label>
-          <div class="row-actions">
-            <input ref={input} id="new-list" value={name} maxLength={80} placeholder="Up next, Best short games…" onInput={e => setName(e.currentTarget.value)} />
-            <button type="submit" class="btn primary" disabled={!name.trim()}>Create</button>
-          </div>
-          {onLibrary && (
-            <label class="check">
-              <input type="checkbox" checked={fromView} onChange={e => setFromView(e.currentTarget.checked)} />
-              Games of the current view, updated as your library changes
-            </label>
-          )}
-          {!sortedLists.value.length && <p class="hint">Add games from a cover (the + button or <kbd>A</kbd>), the detail panel, or a selection.</p>}
-        </form>
+    <form class="new-list" onSubmit={create}>
+      <label for="new-list">New list</label>
+      <div class="row-actions">
+        <input id="new-list" value={name} maxLength={80} placeholder="Up next, Best short games…" onInput={e => setName(e.currentTarget.value)} />
+        <button type="submit" class="btn primary" disabled={!name.trim()}>Create</button>
       </div>
-    </div>
+      <label class="check">
+        <input type="checkbox" checked={fromView} onChange={e => setFromView(e.currentTarget.checked)} />
+        From the Backlog's current view{view ? ` (${view.name})` : ""}, updated as your library changes
+      </label>
+    </form>
   );
 }
 
@@ -138,110 +157,117 @@ export function ListPicker() {
   );
 }
 
-/** Top of a list page: title, description, totals, and the owner's controls. */
+const Pen = () => (
+  <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
+    <path d="M10.5 2.5l3 3L5 14H2v-3z" /><path d="M9 4l3 3" />
+  </svg>
+);
+
+/** Text with a pen next to it that turns into a field of the same size: Enter or leaving it saves, Escape cancels. */
+function InPlace({ tag: Tag, class: cls, value, label, placeholder, maxLength, multiline, onSave }: {
+  tag: "h1" | "p"; class?: string; value: string; label: string; placeholder?: string; maxLength: number; multiline?: boolean;
+  onSave: (value: string) => void;
+}) {
+  const [draft, setDraft] = useState<string | null>(null);
+  const field = useRef<HTMLTextAreaElement>(null);
+  const closed = useRef(false);
+  // Whole lines of the text's own line height: scrollHeight alone runs taller than a tight heading
+  const fit = (f: HTMLTextAreaElement) => {
+    f.style.height = "auto";
+    const line = parseFloat(getComputedStyle(f).lineHeight);
+    f.style.height = line ? `${Math.max(1, Math.round(f.scrollHeight / line)) * line}px` : `${f.scrollHeight}px`;
+  };
+  useLayoutEffect(() => {
+    const f = field.current;
+    if (!f) return;
+    fit(f);
+    f.focus();
+    f.select();
+  }, [draft !== null]);
+  const close = (save: boolean) => {
+    if (closed.current) return; // blur follows Enter and Escape
+    closed.current = true;
+    if (save && draft !== null && draft.trim() !== value) onSave(draft.trim());
+    setDraft(null);
+  };
+  const open = () => { closed.current = false; setDraft(value); };
+
+  const classes = [cls, "in-place"].filter(Boolean).join(" ");
+  if (draft !== null) {
+    return (
+      <Tag class={`${classes} editing`}>
+        <textarea ref={field} rows={1} value={draft} maxLength={maxLength} aria-label={label} placeholder={placeholder}
+          onInput={e => { setDraft(e.currentTarget.value); fit(e.currentTarget); }}
+          onKeyDown={e => {
+            if (e.key === "Enter" && !(multiline && e.shiftKey)) { e.preventDefault(); close(true); }
+            else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); close(false); }
+          }}
+          onBlur={() => close(true)} />
+      </Tag>
+    );
+  }
+  return (
+    <Tag class={classes}>
+      {value || <button type="button" class="in-place-empty" onClick={open}>{placeholder}</button>}
+      <button type="button" class="pen" aria-label={`Edit ${label.toLowerCase()}`} title={`Edit ${label.toLowerCase()}`} onClick={open}><Pen /></button>
+    </Tag>
+  );
+}
+
+/** Top of a list page: title and description edited in place, totals, sharing. */
 export function ListHeader({ list: l }: { list: List }) {
-  const [editing, setEditing] = useState(false);
-  const [sharing, setSharing] = useState(false);
   const all = listEntries(l);
   const hours = all.reduce((s, e) => s + (e.len.hours ?? 0), 0);
   const finished = all.filter(e => e.game.status === "finished").length;
 
   return (
     <header class="top">
-      <div class="eyebrow-row">
-        <Link href="/" class="eyebrow back">← Backlog</Link>
-        <div class="row-actions">
-          <button type="button" class="btn ghost" onClick={() => (listsOpen.value = true)}>Lists</button>
-          <button type="button" class="btn ghost" onClick={() => (settingsOpen.value = true)}>Settings</button>
-        </div>
-      </div>
-      {editing
-        ? <ListForm list={l} onDone={() => setEditing(false)} />
-        : <>
-            <h1>{l.title}</h1>
-            {l.description && <p class="lede">{l.description}</p>}
-          </>}
+      <TopNav />
+      <InPlace tag="h1" class="list-title" value={l.title} label="List name" maxLength={80} onSave={title => title && updateList(l.id, { title })} />
+      <InPlace tag="p" class="lede" value={l.description} label="Description" placeholder="Add a description" maxLength={1000} multiline
+        onSave={description => updateList(l.id, { description })} />
       <p class="list-meta">
         {count(all.length, "game")} · {count(hours, "hour")}{finished > 0 && ` · ${finished} finished`}
         {l.kind === "filter" && <span> · updates with your library</span>}
       </p>
-      {!editing && (
-        <p class="row-actions">
-          <button type="button" class="btn" onClick={() => setEditing(true)}>Rename</button>
-          <button type="button" class="btn" aria-expanded={sharing} onClick={() => setSharing(!sharing)}>
-            {l.visibility === "private" ? "Share" : "Shared ✓"}
-          </button>
-          <button type="button" class="btn ghost" onClick={() => deleteList(l.id)}>Delete list</button>
-        </p>
-      )}
-      {sharing && !editing && <SharePanel list={l} />}
+      <Sharing list={l} />
+      <div class="action">
+        <button type="button" class="btn" onClick={() => deleteList(l.id)} aria-describedby="delete-list-hint">Delete list</button>
+        <p class="hint" id="delete-list-hint">Removes the list, not its games. You can undo it right after.</p>
+      </div>
     </header>
   );
 }
 
-/** Sharing needs an account: the server serves the page. Viewers see the owner's Steam name. */
-function SharePanel({ list: l }: { list: List }) {
+/**
+ * Always shown on the owner's list page: its visibility, Private or Public (anyone with the link).
+ * Sharing needs an account: the server serves the page. Viewers see the owner's Steam name.
+ */
+function Sharing({ list: l }: { list: List }) {
   const me = account.value;
-  if (!me) {
-    return (
-      <div class="callout share" role="region" aria-label="Sharing">
-        <p>Sharing needs an account, so the link keeps working when this browser is closed.</p>
-        <p class="row-actions"><button type="button" class="btn primary" onClick={signIn}>Sign in with Steam</button></p>
-      </div>
-    );
-  }
+  const shared = !!me && l.visibility !== "private";
   const url = `${location.origin}${sharePath(l.shareId)}`;
-  const shared = l.visibility !== "private";
   return (
-    <div class="callout share" role="region" aria-label="Sharing">
-      <div class="segmented" role="radiogroup" aria-label="Who can see this list">
-        <button type="button" role="radio" aria-checked={!shared} onClick={() => setListVisibility(l.id, "private")}>Private</button>
-        <button type="button" role="radio" aria-checked={shared} onClick={() => setListVisibility(l.id, "link")}>Anyone with the link</button>
+    <section class="share" aria-label="Sharing">
+      <div class="action">
+        <div class="segmented" role="radiogroup" aria-label="Visibility" aria-describedby="visibility-hint">
+          <button type="button" role="radio" aria-checked={!shared} onClick={() => setListVisibility(l.id, "private")}>Private</button>
+          <button type="button" role="radio" aria-checked={shared} disabled={!me} onClick={() => setListVisibility(l.id, "link")}>Public</button>
+        </div>
+        <p class="hint" id="visibility-hint">
+          {shared ? <>This list is <b>public</b>: it shows up on your profile and anyone with the link can see it.</> : <>This list is <b>private</b>: only you can see it.</>}
+          {!me && <> Making it public needs an account. <button type="button" class="link" onClick={signIn}>Sign in with Steam</button></>}
+        </p>
       </div>
-      {shared && <>
+      {shared && (
         <p class="share-link">
           <a href={url} target="_blank" rel="noopener">{url.replace(/^https?:\/\//, "")}</a>
           <button type="button" class="btn" onClick={() => navigator.clipboard.writeText(url).then(() => showToast("Link copied"), () => showToast("Couldn't copy the link"))}>
             Copy link
           </button>
         </p>
-        <label class="check">
-          <input type="checkbox" checked={l.visibility === "profile"} onChange={e => setListVisibility(l.id, e.currentTarget.checked ? "profile" : "link")} />
-          Show on my public profile
-          {!me.profilePublic && <> (it's off: <button type="button" class="link" onClick={() => (settingsOpen.value = true)}>turn it on in Settings</button>)</>}
-        </label>
-      </>}
-      <p class="hint">
-        {shared ? `Shared as ${me.name}. Changes show up for viewers within seconds. ` : ""}
-        Viewers see the games, their lengths and your statuses. Notes, playtime and dates stay private.
-      </p>
-    </div>
-  );
-}
-
-function ListForm({ list: l, onDone }: { list: List; onDone: () => void }) {
-  const [title, setTitle] = useState(l.title);
-  const [description, setDescription] = useState(l.description);
-  const input = useRef<HTMLInputElement>(null);
-  useLayoutEffect(() => input.current?.select(), []);
-  const save = (e: Event) => {
-    e.preventDefault();
-    const change: Partial<Pick<List, "title" | "description">> = {};
-    if (title.trim() && title.trim() !== l.title) change.title = title.trim();
-    if (description.trim() !== l.description) change.description = description.trim();
-    if (Object.keys(change).length) updateList(l.id, change);
-    onDone();
-  };
-  return (
-    <form class="list-form" onSubmit={save} onKeyDown={e => { if (e.key === "Escape") { e.stopPropagation(); onDone(); } }}>
-      <input ref={input} value={title} maxLength={80} aria-label="List name" onInput={e => setTitle(e.currentTarget.value)} />
-      <textarea rows={2} value={description} maxLength={1000} placeholder="Description (optional)" aria-label="Description"
-        onInput={e => setDescription(e.currentTarget.value)} />
-      <p class="row-actions">
-        <button type="submit" class="btn primary">Save</button>
-        <button type="button" class="btn ghost" onClick={onDone}>Cancel</button>
-      </p>
-    </form>
+      )}
+    </section>
   );
 }
 

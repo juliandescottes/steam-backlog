@@ -47,7 +47,7 @@ function ProfileSettings({ me }: { me: Me }) {
           Public profile
         </label>
         <p class="hint" id="profile-hint">
-          Your Steam name and avatar, games finished and hours cleared, and the lists you pick in their Share panel.
+          Your Steam name and avatar, games finished and hours cleared, and your public lists.
           {me.profilePublic && me.profileId && <> <a href={profilePath(me.profileId)} onClick={e => { e.preventDefault(); settingsOpen.value = false; navigate(profilePath(me.profileId)); }}>View your profile →</a></>}
         </p>
         {error && <p class="error" role="alert">{error}</p>}

@@ -410,7 +410,6 @@ export function applyServerLists(ls: SyncList[], its: SyncItem[], pending: Op[],
   void db.saveLists(lists.value, flat, [], [], true);
 }
 
-export const listsOpen = signal(false);
 /** Games the "Add to list" picker is open for. */
 export const pickerFor = signal<number[] | null>(null);
 
@@ -732,7 +731,6 @@ export async function deleteEverything() {
     lists.value = [];
     listItems.value = new Map();
     pickerFor.value = null;
-    listsOpen.value = false;
     openId.value = null;
     settingsOpen.value = false;
   });
