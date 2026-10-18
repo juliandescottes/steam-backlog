@@ -10,6 +10,9 @@ export const ALT = isMac ? "⌥" : "Alt+";
 
 export const playtime = (min: number) => (min < 60 ? `${min}min` : `${Math.round((min / 60) * 10) / 10}h`);
 export const date = (ms: number | null) => (ms ? new Date(ms).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }) : "–");
+/** A date input's "2026-03-01" for a time, and back (local noon, so time zones don't shift the day). */
+export const dayValue = (ms: number) => { const d = new Date(ms); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+export const fromDayValue = (v: string) => { const [y, m, d] = v.split("-").map(Number); return y && m && d ? new Date(y, m - 1, d, 12).getTime() : null; };
 export const thousands = (n: number) => Math.round(n).toLocaleString("en");
 /** "1 game", "342 games" */
 export const count = (n: number, word: string) => `${thousands(n)} ${word}${Math.round(n) === 1 ? "" : "s"}`;

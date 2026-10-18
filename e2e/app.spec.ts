@@ -50,6 +50,42 @@ test("status keys on a focused card, undo with Ctrl/Cmd+Z", async ({ page }) => 
   await expect(card(page, "Mid Game")).toHaveCount(0);
   await page.keyboard.press("ControlOrMeta+z");
   await expect(card(page, "Mid Game").locator(".status-chip")).toHaveText("Playing");
+  await card(page, "Mid Game").locator("button.cover").focus();
+  await page.keyboard.press("b");
+  await expect(card(page, "Mid Game").locator(".status-chip")).toHaveCount(0);
+  await page.keyboard.press("f");
+  await expect(card(page, "Mid Game")).toHaveCount(0);
+});
+
+test("STATUS-4 STATUS-5 STATUS-6: finishing records the date, leaving Finished clears it, the date can be changed, undo restores it", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-03-01T12:00:00"));
+  await openLibrary(page);
+  await card(page, "Mid Game").locator("button.cover").click();
+  const sheet = page.getByRole("dialog", { name: "Mid Game" });
+  const finished = sheet.getByLabel("Finished");
+  const button = (name: string) => sheet.getByRole("button", { name, exact: true });
+  await expect(finished).toHaveCount(0);
+
+  await button("Finished").click();
+  await expect(finished).toHaveValue("2026-03-01");
+  await finished.fill("2026-02-14");
+  await expect(page.locator(".toast")).toContainText("Mid Game: finished");
+  await button("Playing").click();
+  await expect(finished).toHaveCount(0);
+  await page.clock.setFixedTime(new Date("2026-04-02T12:00:00"));
+  await button("Finished").click();
+  await expect(finished).toHaveValue("2026-04-02");
+
+  await page.keyboard.press("ControlOrMeta+z");
+  await expect(button("Playing")).toHaveAttribute("aria-pressed", "true");
+  await expect(finished).toHaveCount(0);
+  await page.keyboard.press("ControlOrMeta+z");
+  await expect(finished).toHaveValue("2026-02-14");
+  await page.keyboard.press("ControlOrMeta+z");
+  await expect(finished).toHaveValue("2026-03-01");
+  await page.keyboard.press("ControlOrMeta+z");
+  await expect(button("Backlog")).toHaveAttribute("aria-pressed", "true");
+  await expect(finished).toHaveCount(0);
 });
 
 test("fill-in mode: typed time, rough guess, no ending", async ({ page }) => {

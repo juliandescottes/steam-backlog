@@ -4,8 +4,8 @@ import { SOURCE_LABEL } from "@backlog/shared/lengths";
 import { STATUSES, STATUS_LABEL } from "@backlog/shared/types";
 import { approxReason } from "../lengthText.ts";
 import { listPath, navigate } from "../route.ts";
-import { byId, listsOf, openId, pickerFor, removeFromList, setMyLength, setStatus, settings, updateQuietly } from "../store.ts";
-import { date, hltbSearchUrl, playtime, steamUrl } from "../util.ts";
+import { byId, listsOf, openId, pickerFor, removeFromList, setFinishedAt, setMyLength, setStatus, settings, updateQuietly } from "../store.ts";
+import { date, dayValue, fromDayValue, hltbSearchUrl, playtime, steamUrl } from "../util.ts";
 import { Art } from "./Art.tsx";
 import { LengthEditor } from "./LengthEditor.tsx";
 
@@ -72,7 +72,12 @@ export function Detail() {
           <dl class="facts">
             <div><dt>Steam playtime</dt><dd>{g.playtimeMin ? playtime(g.playtimeMin) : "Never launched"}</dd></div>
             <div><dt>Added</dt><dd>{date(g.addedAt)}</dd></div>
-            {g.finishedAt && <div><dt>Finished</dt><dd>{date(g.finishedAt)}</dd></div>}
+            {g.status === "finished" && g.finishedAt && (
+              <div><dt><label for="finished-at">Finished</label></dt><dd>
+                <input id="finished-at" type="date" class="day" value={dayValue(g.finishedAt)} max={dayValue(Date.now())}
+                  onChange={ev => { const at = fromDayValue(ev.currentTarget.value); if (at) setFinishedAt(g.appid, at); else ev.currentTarget.value = dayValue(g.finishedAt!); }} />
+              </dd></div>
+            )}
           </dl>
         </section>
 

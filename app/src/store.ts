@@ -10,7 +10,7 @@ import { STATUSES, STATUS_LABEL, type Game, type LenKind, type Lengths, type Mea
 import { builtInViews, canonical, sameView, type View } from "@backlog/shared/views";
 import * as db from "./db.ts";
 import { listPath, navigate, route } from "./route.ts";
-import { download } from "./util.ts";
+import { date, download } from "./util.ts";
 
 export type Theme = "system" | "dark" | "light";
 export type Settings = { theme: Theme; measure: Measure };
@@ -569,9 +569,14 @@ const subject = (ids: number[]) => (ids.length === 1 ? nameOf(ids[0]) : `${ids.l
 export function setStatus(appids: number[], status: Status) {
   const now = Date.now();
   const ps = patches(appids, g => (g.status === status ? null : {
-    status, statusAt: now, finishedAt: status === "finished" ? now : g.finishedAt,
+    status, statusAt: now, finishedAt: status === "finished" ? now : null,
   }));
   run(`${subject(ps.map(p => p.appid))} → ${STATUS_LABEL[status]}`, ps);
+}
+
+/** Changes the finish date of a finished game. */
+export function setFinishedAt(appid: number, at: number) {
+  run(`${nameOf(appid)}: finished ${date(at)}`, patches([appid], g => (g.status !== "finished" || g.finishedAt === at ? null : { finishedAt: at })));
 }
 
 /** Answers the triage prompt. Finished on the day they were last played, the best guess Steam gives. */
