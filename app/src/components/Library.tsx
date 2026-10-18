@@ -34,12 +34,8 @@ function Header() {
       <p class="lede">
         Shortest first, {MEASURE_TEXT[settings.value.measure]}.
         {t.unknown > 0 && <> Plus <button type="button" class="link" onClick={() => startFillIn()}>{t.unknown} without a length</button>.</>}
+        <br /><span class="cleared" title={`${thousands(t.finishedHours)}h finished`}>{t.finished} finished · {Math.round(done * 100)}% of hours cleared</span>
       </p>
-      <div class="progress" title={`${t.finished} finished, ${thousands(t.finishedHours)}h`}>
-        <div class="progress-bar" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(done * 100)}
-          aria-label="Hours cleared"><i style={{ width: `${done * 100}%` }} /></div>
-        <span>{t.finished} finished · {Math.round(done * 100)}% of hours cleared</span>
-      </div>
     </header>
   );
 }

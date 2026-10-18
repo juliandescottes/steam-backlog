@@ -104,9 +104,7 @@ footer a { color: inherit; }
 .game.drop-before::before { left: -8px; }
 .game.drop-after::after { right: -8px; }
 .lede b { color: var(--fg); }
-.progress { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font: 500 12.5px/1 var(--mono); color: var(--muted); }
-.progress-bar { flex: 1 1 200px; max-width: 420px; height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
-.progress-bar i { display: block; height: 100%; background: var(--accent); transition: width .4s ease; }
+.lede .cleared { font: 500 12.5px/2 var(--mono); }
 
 /* Band index */
 .index { display: grid; gap: 10px; }
@@ -356,6 +354,6 @@ textarea { width: 100%; padding: 10px 12px; border-radius: 6px; border: 1px soli
 footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); padding-top: 16px; }
 
 @media (prefers-reduced-motion: reduce) {
-  .cover img, .progress-bar i { transition: none; }
+  .cover img { transition: none; }
   .toast, .importing em, .selection-bar { animation: none; }
 }

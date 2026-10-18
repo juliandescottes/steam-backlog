@@ -297,7 +297,7 @@ test("FIND-8 PRIN-2 LIB-1: bulk select: click, shift-click a range, act on all w
 
   await page.keyboard.press("f");
   await expect(page.locator(".toast")).toContainText("3 games → Finished");
-  await expect(page.getByRole("progressbar", { name: "Hours cleared" })).toHaveAttribute("aria-valuenow", "100");
+  await expect(page.locator(".lede")).toContainText("100% of hours cleared");
   await expect(bar).toHaveCount(0);
   await expect(page.locator(".bands .game")).toHaveCount(3);
   await page.locator(".toast").getByRole("button", { name: "Undo" }).click();
