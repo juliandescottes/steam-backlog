@@ -21,7 +21,7 @@ async function savedItems(page: Page, n: number) {
   }))).toBe(n);
 }
 
-test("LIST-1 LIST-2 LIST-3 LIST-4: hand-picked list: create from a cover, add a selection, reorder, remove, survive a reload", async ({ page }) => {
+test("LIST-1 LIST-2 LIST-3 LIST-4: hand-picked list: create from a cover, add a selection, open it from the toast, reorder, remove, survive a reload", async ({ page }) => {
   await openLibrary(page);
 
   // A new list from the + on a cover
@@ -38,11 +38,15 @@ test("LIST-1 LIST-2 LIST-3 LIST-4: hand-picked list: create from a cover, add a 
   await expect(picker(page).getByRole("option", { name: /Up next/ })).toContainText("1 game");
   await page.keyboard.press("Enter");
   await expect(page.locator(".toast")).toContainText("2 games → Up next");
+  const open = page.locator(".toast").getByRole("link", { name: "Open list" });
+  const href = await open.getAttribute("href");
+  expect(href).toMatch(/^\/l\/[0-9a-z]{12}$/);
 
-  // The list page, in the order games were added
+  // The list page, in the order games were added; the toast no longer links to it
   await page.getByRole("button", { name: "Lists" }).click();
   await page.getByRole("dialog", { name: "Lists" }).getByRole("link", { name: /Up next/ }).click();
-  await expect(page).toHaveURL(/\/l\/[0-9a-z]{12}$/);
+  await expect(page).toHaveURL(href!);
+  await expect(open).toHaveCount(0);
   await expect(page.locator("h1")).toHaveText("Up next");
   await expect(page.locator(".list-meta")).toHaveText("3 games · 107 hours");
   await expect(names(page)).toHaveText(["Mid Game", "Short One", "Long Haul"]);

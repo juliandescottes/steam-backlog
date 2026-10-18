@@ -320,7 +320,7 @@ textarea { width: 100%; padding: 10px 12px; border-radius: 6px; border: 1px soli
 .selection-bar .btn.ghost:hover { color: var(--bg); border-color: color-mix(in srgb, var(--bg) 30%, transparent); }
 .toast { display: flex; align-items: center; gap: 12px; padding: 10px 10px 10px 16px; border-radius: 8px; background: var(--fg); color: var(--bg);
   box-shadow: var(--shadow); font-size: 14px; animation: toast-in .18s ease; }
-.toast .btn.ghost { color: var(--accent); font-weight: 700; }
+.toast .btn.ghost { color: var(--accent); font-weight: 700; text-decoration: none; }
 .toast .btn.ghost:hover { border-color: transparent; text-decoration: underline; }
 @keyframes toast-in { from { transform: translateY(8px); opacity: 0; } }
 

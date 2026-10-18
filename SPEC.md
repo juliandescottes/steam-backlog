@@ -84,7 +84,7 @@ Backlog (default) · Playing · Finished · Dropped.
 A list is a named, ordered collection of games with an optional description, hand-picked or filter-based.
 
 - **LIST-1** The Lists button opens a drawer with the library, every list and its size, and a field to create one.
-- **LIST-2** Hand-picked lists: add games from a cover's +, `A`, the detail panel, a selection or the palette. The picker finds a list or creates one from the typed name. Games keep the order they were added in.
+- **LIST-2** Hand-picked lists: add games from a cover's +, `A`, the detail panel, a selection or the palette. The picker finds a list or creates one from the typed name; the toast links to the list. Games keep the order they were added in.
 - **LIST-3** Reorder a hand-picked list by dragging or `Alt+←/→`, with undo. Remove games from the selection bar or the detail panel.
 - **LIST-4** A list page shows title, description, size and hours, with its own status chips and sort ("List order" for hand-picked lists). Finished games stay in the list.
 - **LIST-5** A filter-based list is made from the current view and updates as the library changes.

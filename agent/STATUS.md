@@ -26,7 +26,7 @@ Spec guardrails (2026-10-18, uncommitted): `SPEC.md` rewritten as numbered rules
 
 ## Next: UX pass (asked 2026-10-18)
 
-1. Creating a list: an easy way to jump to it (a link, e.g. in the toast).
+1. ~~Creating a list: an easy way to jump to it (a link, e.g. in the toast).~~ Done: "Open list" in the toast.
 2. Now playing shelf: a setting, off by default (it takes a lot of screen).
 3. Settings: clearer visual separation between sections.
 4. "Delete account…" should look like a button.
