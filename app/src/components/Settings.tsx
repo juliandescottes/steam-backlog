@@ -162,10 +162,14 @@ export function Settings() {
 
         <section class="detail-section">
           <h3>Backup</h3>
-          <p class="row-actions">
-            <button type="button" class="btn" onClick={exportBackup}>Export backup</button>
-            <FilePick label="Restore backup" accept=".json,application/json" onFile={guard(text => setBackup(parseExport(text)))} />
-          </p>
+          <div class="option indented">
+            <p class="row-actions"><button type="button" class="btn" onClick={exportBackup} aria-describedby="export-hint">Export backup</button></p>
+            <p class="hint" id="export-hint">A file with your statuses, dates, notes, lengths, views and lists.</p>
+          </div>
+          <div class="option indented">
+            <p class="row-actions"><FilePick label="Restore backup" accept=".json,application/json" onFile={guard(text => setBackup(parseExport(text)))} /></p>
+            <p class="hint">Shows what the file holds, then merges it into this library or replaces it.</p>
+          </div>
           {backup && (
             <div class="callout">
               <p>Backup from {new Date(backup.exportedAt).toLocaleString()}: {count(backup.games.length, "game")},{" "}
@@ -190,14 +194,17 @@ export function Settings() {
               <h3>Delete account</h3>
               {confirmDelete
                 ? <div class="callout">
-                    <p>This deletes your account and everything synced to it: statuses, notes, your lengths and what you shared with the community. Your Steam account isn't affected. Export a backup first to keep your data.</p>
+                    <p>This deletes your account and everything synced to it: statuses, notes, your lengths, lists and public profile. Your Steam account isn't affected. Export a backup first to keep your data.</p>
                     <p class="row-actions">
                       <button type="button" class="btn" onClick={exportBackup}>Export backup</button>
                       <button type="button" class="btn danger" onClick={() => void deleteAccount()}>Delete my account</button>
                       <button type="button" class="btn ghost" onClick={() => setConfirmDelete(false)}>Keep it</button>
                     </p>
                   </div>
-                : <button type="button" class="btn risky" onClick={() => setConfirmDelete(true)}>Delete account…</button>}
+                : <div class="option indented">
+                    <p class="row-actions"><button type="button" class="btn risky" onClick={() => setConfirmDelete(true)} aria-describedby="delete-hint">Delete account…</button></p>
+                    <p class="hint" id="delete-hint">Removes your account and everything synced to it. Asks first.</p>
+                  </div>}
             </section>
           : <section class="detail-section">
               <h3>Local data</h3>
@@ -207,7 +214,10 @@ export function Settings() {
                     <button type="button" class="btn danger" onClick={() => void deleteEverything()}>Delete everything</button>
                     <button type="button" class="btn ghost" onClick={() => setConfirmDelete(false)}>Keep it</button>
                   </p>
-                : <button type="button" class="btn risky" onClick={() => setConfirmDelete(true)}>Delete local data…</button>}
+                : <div class="option indented">
+                    <p class="row-actions"><button type="button" class="btn risky" onClick={() => setConfirmDelete(true)} aria-describedby="delete-hint">Delete local data…</button></p>
+                    <p class="hint" id="delete-hint">Removes your library, statuses and lengths from this browser. Asks first.</p>
+                  </div>}
             </section>}
       </div>
     </div>
