@@ -18,7 +18,6 @@ npm run build        # static site in app/dist
 Until Steam import exists (milestone 3), the app opens a library file. `npm run library` builds one from the prototype data:
 
 - `tools/out/library.json`: open it on the first screen. Uses IGDB lengths from `tools/igdb_results.json` when present (made by `tools/igdb_coverage.ts`).
-- `tools/out/hltb_lengths.json`: Settings → Import lengths, to use the prototype's HLTB times as your own.
 
 ## Layout
 

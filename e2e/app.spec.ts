@@ -2,7 +2,6 @@ import { expect, test, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 
 const LIBRARY = "e2e/fixtures/library.json";
-const LENGTHS = "e2e/fixtures/lengths.csv";
 
 // Shelves mount only the rows near the screen; a tall window keeps the whole fixture mounted
 test.use({ viewport: { width: 1280, height: 1600 } });
@@ -166,19 +165,15 @@ test("STATUS-3 LIB-8 LEN-12: detail panel edits status and survives a reload", a
   await expect(page.getByRole("dialog").getByRole("textbox")).toHaveValue("Start after the holidays");
 });
 
-test("LEN-14 DATA-1: import lengths from CSV and export a backup", async ({ page }) => {
+test("DATA-1: export a backup", async ({ page }) => {
   await openLibrary(page);
+  await card(page, "Mystery A").locator("button.cover").focus();
+  await page.keyboard.press("p");
   await page.getByRole("button", { name: "Settings" }).click();
-  await page.locator("input[type=file][accept*=csv]").setInputFiles(LENGTHS);
-  await expect(page.locator(".toast")).toContainText("Imported 1 lengths (1 for games not in your library)");
-
   const [download] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Export backup" }).click()]);
   const backup = JSON.parse(readFileSync(await download.path(), "utf8"));
   expect(backup.format).toBe("backlog-export");
-  expect(backup.games.find((g: any) => g.appid === 4)).toMatchObject({ my: { main_extra: 7 }, myKind: "imported" });
-
-  await page.keyboard.press("Escape");
-  await expect(card(page, "Mystery A").locator(".hrs")).toHaveText("7h");
+  expect(backup.games.find((g: any) => g.appid === 4)).toMatchObject({ status: "playing" });
 });
 
 test("DATA-2 DATA-4 ONB-1: restore a backup after a summary, delete local data, open a backup on the welcome page", async ({ page }) => {
@@ -403,15 +398,18 @@ test("FIND-6 FIND-3 FIND-2 LEN-2 PRIN-4: smart views: built-in ones, conditions 
   await expect(views.getByRole("button", { name: "Unknown incl. dropped", exact: true })).toHaveCount(1);
 });
 
-test("LIB-2: Now playing shelf: Playing games, latest first, hidden when empty", async ({ page }) => {
+test("LIB-2: Now playing shelf: off by default; Playing games, latest first, hidden when empty", async ({ page }) => {
   await openLibrary(page);
   const shelf = page.getByRole("region", { name: "Now playing" });
-  await expect(shelf).toHaveCount(0);
-
   for (const name of ["Short One", "Mid Game"]) {
     await card(page, name).locator("button.cover").focus();
     await page.keyboard.press("p");
   }
+  await expect(shelf).toHaveCount(0);
+
+  await page.getByRole("button", { name: "Settings" }).click();
+  await page.getByRole("checkbox", { name: /Now playing shelf/ }).check();
+  await page.keyboard.press("Escape");
   await expect(shelf.locator(".game .name")).toHaveText(["Mid Game", "Short One"]);
 
   // Still shown when the view hides Playing games

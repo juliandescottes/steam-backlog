@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "preact/hooks";
-import { parseExport, parseLengths, parseLibrary, type ExportFile } from "@backlog/shared/files";
+import { parseExport, parseLibrary, type ExportFile } from "@backlog/shared/files";
 import type { Measure } from "@backlog/shared/types";
 import { profilePath, suggestHandle } from "@backlog/shared/share";
-import { account, deleteAccount, refreshLibrary, setProfile, setShareLengths, signIn, signOut, type Me } from "../account.ts";
+import { account, deleteAccount, refreshLibrary, setProfile, signIn, signOut, type Me } from "../account.ts";
 import { navigate } from "../route.ts";
 import {
-  deleteEverything, exportBackup, games, importLengths, mergeLibrary, restoreBackup, settings, settingsOpen, showToast, updateSettings, type Theme,
+  deleteEverything, exportBackup, games, mergeLibrary, restoreBackup, settings, settingsOpen, showToast, updateSettings, type Theme,
 } from "../store.ts";
 import { count, readFile } from "../util.ts";
 
@@ -23,9 +23,11 @@ function FilePick({ label, accept, onFile }: { label: string; accept: string; on
   );
 }
 
-function Radio<T extends string>({ name, value, options, onChange }: { name: string; value: T; options: [T, string][]; onChange: (v: T) => void }) {
+function Radio<T extends string>({ name, value, options, onChange, describedBy }: {
+  name: string; value: T; options: [T, string][]; onChange: (v: T) => void; describedBy?: string;
+}) {
   return (
-    <div class="segmented" role="radiogroup" aria-label={name}>
+    <div class="segmented" role="radiogroup" aria-label={name} aria-describedby={describedBy}>
       {options.map(([v, label]) => (
         <button type="button" key={v} role="radio" aria-checked={value === v} onClick={() => onChange(v)}>{label}</button>
       ))}
@@ -41,30 +43,35 @@ function ProfileSettings({ me }: { me: Me }) {
   const typed = handle.trim().toLowerCase();
   return (
     <>
-      <label class="check">
-        <input type="checkbox" checked={me.profilePublic}
-          onChange={e => void save(e.currentTarget.checked ? { profilePublic: true, ...(typed !== me.handle ? { handle: typed } : {}) } : { profilePublic: false })} />
-        Public profile
-      </label>
-      <form class="row-actions handle" onSubmit={e => { e.preventDefault(); void save({ handle: typed }); }}>
-        <label for="handle">Username</label>
-        <span class="prefix">{location.host}/u/</span>
-        <input id="handle" value={handle} maxLength={30} autoComplete="off" placeholder="your-name" onInput={e => setHandle(e.currentTarget.value)} />
-        {me.handle && typed !== me.handle && <button type="submit" class="btn">Save</button>}
-      </form>
-      {error && <p class="error" role="alert">{error}</p>}
-      <label class="check">
-        <input type="checkbox" checked={me.showStats} disabled={!me.profilePublic} onChange={e => void save({ showStats: e.currentTarget.checked })} />
-        Show games finished and hours cleared
-      </label>
-      <label class="check">
-        <input type="checkbox" checked={me.showBacklog} disabled={!me.profilePublic} onChange={e => void save({ showBacklog: e.currentTarget.checked })} />
-        Show my whole backlog
-      </label>
-      <p class="hint">
-        Shows your Steam name and avatar, and the lists you pick in their Share panel. The whole backlog shows every game with its length and status, never notes or playtime. Changing the username breaks old profile links.
-        {me.profilePublic && me.handle && <> <a href={profilePath(me.handle)} onClick={e => { e.preventDefault(); settingsOpen.value = false; navigate(profilePath(me.handle!)); }}>View your profile →</a></>}
-      </p>
+      <div class="option">
+        <label class="check">
+          <input type="checkbox" checked={me.profilePublic} aria-describedby="profile-hint"
+            onChange={e => void save(e.currentTarget.checked ? { profilePublic: true, ...(typed !== me.handle ? { handle: typed } : {}) } : { profilePublic: false })} />
+          Public profile
+        </label>
+        <p class="hint" id="profile-hint">
+          Your Steam name and avatar, games finished and hours cleared, and the lists you pick in their Share panel.
+          {me.profilePublic && me.handle && <> <a href={profilePath(me.handle)} onClick={e => { e.preventDefault(); settingsOpen.value = false; navigate(profilePath(me.handle!)); }}>View your profile →</a></>}
+        </p>
+      </div>
+      <div class="option indented">
+        <form class="row-actions handle" onSubmit={e => { e.preventDefault(); void save({ handle: typed }); }}>
+          <label for="handle">Username</label>
+          <span class="prefix">{location.host}/u/</span>
+          <input id="handle" value={handle} maxLength={30} autoComplete="off" placeholder="your-name" aria-describedby="handle-hint" onInput={e => setHandle(e.currentTarget.value)} />
+          {me.handle && typed !== me.handle && <button type="submit" class="btn">Save</button>}
+        </form>
+        <p class="hint" id="handle-hint">Changing it breaks old profile links.</p>
+        {error && <p class="error" role="alert">{error}</p>}
+      </div>
+      <div class="option">
+        <label class="check">
+          <input type="checkbox" checked={me.showBacklog} disabled={!me.profilePublic} aria-describedby="backlog-hint"
+            onChange={e => void save({ showBacklog: e.currentTarget.checked })} />
+          Show my whole backlog
+        </label>
+        <p class="hint" id="backlog-hint">Every game with its length and status, never notes or playtime.</p>
+      </div>
     </>
   );
 }
@@ -84,7 +91,7 @@ export function Settings() {
 
   return (
     <div class="sheet-backdrop" onClick={ev => ev.target === ev.currentTarget && (settingsOpen.value = false)}>
-      <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+      <div class="sheet settings" role="dialog" aria-modal="true" aria-labelledby="settings-title">
         <button ref={close} type="button" class="btn ghost close" onClick={() => (settingsOpen.value = false)} aria-label="Close">✕</button>
         <h2 id="settings-title">Settings</h2>
 
@@ -96,62 +103,77 @@ export function Settings() {
                   {account.value.avatar && <img src={account.value.avatar} alt="" width={32} height={32} />}
                   <span>Signed in as <b>{account.value.name}</b>. Changes sync to your other devices.</span>
                 </p>
-                <p class="row-actions">
-                  <button type="button" class="btn" onClick={() => void refreshLibrary()}>Refresh library</button>
-                  <button type="button" class="btn ghost" onClick={() => void signOut()}>Sign out</button>
-                </p>
-                <label class="check">
-                  <input type="checkbox" checked={account.value.shareLengths} onChange={e => void setShareLengths(e.currentTarget.checked)} />
-                  Share my lengths with the community
-                </label>
-                <p class="hint">Lengths you type and the Steam playtime of games you finish, anonymously. Rough guesses and imported lengths stay private.</p>
+                <div class="option indented">
+                  <p class="row-actions"><button type="button" class="btn" onClick={() => void refreshLibrary()} aria-describedby="refresh-hint">Refresh library</button></p>
+                  <p class="hint" id="refresh-hint">Adds games you bought since and updates playtimes from Steam. Happens once a day on its own.</p>
+                </div>
+                <div class="option indented">
+                  <p class="row-actions"><button type="button" class="btn" onClick={() => void signOut()} aria-describedby="sign-out-hint">Sign out</button></p>
+                  <p class="hint" id="sign-out-hint">Removes your games from this browser. They stay in your account.</p>
+                </div>
               </>
-            : <>
-                <p class="row-actions"><button type="button" class="btn primary" onClick={signIn}>Sign in with Steam</button></p>
-                <p class="hint">Imports your Steam library and syncs across devices. What you've done in this browser comes along.</p>
-              </>}
+            : <div class="option indented">
+                <p class="row-actions"><button type="button" class="btn primary" onClick={signIn} aria-describedby="sign-in-hint">Sign in with Steam</button></p>
+                <p class="hint" id="sign-in-hint">Imports your Steam library and syncs across devices. What you've done in this browser comes along.</p>
+              </div>}
         </section>
 
         {account.value && (
           <section class="detail-section">
-            <h3>Public profile</h3>
+            <h3>Sharing</h3>
             <ProfileSettings me={account.value} />
           </section>
         )}
 
         <section class="detail-section">
-          <h3>Theme</h3>
-          <Radio<Theme> name="Theme" value={s.theme} onChange={theme => updateSettings({ theme })}
-            options={[["system", "System"], ["dark", "Dark"], ["light", "Light"]]} />
+          <h3>Display</h3>
+          <div class="option indented">
+            <div class="setting">
+              <span>Theme</span>
+              <Radio<Theme> name="Theme" value={s.theme} onChange={theme => updateSettings({ theme })} describedBy="theme-hint"
+                options={[["system", "System"], ["dark", "Dark"], ["light", "Light"]]} />
+            </div>
+            <p class="hint" id="theme-hint">System follows your device's light or dark mode.</p>
+          </div>
+          <div class="option indented">
+            <div class="setting">
+              <span>Sort and total by</span>
+              <Radio<Measure> name="Length measure" value={s.measure} onChange={measure => updateSettings({ measure })} describedBy="measure-hint"
+                options={[["main_extra", "Main + Extras"], ["main", "Main story"]]} />
+            </div>
+            <p class="hint" id="measure-hint">Which length orders games and adds up to your hours. Main + Extras is the main story plus the side content most players do.</p>
+          </div>
+          <div class="option">
+            <label class="check">
+              <input type="checkbox" checked={s.nowPlaying} aria-describedby="now-playing-hint" onChange={e => updateSettings({ nowPlaying: e.currentTarget.checked })} />
+              Now playing shelf
+            </label>
+            <p class="hint" id="now-playing-hint">Your Playing games in a row above the grid, whatever the view.</p>
+          </div>
         </section>
 
-        <section class="detail-section">
-          <h3>Sort and total by</h3>
-          <Radio<Measure> name="Length measure" value={s.measure} onChange={measure => updateSettings({ measure })}
-            options={[["main_extra", "Main + Extras"], ["main", "Main story"]]} />
-        </section>
-
-        <section class="detail-section">
-          <h3>Library</h3>
-          <p class="row-actions">
-            {!account.value && <FilePick label="Open library file" accept=".json,application/json" onFile={guard(text => {
-              const r = mergeLibrary(parseLibrary(text));
-              showToast(`${count(r.added, "game")} added, ${r.updated} updated`);
-            })} />}
-            <FilePick label="Import lengths" accept=".json,.csv,application/json,text/csv" onFile={guard(text => {
-              const r = importLengths(parseLengths(text));
-              if (r.unknownGames) showToast(`Imported ${r.applied} lengths (${r.unknownGames} for games not in your library)`, true);
-            })} />
-          </p>
-          <p class="hint">Lengths files: JSON (<code>backlog-lengths</code>) or CSV with an <code>appid</code> column and <code>hours</code> or <code>main</code>, <code>main_extra</code>, <code>completionist</code>. They become your own lengths.</p>
-        </section>
+        {!account.value && (
+          <section class="detail-section">
+            <h3>Library</h3>
+            <p class="row-actions">
+              <FilePick label="Open library file" accept=".json,application/json" onFile={guard(text => {
+                const r = mergeLibrary(parseLibrary(text));
+                showToast(`${count(r.added, "game")} added, ${r.updated} updated`);
+              })} />
+            </p>
+          </section>
+        )}
 
         <section class="detail-section">
           <h3>Backup</h3>
-          <p class="row-actions">
-            <button type="button" class="btn" onClick={exportBackup}>Export backup</button>
-            <FilePick label="Restore backup" accept=".json,application/json" onFile={guard(text => setBackup(parseExport(text)))} />
-          </p>
+          <div class="option indented">
+            <p class="row-actions"><button type="button" class="btn" onClick={exportBackup} aria-describedby="export-hint">Export backup</button></p>
+            <p class="hint" id="export-hint">A file with your statuses, dates, notes, lengths, views and lists.</p>
+          </div>
+          <div class="option indented">
+            <p class="row-actions"><FilePick label="Restore backup" accept=".json,application/json" onFile={guard(text => setBackup(parseExport(text)))} /></p>
+            <p class="hint">Shows what the file holds, then merges it into this library or replaces it.</p>
+          </div>
           {backup && (
             <div class="callout">
               <p>Backup from {new Date(backup.exportedAt).toLocaleString()}: {count(backup.games.length, "game")},{" "}
@@ -176,14 +198,17 @@ export function Settings() {
               <h3>Delete account</h3>
               {confirmDelete
                 ? <div class="callout">
-                    <p>This deletes your account and everything synced to it: statuses, notes, your lengths and what you shared with the community. Your Steam account isn't affected. Export a backup first to keep your data.</p>
+                    <p>This deletes your account and everything synced to it: statuses, notes, your lengths, lists and public profile. Your Steam account isn't affected. Export a backup first to keep your data.</p>
                     <p class="row-actions">
                       <button type="button" class="btn" onClick={exportBackup}>Export backup</button>
                       <button type="button" class="btn danger" onClick={() => void deleteAccount()}>Delete my account</button>
                       <button type="button" class="btn ghost" onClick={() => setConfirmDelete(false)}>Keep it</button>
                     </p>
                   </div>
-                : <button type="button" class="btn ghost" onClick={() => setConfirmDelete(true)}>Delete account…</button>}
+                : <div class="option indented">
+                    <p class="row-actions"><button type="button" class="btn risky" onClick={() => setConfirmDelete(true)} aria-describedby="delete-hint">Delete account…</button></p>
+                    <p class="hint" id="delete-hint">Removes your account and everything synced to it. Asks first.</p>
+                  </div>}
             </section>
           : <section class="detail-section">
               <h3>Local data</h3>
@@ -193,7 +218,10 @@ export function Settings() {
                     <button type="button" class="btn danger" onClick={() => void deleteEverything()}>Delete everything</button>
                     <button type="button" class="btn ghost" onClick={() => setConfirmDelete(false)}>Keep it</button>
                   </p>
-                : <button type="button" class="btn ghost" onClick={() => setConfirmDelete(true)}>Delete local data…</button>}
+                : <div class="option indented">
+                    <p class="row-actions"><button type="button" class="btn risky" onClick={() => setConfirmDelete(true)} aria-describedby="delete-hint">Delete local data…</button></p>
+                    <p class="hint" id="delete-hint">Removes your library, statuses and lengths from this browser. Asks first.</p>
+                  </div>}
             </section>}
       </div>
     </div>

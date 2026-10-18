@@ -5,27 +5,26 @@ import { normalizeName } from "@backlog/shared/names";
 import { SHARE_ID } from "@backlog/shared/lists";
 import { HANDLE, type Profile, type SharedList } from "@backlog/shared/share";
 import type { Game } from "@backlog/shared/types";
+import { communityOn } from "./community.ts";
 import { HttpError } from "./http.ts";
 import { GAME_COLUMNS, toGame, type Row } from "./sync.ts";
 
-export type ProfileSettings = { handle?: unknown; public?: unknown; showStats?: unknown; showBacklog?: unknown };
+export type ProfileSettings = { handle?: unknown; public?: unknown; showBacklog?: unknown };
 
 /**
  * Public profile settings: the handle (public username; another user's is refused), whether the profile
- * is on (needs a handle), and whether it shows stats.
+ * is on (needs a handle), and whether it shows the whole backlog.
  */
 export async function setProfile(env: Env, userId: string, s: ProfileSettings) {
   if (s.handle !== undefined && (typeof s.handle !== "string" || !HANDLE.test(s.handle))) throw new HttpError(400, "bad_handle");
-  if ([s.public, s.showStats, s.showBacklog].some(v => v !== undefined && typeof v !== "boolean")) throw new HttpError(400, "bad_request");
+  if ([s.public, s.showBacklog].some(v => v !== undefined && typeof v !== "boolean")) throw new HttpError(400, "bad_request");
   const flag = (v: unknown) => (v === undefined ? null : String(v));
   try {
     const r = await env.DB.prepare(
       `UPDATE users SET handle = coalesce(?2, handle), profile_public = coalesce(?3, profile_public),
-         settings_json = CASE WHEN ?5 IS NULL THEN s.v ELSE json_set(s.v, '$.showBacklog', json(?5)) END
-       FROM (SELECT CASE WHEN ?4 IS NULL THEN settings_json ELSE json_set(settings_json, '$.showStats', json(?4)) END AS v
-             FROM users WHERE id = ?1) s
+         settings_json = CASE WHEN ?4 IS NULL THEN settings_json ELSE json_set(settings_json, '$.showBacklog', json(?4)) END
        WHERE id = ?1 AND (coalesce(?3, profile_public) = 0 OR coalesce(?2, handle) IS NOT NULL)`,
-    ).bind(userId, s.handle ?? null, s.public === undefined ? null : Number(s.public), flag(s.showStats), flag(s.showBacklog)).run();
+    ).bind(userId, s.handle ?? null, s.public === undefined ? null : Number(s.public), flag(s.showBacklog)).run();
     if (!r.meta.changes) throw new HttpError(400, "handle_required");
   } catch (e) {
     if (String(e).includes("UNIQUE")) throw new HttpError(409, "handle_taken");
@@ -64,12 +63,12 @@ export async function sharedList(env: Env, shareId: string): Promise<{ etag: str
        LEFT JOIN user_games ug ON ug.user_id = ?1 AND ug.appid = li.appid
        WHERE li.list_id = ?2 AND li.deleted = 0 ORDER BY li.position`,
     ).bind(l.user_id, l.id).all<Row & { updated_at: number }>()).results;
-    games = rows.map(r => toGame({ ...r, status: r.status ?? "backlog", note: r.note ?? "", playtime_min: r.playtime_min ?? 0, first_seen_at: r.first_seen_at ?? 0 }));
+    games = rows.map(r => toGame({ ...r, status: r.status ?? "backlog", note: r.note ?? "", playtime_min: r.playtime_min ?? 0, first_seen_at: r.first_seen_at ?? 0 }, communityOn(env)));
   } else {
     // Filter lists are computed here with the client's filter code; lengths by Main + Extras, the default measure
     rows = await allGames(env, l.user_id);
     const filter: Filter = l.filter_json ? JSON.parse(l.filter_json) : {};
-    games = rows.map(r => entry(toGame(r)))
+    games = rows.map(r => entry(toGame(r, communityOn(env))))
       .filter(e => matches(e, filter)).sort(compare(l.sort ?? "length")).map(e => e.game);
   }
   // A sum, not the latest: any one game's catalog row changing changes it
@@ -101,7 +100,7 @@ export async function profile(env: Env, handle: string): Promise<Profile | null>
        WHERE l.user_id = ? AND l.visibility = 'profile' AND l.deleted = 0 AND li.deleted = 0 ORDER BY li.position`,
     ).bind(u.id),
   ]);
-  const all = (rows.results as Row[]).map(r => entry(toGame(r)));
+  const all = (rows.results as Row[]).map(r => entry(toGame(r, communityOn(env))));
   const byAppid = new Map(all.map(e => [e.game.appid, e]));
   const finished = all.filter(e => e.game.status === "finished");
   const open = all.filter(e => e.game.status === "backlog" || e.game.status === "playing").sort(compare("length"));
@@ -111,7 +110,7 @@ export async function profile(env: Env, handle: string): Promise<Profile | null>
   type Row2 = { id: string; share_id: string; title: string; description: string; kind: ListKind; filter_json: string | null; sort: SortKey | null };
   return {
     handle, name: u.display_name, avatar: u.avatar_url,
-    stats: settings.showStats === false ? null : { finished: finished.length, hoursCleared: hoursOf(finished) },
+    stats: { finished: finished.length, hoursCleared: hoursOf(finished) },
     backlog: settings.showBacklog ? { games: open.length, hours: hoursOf(open), covers: open.slice(0, 4).map(e => e.game.appid) } : null,
     lists: (lists.results as Row2[]).map(l => {
       const appids = l.kind === "manual"
@@ -140,7 +139,7 @@ export async function sharedBacklog(env: Env, handle: string): Promise<{ etag: s
   ).bind(handle).first<{ id: string; display_name: string; avatar_url: string | null; rev: number }>();
   if (!u) return null;
   const rows = await allGames(env, u.id);
-  const games = rows.map(r => entry(toGame(r))).sort(compare("length")).map(e => forViewers(e.game));
+  const games = rows.map(r => entry(toGame(r, communityOn(env)))).sort(compare("length")).map(e => forViewers(e.game));
   return {
     etag: `"${u.rev}-${rows.reduce((sum, r) => sum + r.updated_at, 0)}-${games.length}"`,
     data: { owner: { name: u.display_name, avatar: u.avatar_url, handle }, list: { title: "Backlog", description: "", kind: "filter", sort: "length" }, games },
@@ -172,7 +171,7 @@ async function preview(env: Env, path: string): Promise<{ title: string; descrip
   if (!p) return null;
   return {
     title: `${p.name} on Backlog`,
-    description: [plural(p.lists.length, "list"), p.stats && `${p.stats.finished} finished`].filter(Boolean).join(" · "),
+    description: [plural(p.lists.length, "list"), `${p.stats.finished} finished`].join(" · "),
     image: p.lists[0]?.covers[0] ?? null,
   };
 }

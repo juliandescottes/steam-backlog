@@ -11,7 +11,7 @@ import type { SyncRequest } from "@backlog/shared/sync";
 const me = (u: User) => ({
   id: u.id, steamId: u.steam_id, handle: u.handle, name: u.display_name, avatar: u.avatar_url, librarySyncedAt: u.library_synced_at,
   shareLengths: JSON.parse(u.settings_json).shareLengths !== false,
-  profilePublic: u.profile_public === 1, showStats: JSON.parse(u.settings_json).showStats !== false,
+  profilePublic: u.profile_public === 1,
   showBacklog: JSON.parse(u.settings_json).showBacklog === true,
 });
 

@@ -4,12 +4,16 @@ import { roundHours } from "@backlog/shared/bands";
  * Community lengths (TECH.md §8). Each user's rows mirror their games: exact lengths they typed,
  * the Steam playtime of games they finished (over 30 min), and No ending. Rough guesses and
  * imported lengths are never shared, nor anything from users who turned sharing off.
+ * Off unless COMMUNITY_LENGTHS is "true"; rows recorded before stay in D1, unused.
  */
+
+export const communityOn = (env: Env) => env.COMMUNITY_LENGTHS === "true";
 
 const IN_APPIDS = "appid IN (SELECT value FROM json_each(?2))";
 
 /** Rewrites the user's rows for these games from their current state. Run in the batch that changes them. */
 export function writeRows(env: Env, userId: string, appids: number[], now: number): D1PreparedStatement[] {
+  if (!communityOn(env)) return [];
   const list = JSON.stringify(appids);
   return [
     env.DB.prepare(`DELETE FROM community_lengths WHERE user_id = ?1 AND ${IN_APPIDS}`).bind(userId, list),

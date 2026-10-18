@@ -26,10 +26,10 @@ Spec guardrails (2026-10-18, uncommitted): `SPEC.md` rewritten as numbered rules
 
 ## Next: UX pass (asked 2026-10-18)
 
-1. Creating a list: an easy way to jump to it (a link, e.g. in the toast).
-2. Now playing shelf: a setting, off by default (it takes a lot of screen).
-3. Settings: clearer visual separation between sections.
-4. "Delete account…" should look like a button.
+1. ~~Creating a list: an easy way to jump to it (a link, e.g. in the toast).~~ Done: "Open list" in the toast.
+2. ~~Now playing shelf: a setting, off by default (it takes a lot of screen).~~ Done.
+3. ~~Settings: clearer visual separation between sections.~~ Done: lines between sections.
+4. ~~"Delete account…" should look like a button.~~ Done.
 5. The Lists button: move it left, near where the drawer opens; make it more visible.
 6. List title and description: edit in place, no size or layout change when they become inputs; a pen icon next to each instead of the Rename button.
 7. Sharing: replace the "Share"/"Shared ✓" toggle button with an always visible sharing section at the top of the list, with a "Share" / "Make private" button instead of the Private / Anyone segmented control.

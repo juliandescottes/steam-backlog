@@ -63,7 +63,7 @@ function Triage() {
   );
 }
 
-/** Games in progress, in a row that scrolls sideways; hidden when there are none (SPEC §3). */
+/** Games in progress, in a row that scrolls sideways; when turned on in Settings, hidden when there are none (LIB-2). */
 function NowPlaying() {
   const list = nowPlaying.value;
   if (!list.length) return null;
@@ -149,7 +149,7 @@ export function Library() {
       {openList ? <ListHeader key={openList.id} list={openList} /> : <>
         <Header />
         <Triage />
-        <NowPlaying />
+        {settings.value.nowPlaying && <NowPlaying />}
         <ViewTabs />
       </>}
       {byLength && bands.length > 0 && <BandIndex groups={bands} />}

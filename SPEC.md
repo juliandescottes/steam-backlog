@@ -27,7 +27,7 @@ Each rule has a bold ID like STATUS-4 and a test that cites it in its title, che
 ## 3. Library view (home)
 
 - **LIB-1** Header: "N games, H hours to clear" over Backlog + Playing, a link to fill in the games without a length, and a progress bar of finished hours over finished + remaining hours.
-- **LIB-2** Now playing shelf: a row of Playing games above the grid, most recently changed first, shown whatever the view's statuses, hidden when empty.
+- **LIB-2** Now playing shelf, off by default (Settings): a row of Playing games above the grid, most recently changed first, shown whatever the view's statuses, hidden when empty.
 - **LIB-3** Length bands: Under 3 h, 3–6, 6–10, 10–20, 20–40, 40–80, 80 h and up, No ending, Unknown. Sorted by length, games are grouped by band, with a stacked bar and a legend that link to each band.
 - **LIB-4** Hours badges show quarter hours under 3 h (`1.75h`), whole hours above (`113h`), no space before the unit, colored by band. Stored to the quarter hour.
 - **LIB-5** Approximate lengths have a dotted band edge and a tooltip with the reason; no "~" on covers.
@@ -52,9 +52,8 @@ IGDB has no time for a large share of most libraries (38% of the prototype colle
 - **LEN-11** On a card in the Unknown band, the `?` badge opens an inline editor with the same input and paste.
 - **LEN-12** The user's own length wins over IGDB and community lengths. The detail panel edits it, can remove it, and names the source: IGDB (with the number of submissions), Community, Yours, or Approximate.
 - **LEN-13** IGDB times with fewer than 3 submissions are approximate.
-- **LEN-14** Import lengths (Settings): a JSON or CSV file of Steam app ID + hours becomes the user's own lengths.
-- **LEN-15** Lengths the user types, and the Steam playtime of games they finish, are shared anonymously with the community. On by default, off in Settings (which removes them). Rough guesses and imported lengths are never shared; un-finishing takes the playtime back.
-- **LEN-16** Once a game has 3 or more community entries, other users see their median, labeled Community.
+- **LEN-15** Community lengths are off (a server switch, `COMMUNITY_LENGTHS`): nothing is recorded and none are shown. When on: lengths the user types, and the Steam playtime of games they finish, are shared anonymously, unless the user turned sharing off (which removes them). Rough guesses and imported lengths are never shared; un-finishing takes the playtime back.
+- **LEN-16** When community lengths are on, once a game has 3 or more community entries, other users see their median, labeled Community.
 
 ## 5. Statuses
 
@@ -84,7 +83,7 @@ Backlog (default) · Playing · Finished · Dropped.
 A list is a named, ordered collection of games with an optional description, hand-picked or filter-based.
 
 - **LIST-1** The Lists button opens a drawer with the library, every list and its size, and a field to create one.
-- **LIST-2** Hand-picked lists: add games from a cover's +, `A`, the detail panel, a selection or the palette. The picker finds a list or creates one from the typed name. Games keep the order they were added in.
+- **LIST-2** Hand-picked lists: add games from a cover's +, `A`, the detail panel, a selection or the palette. The picker finds a list or creates one from the typed name; the toast links to the list. Games keep the order they were added in.
 - **LIST-3** Reorder a hand-picked list by dragging or `Alt+←/→`, with undo. Remove games from the selection bar or the detail panel.
 - **LIST-4** A list page shows title, description, size and hours, with its own status chips and sort ("List order" for hand-picked lists). Finished games stay in the list.
 - **LIST-5** A filter-based list is made from the current view and updates as the library changes.
@@ -96,7 +95,7 @@ A list is a named, ordered collection of games with an optional description, han
 - **LIST-11** The shared page refreshes every 30 s while visible and when it comes back into view; an unchanged list costs a 304.
 - **LIST-12** Making a list private again, or deleting it, stops the link at once; viewers can't tell private from missing.
 - **LIST-13** Shared and profile pages have a title and a link preview.
-- **LIST-14** Public profile `/u/<username>`: off by default, needs a username (suggested from the Steam name). Shows the Steam name and avatar, optional stats (games finished, hours cleared) and the lists marked "Show on my public profile".
+- **LIST-14** Public profile `/u/<username>`: off by default, needs a username (suggested from the Steam name). Shows the Steam name and avatar, stats (games finished, hours cleared) and the lists marked "Show on my public profile".
 - **LIST-15** Optionally the profile shows the whole library at `/u/<username>/backlog`: read-only, starting on Backlog + Playing. Turning the profile off hides both pages.
 
 ## 8. Data ownership
@@ -118,7 +117,7 @@ A list is a named, ordered collection of games with an optional description, han
 - **SET-2** Length measure for sorting and totals: Main + Extras (default) or Main story.
 - **SET-3** A link to the user's Steam profile. (planned)
 
-Settings also holds the account, public profile, community sharing, import lengths, backup and delete controls covered above.
+Settings also holds the account, public profile, backup and delete controls covered above.
 
 ## 11. Platforms
 

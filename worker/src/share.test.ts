@@ -24,7 +24,7 @@ beforeEach(async () => {
   handle = `player-${n}`;
 });
 
-const me = async () => (await (await w.call("GET", "/api/me")).json()) as { handle: string | null; profilePublic: boolean; showStats: boolean; showBacklog: boolean };
+const me = async () => (await (await w.call("GET", "/api/me")).json()) as { handle: string | null; profilePublic: boolean; showBacklog: boolean };
 
 test("profile settings: a valid, unique handle; on needs one", async () => {
   expect((await w.call("POST", "/api/profile", { public: true })).status).toBe(400); // no handle yet
@@ -32,13 +32,9 @@ test("profile settings: a valid, unique handle; on needs one", async () => {
   expect((await w.call("POST", "/api/profile", { handle: "-x" })).status).toBe(400);
   expect((await w.call("POST", "/api/profile", { public: "yes" })).status).toBe(400);
   expect((await w.call("POST", "/api/profile", { handle, public: true })).status).toBe(200);
-  expect(await me()).toMatchObject({ handle, profilePublic: true, showStats: true, showBacklog: false });
-  expect((await w.call("POST", "/api/profile", { showStats: false })).status).toBe(200);
-  expect(await me()).toMatchObject({ handle, profilePublic: true, showStats: false, showBacklog: false });
+  expect(await me()).toMatchObject({ handle, profilePublic: true, showBacklog: false });
   expect((await w.call("POST", "/api/profile", { showBacklog: true })).status).toBe(200);
-  expect(await me()).toMatchObject({ showStats: false, showBacklog: true }); // each setting changes alone
-  expect((await w.call("POST", "/api/profile", { showStats: true })).status).toBe(200);
-  expect(await me()).toMatchObject({ showStats: true, showBacklog: true });
+  expect(await me()).toMatchObject({ handle, profilePublic: true, showBacklog: true }); // each setting changes alone
 
   const mine = handle;
   await w.call("POST", "/api/auth/dev", { steamId: "76561190999999999" });
@@ -47,7 +43,7 @@ test("profile settings: a valid, unique handle; on needs one", async () => {
   expect(await taken.json()).toEqual({ error: "handle_taken" });
 });
 
-test("LIST-14: a public profile: lists marked for it with their size, stats unless hidden; off is 404", async () => {
+test("LIST-14: a public profile: lists marked for it with their size, and stats; off is 404", async () => {
   await sync([
     listOp("pl1", { ...LIST, visibility: "profile", shareId: "onprofile001", position: "b" }),
     { id: `op-${++n}`, type: "item", listId: "pl1", appid: 620, at: 1, set: { position: "a", deleted: false } },
@@ -72,8 +68,6 @@ test("LIST-14: a public profile: lists marked for it with their size, stats unle
   expect(await (await w.call("GET", `/u/${handle}`)).text()).toContain("<title>Dev user on Backlog</title>");
 
   await w.call("POST", "/api/auth/dev", { steamId }); // signed in again
-  await w.call("POST", "/api/profile", { showStats: false });
-  expect(((await (await w.call("GET", `/api/u/${handle}`)).json()) as Profile).stats).toBeNull();
   await w.call("POST", "/api/profile", { public: false });
   expect((await w.call("GET", `/api/u/${handle}`)).status).toBe(404);
   expect(((await (await w.call("GET", "/api/s/linkonly0001")).json()) as SharedList).owner.handle).toBeNull();

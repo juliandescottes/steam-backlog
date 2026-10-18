@@ -2,7 +2,7 @@ import {
   mergeItemOps, mergeListOps, mergeOps, mergeViewOps, validOp, type GameFields, type SyncItem, type SyncList, type SyncRequest, type SyncResponse, type SyncView,
 } from "@backlog/shared/sync";
 import type { Game, LenKind, Status } from "@backlog/shared/types";
-import { recompute, writeRows } from "./community.ts";
+import { communityOn, recompute, writeRows } from "./community.ts";
 import { HttpError } from "./http.ts";
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -17,13 +17,13 @@ export type Row = {
   playtime_min: number; last_played_at: number | null; first_seen_at: number;
 };
 
-export const toGame = (r: Row): Game => ({
+export const toGame = (r: Row, community: boolean): Game => ({
   appid: r.appid, name: r.name,
   portrait: r.has_portrait_art == null ? null : r.has_portrait_art === 1,
   playtimeMin: r.playtime_min, lastPlayedAt: r.last_played_at, addedAt: r.first_seen_at,
   igdb: r.igdb_main == null && r.igdb_main_extra == null && r.igdb_comp == null ? null
     : { main: r.igdb_main, main_extra: r.igdb_main_extra, comp: r.igdb_comp, count: r.igdb_count },
-  community: r.comm_count || r.comm_endless_count
+  community: community && (r.comm_count || r.comm_endless_count)
     ? { main_extra: r.comm_main_extra, count: r.comm_count, endlessCount: r.comm_endless_count } : null,
   status: r.status, statusAt: r.status_at, finishedAt: r.finished_at, note: r.note,
   my: r.my_main == null && r.my_main_extra == null && r.my_comp == null ? null
@@ -147,7 +147,7 @@ export async function sync(env: Env, userId: string, req: SyncRequest, now = Dat
         env.DB.prepare("DELETE FROM applied_ops WHERE user_id = ? AND at < ?").bind(userId, now - DAY),
         ...writeRows(env, userId, patches.map(p => p.appid), now),
       ]);
-      if (patches.length) await recompute(env, patches.map(p => p.appid), now);
+      if (patches.length && communityOn(env)) await recompute(env, patches.map(p => p.appid), now);
     }
   }
 
@@ -165,7 +165,7 @@ export async function sync(env: Env, userId: string, req: SyncRequest, now = Dat
     env.DB.prepare("SELECT list_id, appid, position, deleted FROM list_items WHERE user_id = ? AND rev > ?").bind(userId, since),
   ]);
   // The catalog cursor trails by a minute: a row another request writes during this one is sent again, not missed
-  return { rev: (rev.results[0] as { rev: number }).rev, catalogAt: now - 60_000, games: (rows.results as Row[]).map(toGame),
+  return { rev: (rev.results[0] as { rev: number }).rev, catalogAt: now - 60_000, games: (rows.results as Row[]).map(r => toGame(r, communityOn(env))),
     views: (viewRows.results as ViewRow[]).map(toView), lists: (listRows.results as ListRow[]).map(toList),
     items: (itemRows.results as ItemRow[]).map(toItem) };
 }
