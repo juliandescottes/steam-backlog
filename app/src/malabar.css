@@ -86,8 +86,7 @@
 [data-design="malabar"] body { background: radial-gradient(var(--dots) 1.2px, transparent 1.6px) 0 0 / 16px 16px, var(--bg); }
 [data-design="malabar"] :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 [data-design="malabar"] h1 { font: 700 clamp(40px, 7vw, 80px)/.92 var(--display); text-transform: none; letter-spacing: -.015em; }
-[data-design="malabar"] h1 em { color: var(--on-pop); background: var(--pop); padding: 0 .12em; border-radius: .18em;
-  -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+[data-design="malabar"] h1 em { display: inline-block; color: var(--on-pop); background: var(--pop); padding: .04em .12em .08em; margin-block: .14em .06em; border-radius: .18em; }
 [data-design="malabar"] h1.list-title { font-size: clamp(30px, 5vw, 58px); }
 /* The brand is a pill-shaped sticker, slightly askew */
 [data-design="malabar"] .brand, [data-design="malabar"] .brand:hover { padding: 6px 14px 7px; border: 2px solid var(--hard); border-radius: 999px;
