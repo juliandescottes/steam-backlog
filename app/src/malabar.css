@@ -96,10 +96,11 @@
 [data-design="malabar"] h1 em { display: inline-block; color: var(--on-pop); background: var(--pop); padding: .04em .12em .08em; margin-block: .14em .06em; border-radius: .18em; }
 [data-design="malabar"] h1.list-title { font-size: clamp(30px, 5vw, 58px); }
 /* The brand is a pill-shaped sticker, slightly askew */
-[data-design="malabar"] .brand, [data-design="malabar"] .brand:hover { padding: 6px 14px 7px; border: 2px solid var(--hard); border-radius: 999px;
-  background: var(--brand-bg); color: var(--brand-fg); font: 700 19px/1 var(--display); text-transform: none; transform: rotate(-3deg);
+[data-design="malabar"] .brand, [data-design="malabar"] .brand:hover { padding: 7px 18px 9px; border: 2px solid var(--hard); border-radius: 999px;
+  background: var(--brand-bg); color: var(--brand-fg); font: 700 25px/1 var(--display); text-transform: none; transform: rotate(-3deg);
   box-shadow: 3px 3px 0 var(--drop); }
 [data-design="malabar"] .brand:hover { transform: rotate(-3deg) translate(-1px, -1px); box-shadow: 4px 4px 0 var(--drop); }
+@media (max-width: 600px) { [data-design="malabar"] .brand, [data-design="malabar"] .brand:hover { padding: 6px 14px 7px; font-size: 19px; } }
 [data-design="malabar"] .eyebrow { font-family: var(--mono); font-size: 13px; font-weight: 800; letter-spacing: .1em; }
 [data-design="malabar"] .top-nav a.active { border-bottom-width: 4px; }
 [data-design="malabar"] .view { border-bottom-width: 4px; } /* every tab, so the row keeps its height whichever is active */
