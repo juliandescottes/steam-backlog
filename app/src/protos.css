@@ -1,0 +1,63 @@
+/* Visual prototypes, dev only: picked with the switcher in the corner (Protos.tsx). They layer over the original styles,
+   so the switcher turns the Malabar design off for them. */
+
+/* ============ Terminal: a green phosphor CRT. Everything monospace, scanlines, glow, brackets for buttons. ============ */
+:root[data-proto="terminal"] {
+  --bg: #050a06; --surface: #0b140d; --surface-2: #102016; --line: #1d3a24; --fg: #b6ffb0; --muted: #5fae67; --accent: #e9ff6b; --on-accent: #050a06;
+  --b0: #4dffd2; --b1: #7dff6b; --b2: #d6ff5c; --b3: #ffd65c; --b4: #ffa04d; --b5: #ff6b6b; --b6: #d38bff; --bend: #6bc4ff; --bnone: #3f7a4a;
+  --display: "VT323", ui-monospace, monospace; --body: "IBM Plex Mono", ui-monospace, monospace; --mono: "IBM Plex Mono", ui-monospace, monospace;
+  color-scheme: dark;
+}
+[data-proto="terminal"] body { font-size: 14px; text-shadow: 0 0 6px rgba(120, 255, 140, .35); }
+[data-proto="terminal"] body::after { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 200;
+  background: repeating-linear-gradient(transparent 0 2px, rgba(0, 0, 0, .22) 2px 3px), radial-gradient(ellipse at center, transparent 60%, rgba(0, 0, 0, .55)); }
+[data-proto="terminal"] h1 { font: 400 clamp(48px, 8vw, 96px)/.9 var(--display); text-transform: uppercase; }
+[data-proto="terminal"] h1::before { content: "> "; color: var(--muted); }
+[data-proto="terminal"] .brand { font: 400 28px/1 var(--display); color: var(--accent); }
+[data-proto="terminal"] .brand::after { content: "_"; animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+[data-proto="terminal"] .btn, [data-proto="terminal"] .chip, [data-proto="terminal"] .tools input[type=search], [data-proto="terminal"] .tools select,
+[data-proto="terminal"] .legend a, [data-proto="terminal"] .cover, [data-proto="terminal"] .triage, [data-proto="terminal"] .modal, [data-proto="terminal"] .hrs,
+[data-proto="terminal"] .status-chip, [data-proto="terminal"] .quick button, [data-proto="terminal"] .bar { border-radius: 0; }
+[data-proto="terminal"] .btn::before { content: "["; } [data-proto="terminal"] .btn::after { content: "]"; }
+[data-proto="terminal"] .btn { border: 0; background: transparent; padding-inline: 4px; }
+[data-proto="terminal"] .btn.primary { background: var(--accent); }
+[data-proto="terminal"] .cover { border: 1px solid var(--line); }
+[data-proto="terminal"] .cover img { filter: grayscale(1) sepia(1) hue-rotate(60deg) saturate(2.2) brightness(.85) contrast(1.15); }
+[data-proto="terminal"] .cover:hover img { filter: none; transform: none; }
+[data-proto="terminal"] .hrs { background: #050a06; color: var(--c); border: 1px solid var(--c); }
+[data-proto="terminal"] .status-chip { background: var(--accent); color: #050a06; }
+[data-proto="terminal"] .band-head { border-bottom: 1px dashed var(--c); }
+[data-proto="terminal"] .band-head h2 { font: 400 clamp(32px, 4.4vw, 46px)/1 var(--display); }
+[data-proto="terminal"] .band-head h2::before { content: "## "; opacity: .6; }
+[data-proto="terminal"] .triage { border: 1px dashed var(--accent); }
+
+/* ============ Handheld: a pocket console. Four shades of pea green, pixel type, chunky pixel borders. ============ */
+:root[data-proto="handheld"] {
+  --bg: #c4cfa1; --surface: #d4ddb4; --surface-2: #b5c28c; --line: #8b9c5e; --fg: #2a3a1c; --muted: #52673a; --accent: #2a3a1c; --on-accent: #d4ddb4;
+  --b0: #2a3a1c; --b1: #2a3a1c; --b2: #3c5228; --b3: #3c5228; --b4: #52673a; --b5: #52673a; --b6: #6b8048; --bend: #6b8048; --bnone: #8b9c5e;
+  --display: "Press Start 2P", ui-monospace, monospace; --body: "Silkscreen", ui-monospace, monospace; --mono: "Silkscreen", ui-monospace, monospace;
+  color-scheme: light;
+}
+[data-proto="handheld"] body { font-size: 15px; }
+[data-proto="handheld"] h1 { font: 400 clamp(22px, 3.6vw, 40px)/1.35 var(--display); text-transform: uppercase; }
+[data-proto="handheld"] h1 em { color: var(--fg); background: var(--surface-2); }
+[data-proto="handheld"] .brand { font: 400 15px/1 var(--display); padding: 8px; background: var(--fg); color: var(--bg); }
+[data-proto="handheld"] .brand:hover { color: var(--bg); }
+[data-proto="handheld"] .btn, [data-proto="handheld"] .chip, [data-proto="handheld"] .tools input[type=search], [data-proto="handheld"] .tools select,
+[data-proto="handheld"] .legend a, [data-proto="handheld"] .triage, [data-proto="handheld"] .modal { border-radius: 0; border: 3px solid var(--fg); box-shadow: 4px 4px 0 var(--line); }
+[data-proto="handheld"] .cover { border-radius: 0; border: 3px solid var(--fg); }
+[data-proto="handheld"] .cover img { filter: grayscale(1) sepia(.6) hue-rotate(40deg) saturate(1.4) contrast(1.3) brightness(.95); image-rendering: pixelated; }
+[data-proto="handheld"] .cover:hover img { filter: none; transform: none; }
+[data-proto="handheld"] .hrs { border-radius: 0; background: var(--bg); color: var(--fg); border: 2px solid var(--fg); font: 400 10px/1 var(--display); padding: 5px; }
+[data-proto="handheld"] .status-chip { border-radius: 0; background: var(--fg); color: var(--bg); font: 400 8px/1 var(--display); padding: 5px; }
+[data-proto="handheld"] .band-head { border-bottom: 3px dotted var(--fg); }
+[data-proto="handheld"] .band-head h2 { color: var(--fg); font: 400 clamp(16px, 2.4vw, 24px)/1.2 var(--display); }
+[data-proto="handheld"] .bar { border: 3px solid var(--fg); border-radius: 0; height: 18px; }
+[data-proto="handheld"] .bar a:nth-child(odd) { background-image: repeating-linear-gradient(45deg, rgba(0, 0, 0, .25) 0 3px, transparent 3px 6px); }
+[data-proto="handheld"] .name { font-size: 13px; }
+
+/* The switcher */
+.proto-switch { position: fixed; left: 12px; bottom: 12px; z-index: 300; display: flex; gap: 6px; align-items: center; padding: 6px 8px; border-radius: 8px;
+  background: rgba(0, 0, 0, .78); color: #fff; font: 600 12px/1 system-ui, sans-serif; }
+.proto-switch select { padding: 4px 6px; border-radius: 5px; border: 0; color: #111; background: #fff; font: inherit; }

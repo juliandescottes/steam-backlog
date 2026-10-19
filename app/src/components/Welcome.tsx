@@ -3,6 +3,7 @@ import { FileFormatError, parseExport, parseLibrary } from "@backlog/shared/file
 import { signIn } from "../account.ts";
 import { mergeLibrary, restoreBackup } from "../store.ts";
 import { readFile } from "../util.ts";
+import { Brand } from "./Brand.tsx";
 
 /** npm run dev:api only: signs in without Steam. */
 async function devSignIn() {
@@ -37,7 +38,7 @@ export function Welcome() {
   return (
     <div class="wrap welcome">
       <header class="top">
-        <div class="eyebrow">Backlog</div>
+        <div class="eyebrow-row"><Brand /></div>
         <h1>What can you <em>finish</em> this weekend?</h1>
         <p class="lede">Your Steam games, shortest first. Statuses in one click, and everything stays fast because your library lives in your browser.</p>
       </header>

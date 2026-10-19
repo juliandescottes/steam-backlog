@@ -54,8 +54,12 @@ kbd { padding: 1px 5px; border: 1px solid var(--line); border-bottom-width: 2px;
 /* Header */
 header.top { display: grid; gap: 14px; }
 .eyebrow-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+/* The app's name, ahead of the page links */
+.brand { font: 800 22px/1 var(--display); letter-spacing: .02em; text-transform: uppercase; color: var(--fg); text-decoration: none; }
+.brand:hover { color: var(--accent); }
 /* Backlog and Lists, the user's two pages */
-.top-nav { display: flex; gap: 20px; }
+.top-nav { display: flex; gap: 20px; margin-right: auto; }
+.eyebrow-row:has(.brand) { flex-wrap: wrap; gap: 12px 28px; }
 .top-nav a { padding-block: 4px; border-bottom: 2px solid transparent; }
 .top-nav a.active { color: var(--fg); border-bottom-color: var(--accent); }
 .eyebrow { font: 700 12px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }

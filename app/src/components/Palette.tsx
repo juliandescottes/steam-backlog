@@ -8,7 +8,7 @@ import { account, refreshLibrary, signIn } from "../account.ts";
 import { LISTS_PATH, listPath, navigate } from "../route.ts";
 import {
   applyView, clearSelection, currentList, entries, exportBackup, openId, paletteOpen, pickerFor, selectAll, selection, setStatus,
-  settingsOpen, shortcutsOpen, sortedLists, sortKey, startFillIn, statuses, triageOpen, undo, updateSettings, views, type Theme,
+  settingsOpen, shortcutsOpen, sortedLists, sortKey, startFillIn, statuses, triageOpen, undo, updateSettings, views, type Palette, type Theme,
 } from "../store.ts";
 import { isMac } from "../util.ts";
 
@@ -44,6 +44,9 @@ function actions(): Item[] {
   else out.push({ label: "Sign in with Steam", run: signIn });
   out.push({ label: "Export backup", run: exportBackup });
   for (const t of ["dark", "light", "system"] as Theme[]) out.push({ label: `Theme: ${t}`, run: () => updateSettings({ theme: t }) });
+  for (const [p, label] of [["default", "Default"], ["bubblegum", "Bubblegum"], ["cottoncandy", "Cottoncandy"]] as [Palette, string][]) {
+    out.push({ label: `Colors: ${label}`, run: () => updateSettings({ palette: p }) });
+  }
   out.push(
     { label: "Settings", run: () => (settingsOpen.value = true) },
     { label: "Keyboard shortcuts", keys: "?", run: () => (shortcutsOpen.value = true) },

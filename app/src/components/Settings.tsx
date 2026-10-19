@@ -5,7 +5,7 @@ import { profilePath } from "@backlog/shared/share";
 import { account, deleteAccount, refreshLibrary, setProfile, signIn, signOut, type Me } from "../account.ts";
 import { navigate } from "../route.ts";
 import {
-  deleteEverything, exportBackup, games, mergeLibrary, restoreBackup, settings, settingsOpen, showToast, updateSettings, type Theme,
+  deleteEverything, exportBackup, games, mergeLibrary, restoreBackup, settings, settingsOpen, showToast, updateSettings, type Palette, type Theme,
 } from "../store.ts";
 import { count, readFile } from "../util.ts";
 
@@ -122,6 +122,14 @@ export function Settings() {
                 options={[["system", "System"], ["dark", "Dark"], ["light", "Light"]]} />
             </div>
             <p class="hint" id="theme-hint">System follows your device's light or dark mode.</p>
+          </div>
+          <div class="option indented">
+            <div class="setting">
+              <span>Colors</span>
+              <Radio<Palette> name="Colors" value={s.palette} onChange={palette => updateSettings({ palette })} describedBy="palette-hint"
+                options={[["default", "Default"], ["bubblegum", "Bubblegum"], ["cottoncandy", "Cottoncandy"]]} />
+            </div>
+            <p class="hint" id="palette-hint">Each comes with a light and a dark page; Theme picks which.</p>
           </div>
           <div class="option indented">
             <div class="setting">

@@ -1,0 +1,201 @@
+/* The Malabar design, after the French bubble gum: thick outlines, hard offset shadows, round chewy type, pill-shaped labels,
+   flash-tattoo status chips. Layered over styles.css when <html data-design="malabar">; colors come from a palette
+   (data-palette, Settings → Colors: Default, Bubblegum, Cottoncandy), each with a light and a dark page. */
+
+/* ---- Palettes ---- */
+
+/* Default: a riso-printed zine. Cream paper or a dark violet night, hot pink, a yellow highlighter, rainbow length bands.
+   On the bare design selector, so it also covers a missing or unknown palette. */
+:root[data-design="malabar"] {
+  --bg: #1b1824; --surface: #24202f; --surface-2: #2e2a3b; --line: #423c55; --fg: #f6f2e8; --muted: #b1abc2; --accent: #ff4f8b; --on-accent: #16131c;
+  --b0: #00c9ad; --b1: #84e04f; --b2: #ece537; --b3: #ffb21a; --b4: #ff7a2b; --b5: #ff4466; --b6: #ab74ff; --bend: #5b93ff; --bnone: #77728a;
+  --danger: #ff4466; --shadow: 8px 8px 0 #08060c; --ink: #6b6485; --hard: #08060c; --drop: #08060c; --dots: rgba(246, 242, 232, .07);
+  --pop: #ece537; --on-pop: #15121a; --brand-bg: #ff4f8b; --brand-fg: #15121a; --triage-shadow: #ff4f8b; --chip: #ece537;
+  --sticker-ink: #15121a; --paper: #fffdf7; --band-text: #15121a; --on-deep: #15121a;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) { :root[data-design="malabar"]:not([data-theme="dark"]) {
+  --bg: #f5f0e4; --surface: #fffdf7; --surface-2: #efe8d8; --line: #d8cfbd; --fg: #15121a; --muted: #5d5867; --accent: #ff3d7f; --on-accent: #15121a;
+  --b0: #00b89e; --b1: #6fcf3b; --b2: #f2e22a; --b3: #ffae00; --b4: #ff7319; --b5: #ff3d62; --b6: #9b5cff; --bend: #3d7bff; --bnone: #a19bab;
+  --danger: #e8244f; --shadow: 8px 8px 0 #c4baa6; --ink: #15121a; --hard: #15121a; --drop: #c4baa6; --dots: rgba(21, 18, 26, .09);
+  --pop: #f2e22a; --on-pop: #15121a; --brand-bg: #ff3d7f; --brand-fg: #15121a; --triage-shadow: #ff3d7f; --chip: #f2e22a;
+  --sticker-ink: #15121a; --paper: #fffdf7; --band-text: #15121a; --on-deep: #15121a;
+  color-scheme: light; } }
+:root[data-design="malabar"][data-theme="light"] {
+  --bg: #f5f0e4; --surface: #fffdf7; --surface-2: #efe8d8; --line: #d8cfbd; --fg: #15121a; --muted: #5d5867; --accent: #ff3d7f; --on-accent: #15121a;
+  --b0: #00b89e; --b1: #6fcf3b; --b2: #f2e22a; --b3: #ffae00; --b4: #ff7319; --b5: #ff3d62; --b6: #9b5cff; --bend: #3d7bff; --bnone: #a19bab;
+  --danger: #e8244f; --shadow: 8px 8px 0 #c4baa6; --ink: #15121a; --hard: #15121a; --drop: #c4baa6; --dots: rgba(21, 18, 26, .09);
+  --pop: #f2e22a; --on-pop: #15121a; --brand-bg: #ff3d7f; --brand-fg: #15121a; --triage-shadow: #ff3d7f; --chip: #f2e22a;
+  --sticker-ink: #15121a; --paper: #fffdf7; --band-text: #15121a; --on-deep: #15121a;
+  color-scheme: light; }
+
+/* Bubblegum: a yellow page with pink by day, raspberry with yellow at night. Length bands take the other color:
+   blush to deep raspberry by day, cream to deep amber by night. */
+:root[data-design="malabar"][data-palette="bubblegum"] {
+  --bg: #3b0a2c; --surface: #4c0f39; --surface-2: #5e1647; --line: #7d2a63; --fg: #fff3c4; --muted: #f2a9cf; --accent: #ff3d9e; --on-accent: #2b0620;
+  --b0: #fff6c2; --b1: #ffec8a; --b2: #ffe04d; --b3: #ffd014; --b4: #f5b400; --b5: #e09600; --b6: #c47c00; --bend: #b9a7ff; --bnone: #b39aa8;
+  --danger: #ff4466; --shadow: 8px 8px 0 #1c0414; --ink: #a14a85; --hard: #1c0414; --drop: #1c0414; --dots: rgba(255, 217, 46, .1);
+  --pop: #ffd92e; --on-pop: #3b0a2c; --brand-bg: #ff3d9e; --brand-fg: #ffe766; --triage-shadow: #ffd92e; --chip: #ffd92e;
+  --sticker-ink: #4a0b35; --paper: #fffbe6; --band-text: #2a0820; --on-deep: #2a0820;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) { :root[data-design="malabar"][data-palette="bubblegum"]:not([data-theme="dark"]) {
+  --bg: #ffe766; --surface: #fffbe6; --surface-2: #fff2a8; --line: #f2c94c; --fg: #4a0b35; --muted: #8a3a6b; --accent: #ff2e93; --on-accent: #fffbe6;
+  --b0: #ffd6ea; --b1: #ffb3d6; --b2: #ff8cc4; --b3: #ff5fab; --b4: #f0307f; --b5: #c41a68; --b6: #8e0f50; --bend: #b9a7ff; --bnone: #b39aa8;
+  --danger: #e8244f; --shadow: 8px 8px 0 #ff8cc4; --ink: #4a0b35; --hard: #4a0b35; --drop: #ff8cc4; --dots: rgba(255, 46, 147, .18);
+  --pop: #ff2e93; --on-pop: #ffe766; --brand-bg: #ff2e93; --brand-fg: #ffe766; --triage-shadow: #ff2e93; --chip: #ffd92e;
+  --sticker-ink: #4a0b35; --paper: #fffbe6; --band-text: #2a0820; --on-deep: #fff;
+  color-scheme: light; } }
+:root[data-design="malabar"][data-palette="bubblegum"][data-theme="light"] {
+  --bg: #ffe766; --surface: #fffbe6; --surface-2: #fff2a8; --line: #f2c94c; --fg: #4a0b35; --muted: #8a3a6b; --accent: #ff2e93; --on-accent: #fffbe6;
+  --b0: #ffd6ea; --b1: #ffb3d6; --b2: #ff8cc4; --b3: #ff5fab; --b4: #f0307f; --b5: #c41a68; --b6: #8e0f50; --bend: #b9a7ff; --bnone: #b39aa8;
+  --danger: #e8244f; --shadow: 8px 8px 0 #ff8cc4; --ink: #4a0b35; --hard: #4a0b35; --drop: #ff8cc4; --dots: rgba(255, 46, 147, .18);
+  --pop: #ff2e93; --on-pop: #ffe766; --brand-bg: #ff2e93; --brand-fg: #ffe766; --triage-shadow: #ff2e93; --chip: #ffd92e;
+  --sticker-ink: #4a0b35; --paper: #fffbe6; --band-text: #2a0820; --on-deep: #fff;
+  color-scheme: light; }
+
+/* Cottoncandy: Default printed on pink stock, deep magenta at night. The brand goes dark with pink type so it shows on pink. */
+:root[data-design="malabar"][data-palette="cottoncandy"] {
+  --bg: #2a0b22; --surface: #3a1030; --surface-2: #4a163e; --line: #6e2a5f; --fg: #ffeaf5; --muted: #e7a9cc; --accent: #ff2e93; --on-accent: #1e0618;
+  --b0: #00c9ad; --b1: #84e04f; --b2: #ece537; --b3: #ffb21a; --b4: #ff7a2b; --b5: #ff4466; --b6: #ab74ff; --bend: #5b93ff; --bnone: #77728a;
+  --danger: #ff4466; --shadow: 8px 8px 0 #12030d; --ink: #94457f; --hard: #12030d; --drop: #12030d; --dots: rgba(255, 110, 185, .13);
+  --pop: #ece537; --on-pop: #15121a; --brand-bg: #ffeaf5; --brand-fg: #ff2e93; --triage-shadow: #ff2e93; --chip: #ece537;
+  --sticker-ink: #2a0820; --paper: #fff4fa; --band-text: #15121a; --on-deep: #15121a;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) { :root[data-design="malabar"][data-palette="cottoncandy"]:not([data-theme="dark"]) {
+  --bg: #ffc4e1; --surface: #fff4fa; --surface-2: #ffdced; --line: #f39fc9; --fg: #2a0820; --muted: #7e3a64; --accent: #ff1f8e; --on-accent: #2a0820;
+  --b0: #00b89e; --b1: #6fcf3b; --b2: #f2e22a; --b3: #ffae00; --b4: #ff7319; --b5: #ff3d62; --b6: #9b5cff; --bend: #3d7bff; --bnone: #a19bab;
+  --danger: #e8244f; --shadow: 8px 8px 0 #e889bb; --ink: #2a0820; --hard: #2a0820; --drop: #e889bb; --dots: rgba(255, 31, 142, .2);
+  --pop: #f2e22a; --on-pop: #15121a; --brand-bg: #2a0820; --brand-fg: #ff1f8e; --triage-shadow: #ff1f8e; --chip: #f2e22a;
+  --sticker-ink: #2a0820; --paper: #fff4fa; --band-text: #15121a; --on-deep: #15121a;
+  color-scheme: light; } }
+:root[data-design="malabar"][data-palette="cottoncandy"][data-theme="light"] {
+  --bg: #ffc4e1; --surface: #fff4fa; --surface-2: #ffdced; --line: #f39fc9; --fg: #2a0820; --muted: #7e3a64; --accent: #ff1f8e; --on-accent: #2a0820;
+  --b0: #00b89e; --b1: #6fcf3b; --b2: #f2e22a; --b3: #ffae00; --b4: #ff7319; --b5: #ff3d62; --b6: #9b5cff; --bend: #3d7bff; --bnone: #a19bab;
+  --danger: #e8244f; --shadow: 8px 8px 0 #e889bb; --ink: #2a0820; --hard: #2a0820; --drop: #e889bb; --dots: rgba(255, 31, 142, .2);
+  --pop: #f2e22a; --on-pop: #15121a; --brand-bg: #2a0820; --brand-fg: #ff1f8e; --triage-shadow: #ff1f8e; --chip: #f2e22a;
+  --sticker-ink: #2a0820; --paper: #fff4fa; --band-text: #15121a; --on-deep: #15121a;
+  color-scheme: light; }
+
+/* ---- Design ---- */
+
+:root[data-design="malabar"] {
+  --display: "Fredoka", "Arial Rounded MT Bold", sans-serif; --body: "Nunito", system-ui, sans-serif; --mono: "Space Mono", ui-monospace, monospace;
+}
+[data-design="malabar"] body { background: radial-gradient(var(--dots) 1.2px, transparent 1.6px) 0 0 / 16px 16px, var(--bg); }
+[data-design="malabar"] :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+[data-design="malabar"] h1 { font: 700 clamp(40px, 7vw, 80px)/.92 var(--display); text-transform: none; letter-spacing: -.015em; }
+[data-design="malabar"] h1 em { color: var(--on-pop); background: var(--pop); padding: 0 .12em; border-radius: .18em;
+  -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+[data-design="malabar"] h1.list-title { font-size: clamp(30px, 5vw, 58px); }
+/* The brand is a pill-shaped sticker, slightly askew */
+[data-design="malabar"] .brand, [data-design="malabar"] .brand:hover { padding: 6px 14px 7px; border: 2px solid var(--hard); border-radius: 999px;
+  background: var(--brand-bg); color: var(--brand-fg); font: 700 19px/1 var(--display); text-transform: none; transform: rotate(-3deg);
+  box-shadow: 3px 3px 0 var(--drop); }
+[data-design="malabar"] .brand:hover { transform: rotate(-3deg) translate(-1px, -1px); box-shadow: 4px 4px 0 var(--drop); }
+[data-design="malabar"] .eyebrow { font-family: var(--mono); font-weight: 700; letter-spacing: .06em; }
+[data-design="malabar"] .top-nav a.active, [data-design="malabar"] .view.active { border-bottom-width: 4px; }
+[data-design="malabar"] .view button { font-weight: 700; }
+[data-design="malabar"] .empty { font-style: normal; }
+[data-design="malabar"] kbd { border: 2px solid var(--ink); border-radius: 5px; box-shadow: 2px 2px 0 var(--drop); font-weight: 700; }
+
+/* Controls: outlined, with a hard shadow that presses in */
+[data-design="malabar"] .btn:not(.ghost), [data-design="malabar"] .tools input[type=search], [data-design="malabar"] .tools select, [data-design="malabar"] .segmented {
+  border: 2px solid var(--ink); border-radius: 8px; box-shadow: 3px 3px 0 var(--drop); }
+[data-design="malabar"] .btn:not(.ghost) { font-weight: 700; transition: transform .08s, box-shadow .08s; }
+[data-design="malabar"] .btn:not(.ghost):hover:not(:disabled) { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--drop); border-color: var(--ink); }
+[data-design="malabar"] .btn:not(.ghost):active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--drop); }
+[data-design="malabar"] .btn.primary { color: var(--on-accent); }
+[data-design="malabar"] .btn.risky { border: 2px solid var(--danger); color: var(--danger); box-shadow: 3px 3px 0 var(--drop); }
+[data-design="malabar"] .btn.danger { color: var(--sticker-ink); }
+[data-design="malabar"] .chip { border: 2px solid var(--line); font-weight: 700; }
+[data-design="malabar"] .chip[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+[data-design="malabar"] .chip.pill { background: var(--surface-2); border-color: var(--ink); color: var(--fg); }
+[data-design="malabar"] .tools { background: color-mix(in srgb, var(--bg) 92%, transparent); }
+[data-design="malabar"] textarea, [data-design="malabar"] .len-row input, [data-design="malabar"] .new-list input:not([type]),
+[data-design="malabar"] .view.naming input { border: 2px solid var(--ink); border-radius: 8px; background: var(--bg); box-shadow: 3px 3px 0 var(--drop); }
+[data-design="malabar"] .guess { border: 2px solid var(--ink); border-left: 6px solid var(--c, var(--bend)); border-radius: 6px; font-weight: 700; }
+[data-design="malabar"] .segmented button { border-right: 2px solid var(--ink); font-weight: 700; }
+[data-design="malabar"] .segmented button[aria-pressed="true"], [data-design="malabar"] .segmented button[aria-checked="true"] { color: var(--on-accent); }
+
+/* Covers */
+[data-design="malabar"] .cover { border: 2px solid var(--ink); border-radius: 10px; box-shadow: 4px 4px 0 var(--drop); transition: transform .1s, box-shadow .1s; }
+[data-design="malabar"] .cover:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--drop); }
+[data-design="malabar"] .cover:hover img { transform: none; }
+[data-design="malabar"] .name { font-weight: 800; letter-spacing: -.01em; }
+/* Text on a band color: dark, light on the deepest shades when the palette says so */
+[data-design="malabar"] { --on-c: var(--band-text); }
+[data-design="malabar"] [style*="--b4)"], [data-design="malabar"] [style*="--b5)"], [data-design="malabar"] [style*="--b6)"] { --on-c: var(--on-deep); }
+[data-design="malabar"] .hrs { left: 8px; bottom: 8px; padding: 4px 7px; border: 2px solid var(--sticker-ink); border-radius: 6px; background: var(--c);
+  color: var(--on-c); font: 700 13px/1 var(--mono); }
+[data-design="malabar"] .hrs.approx { background: var(--paper); border-style: dashed; color: var(--sticker-ink); box-shadow: inset 0 -4px 0 var(--c); }
+[data-design="malabar"] .hrs.unknown { background: var(--paper); color: var(--sticker-ink); }
+/* Status chips in flash-tattoo style: outlined, glossy fill */
+[data-design="malabar"] .status-chip { --tat: var(--chip); --tat-text: var(--sticker-ink);
+  top: 7px; right: 7px; padding: 5px 9px 4px; border: 2px solid var(--sticker-ink); border-radius: 999px;
+  background: linear-gradient(155deg, rgba(255, 255, 255, .55), rgba(255, 255, 255, 0) 45%), var(--tat); color: var(--tat-text);
+  font: 700 12px/1 var(--display); letter-spacing: .07em; box-shadow: 1px 2px 0 color-mix(in srgb, var(--sticker-ink) 55%, transparent); }
+[data-design="malabar"] .status-playing .status-chip { --tat: var(--accent); --tat-text: #fff; text-shadow: 1px 1px 0 var(--sticker-ink); }
+[data-design="malabar"] .status-dropped .status-chip { --tat: #b9a7ff; }
+[data-design="malabar"] .quick button { border: 2px solid var(--sticker-ink); border-radius: 6px; background: var(--paper); color: var(--sticker-ink); }
+/* Selecting: square checkboxes, a frame and shadow in the accent round picked covers */
+[data-design="malabar"] .select { border-radius: 7px; border-color: var(--sticker-ink); background: var(--paper); box-shadow: 2px 2px 0 var(--sticker-ink); }
+[data-design="malabar"] .select:hover, [data-design="malabar"] .selected .select { color: var(--sticker-ink); }
+[data-design="malabar"] .selected .select { border-color: var(--sticker-ink); }
+[data-design="malabar"] .selected .cover { outline: 0; border-color: var(--accent); box-shadow: 4px 4px 0 var(--accent); }
+
+/* Bands: the name on a pill of the band's color */
+[data-design="malabar"] .band-head { border-bottom: 2px solid var(--ink); align-items: center; }
+[data-design="malabar"] .band-head h2 { padding: 4px 16px 6px; border: 2px solid var(--hard); border-radius: 999px; background: var(--c); color: var(--on-c);
+  font: 700 clamp(24px, 3.4vw, 36px)/1 var(--display); text-transform: none; letter-spacing: -.01em; box-shadow: 3px 3px 0 var(--drop); }
+[data-design="malabar"] .bar { height: 20px; border: 2px solid var(--ink); border-radius: 8px; box-shadow: 3px 3px 0 var(--drop); }
+[data-design="malabar"] .bar a + a { border-left: 2px solid var(--hard); }
+[data-design="malabar"] .legend a { border: 2px solid var(--ink); font-weight: 700; box-shadow: 2px 2px 0 var(--drop); }
+[data-design="malabar"] .legend i { border: 1.5px solid var(--sticker-ink); border-radius: 3px; width: 11px; height: 11px; }
+[data-design="malabar"] .triage { border: 2px solid var(--ink); border-radius: 14px; box-shadow: 6px 6px 0 var(--triage-shadow); }
+
+/* Panels: outlined, with a hard shadow; bottom sheets on phones */
+[data-design="malabar"] .modal, [data-design="malabar"] .popover { border: 2px solid var(--ink); border-radius: 14px; box-shadow: 8px 8px 0 var(--drop); }
+[data-design="malabar"] .sheet { border-left: 2px solid var(--ink); box-shadow: -8px 0 0 var(--drop); }
+@media (max-width: 600px) { [data-design="malabar"] .sheet { border: 2px solid var(--ink); border-bottom: 0; border-radius: 18px 18px 0 0; box-shadow: 0 -6px 0 var(--drop); } }
+[data-design="malabar"] .sheet h2, [data-design="malabar"] .fill-top h2, [data-design="malabar"] .fill-main h3, [data-design="malabar"] .fill-done h3 {
+  font-family: var(--display); font-weight: 700; text-transform: none; letter-spacing: -.01em; }
+[data-design="malabar"] .detail-section h3, [data-design="malabar"] .shortcuts h3, [data-design="malabar"] .settings h3 {
+  width: fit-content; padding: 4px 8px; border-radius: 6px; background: var(--fg); color: var(--bg); font: 700 11.5px/1 var(--mono); letter-spacing: .06em; }
+[data-design="malabar"] .settings > section + section { border-top: 2px dashed var(--line); }
+[data-design="malabar"] .big-len { font: 700 40px/1 var(--display); letter-spacing: -.01em; }
+[data-design="malabar"] .callout { border: 2px dashed var(--ink); background: transparent; }
+[data-design="malabar"] .facts .day { border-bottom: 2px dashed var(--ink); }
+[data-design="malabar"] .palette li { font-weight: 600; }
+[data-design="malabar"] .palette li.active { background: var(--accent); color: var(--on-accent); box-shadow: none; }
+[data-design="malabar"] .palette li.active .palette-meta { color: var(--on-accent); }
+[data-design="malabar"] .palette input { border-bottom: 2px solid var(--ink); font-weight: 600; outline: none; }
+[data-design="malabar"] .triage-list .thumb { border: 2px solid var(--ink); border-radius: 5px; }
+[data-design="malabar"] .triage-list .check:hover { background: var(--surface-2); }
+
+/* Toast and selection bar: inverted, like a printed sticker */
+[data-design="malabar"] .toast { border: 2px solid var(--hard); border-radius: 10px; box-shadow: 4px 4px 0 var(--accent); font-weight: 600; }
+[data-design="malabar"] .toast .btn.ghost { color: var(--accent); box-shadow: none; }
+[data-design="malabar"] .selection-bar { border-top: 4px solid var(--accent); }
+[data-design="malabar"] .sel-count b { border: 2px solid var(--hard); border-radius: 7px; color: var(--on-accent); }
+[data-design="malabar"] .selection-bar .btn:not(.ghost) { border: 2px solid var(--bg); box-shadow: 3px 3px 0 var(--accent); }
+
+/* Lists, profiles and shared pages */
+[data-design="malabar"] .profile-list { border: 2px solid var(--ink); border-radius: 14px; box-shadow: 5px 5px 0 var(--drop); transition: transform .1s, box-shadow .1s; }
+[data-design="malabar"] .profile-list:hover { border-color: var(--ink); transform: translate(-2px, -2px); box-shadow: 7px 7px 0 var(--drop); }
+[data-design="malabar"] .profile-list-text b { font: 700 20px/1.1 var(--display); }
+[data-design="malabar"] .mini-covers span { border: 1.5px solid var(--ink); border-radius: 5px; }
+[data-design="malabar"] .share-link { border-left: 4px solid var(--accent); }
+[data-design="malabar"] .profile-head img, [data-design="malabar"] .eyebrow.owner img { border: 2px solid var(--ink); box-shadow: 3px 3px 0 var(--drop); }
+[data-design="malabar"] footer { border-top: 2px solid var(--ink); }
+[data-design="malabar"] .new-list > label:not(.check) { font: 700 20px/1 var(--display); }
+
+/* Welcome */
+[data-design="malabar"] .drop { border: 3px dashed var(--ink); border-radius: 18px; }
+[data-design="malabar"] .drop:hover, [data-design="malabar"] .drop.over { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--surface)); }
+[data-design="malabar"] .drop b, [data-design="malabar"] .welcome .or { font-family: var(--display); font-weight: 700; text-transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-design="malabar"] .btn, [data-design="malabar"] .cover, [data-design="malabar"] .profile-list { transition: none; }
+}
