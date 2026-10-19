@@ -36,7 +36,7 @@ export function TopNav() {
         <Link href="/" class={`eyebrow${p === "library" ? " active" : ""}`} aria-current={p === "library" ? "page" : undefined}>Backlog</Link>
         <Link href={LISTS_PATH} class={`eyebrow${inLists ? " active" : ""}`} aria-current={p === "lists" ? "page" : undefined}>Lists</Link>
       </nav>
-      <button type="button" class="btn ghost" onClick={() => (settingsOpen.value = true)}>Settings</button>
+      <button type="button" class="btn settings-btn" onClick={() => (settingsOpen.value = true)}><Cog />Settings</button>
     </div>
   );
 }
@@ -158,6 +158,12 @@ export function ListPicker() {
     </div>
   );
 }
+
+const Cog = () => (
+  <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor">
+    <circle cx="8" cy="8" r="5.6" stroke-width="2.6" stroke-dasharray="2.2 2.2" /><circle cx="8" cy="8" r="3.6" stroke-width="1.6" />
+  </svg>
+);
 
 const Pen = () => (
   <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">

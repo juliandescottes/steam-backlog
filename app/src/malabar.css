@@ -107,6 +107,8 @@
 [data-design="malabar"] .btn:not(.ghost):hover:not(:disabled) { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--drop); border-color: var(--ink); }
 [data-design="malabar"] .btn:not(.ghost):active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--drop); }
 [data-design="malabar"] .btn.primary { color: var(--on-accent); }
+[data-design="malabar"] .btn.settings-btn:not(.ghost) { border-color: var(--line); box-shadow: 2px 2px 0 var(--drop); color: var(--muted); }
+[data-design="malabar"] .btn.settings-btn:not(.ghost):hover:not(:disabled) { color: var(--fg); }
 [data-design="malabar"] .btn.risky { border: 2px solid var(--danger); color: var(--danger); box-shadow: 3px 3px 0 var(--drop); }
 [data-design="malabar"] .btn.danger { color: var(--sticker-ink); }
 [data-design="malabar"] .chip { border: 2px solid var(--line); font-weight: 700; }
