@@ -119,7 +119,8 @@
 [data-design="malabar"] textarea, [data-design="malabar"] .len-row input, [data-design="malabar"] .new-list input:not([type]),
 [data-design="malabar"] .view.naming input { border: 2px solid var(--ink); border-radius: 8px; background: var(--bg); box-shadow: 3px 3px 0 var(--drop); }
 [data-design="malabar"] .guess { border: 2px solid var(--ink); border-left: 6px solid var(--c, var(--bend)); border-radius: 6px; font-weight: 700; }
-[data-design="malabar"] .segmented button { border-right: 2px solid var(--ink); font-weight: 700; }
+[data-design="malabar"] .segmented button { font-weight: 700; }
+[data-design="malabar"] .segmented button:not(:last-child) { border-right: 2px solid var(--ink); }
 [data-design="malabar"] .segmented button[aria-pressed="true"], [data-design="malabar"] .segmented button[aria-checked="true"] { color: var(--on-accent); }
 
 /* Covers */
