@@ -5,7 +5,7 @@ export default defineConfig({
   fullyParallel: true,
   use: { baseURL: "http://localhost:5180", channel: "chrome" },
   webServer: [
-    { command: "API_PORT=8788 npx vite --port 5180 --strictPort", cwd: "app", url: "http://localhost:5180", reuseExistingServer: true },
+    { command: "VITE_E2E=1 API_PORT=8788 npx vite --port 5180 --strictPort", cwd: "app", url: "http://localhost:5180", reuseExistingServer: true },
     // Its own Worker and D1, offline: no Steam or Twitch keys, dev sign-in and the fixed dev library (worker/src/library.ts)
     {
       // A fresh database each run: community lengths from one run would reorder the next

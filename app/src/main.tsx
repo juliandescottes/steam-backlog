@@ -70,3 +70,7 @@ function App() {
 installKeys();
 void load().then(initAccount);
 render(<App />, document.getElementById("app")!);
+// Dev only: visual theme prototypes; hidden from e2e
+if (import.meta.env.DEV && !import.meta.env.VITE_E2E) {
+  void import("./Protos.tsx").then(m => render(<m.Protos />, document.body.appendChild(document.createElement("div"))));
+}
