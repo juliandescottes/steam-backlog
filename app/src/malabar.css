@@ -205,9 +205,8 @@
 [data-design="malabar"] .new-list > label:not(.check) { font: 700 20px/1 var(--display); }
 
 /* Welcome */
-[data-design="malabar"] .drop { border: 3px dashed var(--ink); border-radius: 18px; }
-[data-design="malabar"] .drop:hover, [data-design="malabar"] .drop.over { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--surface)); }
-[data-design="malabar"] .drop b, [data-design="malabar"] .welcome .or { font-family: var(--display); font-weight: 700; text-transform: none; }
+[data-design="malabar"] .drop.over { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--surface)); }
+[data-design="malabar"] .welcome .or { font-family: var(--display); font-weight: 700; text-transform: none; }
 
 @media (prefers-reduced-motion: reduce) {
   [data-design="malabar"] .btn, [data-design="malabar"] .cover, [data-design="malabar"] .profile-list { transition: none; }

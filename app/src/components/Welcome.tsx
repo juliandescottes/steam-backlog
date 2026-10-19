@@ -42,21 +42,25 @@ export function Welcome() {
         <h1>What can you <em>finish</em> this weekend?</h1>
         <p class="lede">Your Steam games, shortest first. Statuses in one click, and everything stays fast because your library lives in your browser.</p>
       </header>
-      <p class="row-actions">
-        <button type="button" class="btn primary steam" onClick={signIn}>Sign in with Steam</button>
-        <span class="hint">Imports your library. Steam only shares it when your profile's game details are public.</span>
-        {import.meta.env.DEV && <button type="button" class="btn ghost" onClick={devSignIn}>Dev sign-in</button>}
-      </p>
+      <div class="option">
+        <p class="row-actions">
+          <button type="button" class="btn primary steam" onClick={signIn}>Sign in with Steam</button>
+          {import.meta.env.DEV && <button type="button" class="btn ghost" onClick={devSignIn}>Dev sign-in</button>}
+        </p>
+        <p class="hint">Imports your library. Steam only shares it when your profile's game details are public.</p>
+      </div>
       {error && <p class="error" role="alert">{error}</p>}
-      <h2 class="or">Or stay local</h2>
-      <label class={`drop${over ? " over" : ""}`}
-        onDragOver={e => { e.preventDefault(); setOver(true); }} onDragLeave={() => setOver(false)}
-        onDrop={e => { e.preventDefault(); setOver(false); void open(e.dataTransfer?.files[0]); }}>
-        <input type="file" accept=".json,application/json" hidden onChange={e => void open(e.currentTarget.files?.[0])} />
-        <b>Open a library file</b>
-        <span>Drop it here or click to choose. A backup works too.</span>
-      </label>
-      <p class="hint">Without an account nothing leaves this browser. A library file comes from <code>npm run library</code> in the repo.</p>
+      <div class="option">
+        <h2 class="or">Or stay local</h2>
+        <label class={`drop${over ? " over" : ""}`}
+          onDragOver={e => { e.preventDefault(); setOver(true); }} onDragLeave={() => setOver(false)}
+          onDrop={e => { e.preventDefault(); setOver(false); void open(e.dataTransfer?.files[0]); }}>
+          <input type="file" accept=".json,application/json" hidden onChange={e => void open(e.currentTarget.files?.[0])} />
+          <span class="btn">Open a library file</span>
+          <span class="hint">or drop it here. A backup works too.</span>
+        </label>
+        <p class="hint">Without an account nothing leaves this browser.</p>
+      </div>
     </div>
   );
 }
