@@ -214,14 +214,26 @@ test("PLAT-1: no horizontal scrolling at phone width", async ({ page }) => {
   expect(overflow).toBe(0);
 });
 
-test("ONB-5: offers once to finish games played past 80% of their length", async ({ page }) => {
+/** The fixture library with some playtimes, by game index. */
+async function openPlayed(page: Page, playtimes: Record<number, number>) {
   await page.route("**/*steamstatic.com/**", r => r.abort());
   await page.goto("/");
   const library = JSON.parse(readFileSync(LIBRARY, "utf8"));
-  library.games[0].playtimeMin = 100; // Short One: 2h, so 96 min is 80%
-  library.games[1].playtimeMin = 600; // Mid Game: 15h, not yet
+  for (const [i, min] of Object.entries(playtimes)) library.games[i].playtimeMin = min;
   await page.setInputFiles("input[type=file]", { name: "library.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(library)) });
+  await expect(page.locator("h1")).toHaveText(/^6 games/);
+}
 
+/** Waits until IndexedDB holds a game's field value: writes land a moment after the UI. */
+const stored = (page: Page, appid: number, field: string, value: unknown) => page.waitForFunction(([appid, field, value]) => new Promise(resolve => {
+  indexedDB.open("backlog").onsuccess = e => {
+    const get = (e.target as IDBOpenDBRequest).result.transaction("games").objectStore("games").get(appid);
+    get.onsuccess = () => resolve(get.result[field as string] === value);
+  };
+}), [appid, field, value] as const);
+
+test("ONB-5: offers to finish games played past 80% of their length until each is answered", async ({ page }) => {
+  await openPlayed(page, { 0: 100, 1: 600 }); // Short One: 2h, so 96 min is 80%; Mid Game: 15h, not yet
   await expect(card(page, "Mid Game").locator(".sub")).toHaveText("Played 10h");
   const triage = page.getByRole("complementary", { name: "Finished games" });
   await expect(triage).toContainText("You've played 1 game for at least 80% of its length (Short One). Mark it Finished?");
@@ -230,16 +242,66 @@ test("ONB-5: offers once to finish games played past 80% of their length", async
   await expect(triage).toHaveCount(0);
   await page.locator(".toast").getByRole("button", { name: "Undo" }).click();
   await expect(card(page, "Short One")).toHaveCount(1);
-  // Writes reach IndexedDB a moment later; reload once the undo is stored
-  await page.waitForFunction(() => new Promise(resolve => {
-    indexedDB.open("backlog").onsuccess = e => {
-      const get = (e.target as IDBOpenDBRequest).result.transaction("games").objectStore("games").get(1);
-      get.onsuccess = () => resolve(get.result.status === "backlog");
-    };
-  }));
+  await expect(triage).toBeVisible(); // unanswered again
+
+  await triage.getByRole("button", { name: "No thanks" }).click();
+  await expect(triage).toHaveCount(0);
+  await expect(page.locator(".toast")).toContainText("Short One kept in Backlog");
+  await stored(page, 1, "triageDeclined", true);
   await page.reload();
   await expect(page.locator("h1")).toHaveText(/^6 games/);
-  await expect(triage).toHaveCount(0); // asked once
+  await expect(triage).toHaveCount(0);
+
+  // A game newly past 80% is offered: Mid Game at 12h makes 10h played 83%
+  await card(page, "Mid Game").locator("button.cover").click();
+  await page.getByRole("button", { name: "Edit length" }).click();
+  await page.keyboard.type("12");
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("Escape");
+  await expect(triage).toContainText("You've played 1 game for at least 80% of its length (Mid Game).");
+});
+
+test("ONB-10: review the offer, unchecking games to keep in the Backlog", async ({ page }) => {
+  await openPlayed(page, { 0: 100, 1: 840 }); // Short One and Mid Game past 80%
+  const triage = page.getByRole("complementary", { name: "Finished games" });
+  await triage.getByRole("button", { name: "Review…" }).click();
+  const review = page.getByRole("dialog", { name: "Finished games" });
+  await expect(review.getByRole("checkbox")).toHaveCount(2);
+  await expect(review.getByRole("listitem").first()).toContainText(/Mid Game.*Played 14h of 15h/);
+  await review.getByRole("checkbox", { name: /Short One/ }).uncheck();
+  await review.getByRole("button", { name: "Mark 1 game Finished" }).click();
+  await expect(review).toHaveCount(0);
+  await expect(triage).toHaveCount(0);
+  await expect(card(page, "Mid Game")).toHaveCount(0);
+  await expect(card(page, "Short One").locator(".status-chip")).toHaveCount(0);
+  await expect(page.locator(".toast")).toContainText("Mid Game → Finished, Short One kept in Backlog");
+
+  // One undo for both
+  await page.locator(".toast").getByRole("button", { name: "Undo" }).click();
+  await expect(card(page, "Mid Game")).toHaveCount(1);
+  await expect(triage).toContainText("You've played 2 games");
+});
+
+test("ONB-11: the palette opens the review any time, declined games unchecked", async ({ page }) => {
+  await openPlayed(page, { 0: 100 });
+  const mod = process.platform === "darwin" ? "Meta" : "Control";
+  const review = page.getByRole("dialog", { name: "Finished games" });
+  await page.getByRole("complementary", { name: "Finished games" }).getByRole("button", { name: "No thanks" }).click();
+
+  await page.keyboard.press(`${mod}+k`);
+  await page.keyboard.type("review finished");
+  await page.keyboard.press("Enter");
+  await expect(review.getByRole("checkbox", { name: /Short One/ })).not.toBeChecked();
+  await review.getByRole("checkbox", { name: /Short One/ }).check();
+  await review.getByRole("button", { name: "Mark 1 game Finished" }).click();
+  await expect(card(page, "Short One")).toHaveCount(0);
+
+  await page.keyboard.press(`${mod}+k`);
+  await page.keyboard.type("review finished");
+  await page.keyboard.press("Enter");
+  await expect(review).toContainText("No Backlog game has been played for 80% of its length.");
+  await page.keyboard.press("Escape");
+  await expect(review).toHaveCount(0);
 });
 
 test("FIND-7 FIND-1: arrow keys move between games across bands; ? lists the shortcuts", async ({ page }) => {

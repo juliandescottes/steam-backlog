@@ -34,9 +34,17 @@ test("first sync returns the whole library as client games", async () => {
   expect(r.games).toHaveLength(3);
   expect(r.games.find(g => g.appid === 2)).toEqual({
     appid: 2, name: "Game 2", portrait: null, playtimeMin: 20, lastPlayedAt: null, addedAt: expect.any(Number),
-    igdb: null, community: null, status: "backlog", statusAt: null, finishedAt: null, note: "", my: null, myKind: null,
+    igdb: null, community: null, status: "backlog", statusAt: null, finishedAt: null, note: "", my: null, myKind: null, triageDeclined: false,
   });
   expect((await sync(r.rev)).games).toEqual([]);
+});
+
+test("ONB-5: declining the finished-games offer for a game syncs, and so does its undo", async () => {
+  const { rev } = await sync(0);
+  const r = await sync(rev, [op(2, { triageDeclined: true }), op(3, { triageDeclined: "yes" as never })]);
+  expect(r.games.map(g => [g.appid, g.triageDeclined])).toEqual([[2, true]]);
+  const undo = await sync(r.rev, [op(2, { triageDeclined: false })]);
+  expect(undo.games.find(g => g.appid === 2)).toMatchObject({ triageDeclined: false });
 });
 
 test("ops set fields, and later syncs return only what changed", async () => {

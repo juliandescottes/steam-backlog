@@ -13,7 +13,7 @@ export type Row = {
   igdb_main: number | null; igdb_main_extra: number | null; igdb_comp: number | null; igdb_count: number | null;
   comm_main_extra: number | null; comm_count: number; comm_endless_count: number;
   status: Status; status_at: number | null; finished_at: number | null; note: string;
-  my_main: number | null; my_main_extra: number | null; my_comp: number | null; my_len_kind: LenKind | null;
+  my_main: number | null; my_main_extra: number | null; my_comp: number | null; my_len_kind: LenKind | null; triage_declined: number;
   playtime_min: number; last_played_at: number | null; first_seen_at: number;
 };
 
@@ -28,19 +28,20 @@ export const toGame = (r: Row, community: boolean): Game => ({
   status: r.status, statusAt: r.status_at, finishedAt: r.finished_at, note: r.note,
   my: r.my_main == null && r.my_main_extra == null && r.my_comp == null ? null
     : { main: r.my_main, main_extra: r.my_main_extra, comp: r.my_comp },
-  myKind: r.my_len_kind,
+  myKind: r.my_len_kind, triageDeclined: r.triage_declined === 1,
 });
 
 /** A game as a client gets it: `games g` joined with `user_games ug`. */
 export const GAME_COLUMNS = `g.appid, g.name, g.has_portrait_art, g.igdb_main, g.igdb_main_extra, g.igdb_comp, g.igdb_count,
   g.comm_main_extra, g.comm_count, g.comm_endless_count,
-  ug.status, ug.status_at, ug.finished_at, ug.note, ug.my_main, ug.my_main_extra, ug.my_comp, ug.my_len_kind,
+  ug.status, ug.status_at, ug.finished_at, ug.note, ug.my_main, ug.my_main_extra, ug.my_comp, ug.my_len_kind, ug.triage_declined,
   ug.playtime_min, ug.last_played_at, ug.first_seen_at`;
 
 /** Columns an op can set, and where each value sits in the flattened op. */
 const SETTABLE: [column: string, path: string][] = [
   ["status", "status"], ["status_at", "statusAt"], ["finished_at", "finishedAt"], ["note", "note"],
   ["my_main", "myMain"], ["my_main_extra", "myMainExtra"], ["my_comp", "myComp"], ["my_len_kind", "myKind"],
+  ["triage_declined", "triageDeclined"],
 ];
 
 /** View columns an op can set, and the op field holding each. */

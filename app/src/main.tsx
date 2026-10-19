@@ -11,10 +11,11 @@ import { SelectionBar } from "./components/SelectionBar.tsx";
 import { Settings } from "./components/Settings.tsx";
 import { Shortcuts } from "./components/Shortcuts.tsx";
 import { Toast } from "./components/Toast.tsx";
+import { TriageReview } from "./components/Triage.tsx";
 import { Welcome } from "./components/Welcome.tsx";
 import { installKeys } from "./keys.ts";
 import { route } from "./route.ts";
-import { fillInQueue, games, viewing, load, loaded, openId, paletteOpen, pickerFor, settingsOpen, shortcutsOpen } from "./store.ts";
+import { fillInQueue, games, viewing, load, loaded, openId, paletteOpen, pickerFor, settingsOpen, shortcutsOpen, triageOpen } from "./store.ts";
 import "./styles.css";
 
 // Dev only: which cards rendered, for e2e/perf.spec.ts
@@ -55,6 +56,7 @@ function App() {
       {settingsOpen.value && <Settings />}
       {fillInQueue.value && <FillIn />}
       {shortcutsOpen.value && <Shortcuts />}
+      {triageOpen.value && <TriageReview />}
       {pickerFor.value && <ListPicker />}
       {paletteOpen.value && !importing.value && games.value.size > 0 && <Palette />}
       <div class="dock">

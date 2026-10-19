@@ -4,13 +4,14 @@ import { STATUSES, STATUS_LABEL, type Status } from "@backlog/shared/types";
 import type { Signal } from "@preact/signals";
 import { route } from "../route.ts";
 import {
-  canReorder, currentList, dismissTriage, editingId, finishPlayed, listItems, listSort, listStatuses, moveInList, nowPlaying, played, query,
-  selection, settings, shelves, sortKey, sorting, startFillIn, statuses, totals, triageCandidates, triaged, visible, type ListSort,
+  canReorder, currentList, editingId, listItems, listSort, listStatuses, moveInList, nowPlaying, played, query,
+  selection, settings, shelves, sortKey, sorting, startFillIn, statuses, totals, visible, type ListSort,
 } from "../store.ts";
 import { count, thousands } from "../util.ts";
 import { Card } from "./Card.tsx";
 import { ListHeader, MissingList, TopNav } from "./Lists.tsx";
 import { Shelf } from "./Shelf.tsx";
+import { TriageOffer } from "./Triage.tsx";
 import { ConditionPills, ViewTabs } from "./Views.tsx";
 
 const MEASURE_TEXT = {
@@ -31,25 +32,6 @@ function Header() {
         <br /><span class="cleared" title={`${thousands(t.finishedHours)}h finished`}>{t.finished} finished · {Math.round(done * 100)}% of hours cleared</span>
       </p>
     </header>
-  );
-}
-
-function Triage() {
-  const list = triageCandidates.value;
-  if (triaged.value || !list.length) return null;
-  const names = list.slice(0, 2).map(e => e.game.name);
-  const more = list.length - names.length;
-  return (
-    <aside class="triage" aria-label="Finished games">
-      <p>
-        You've played <b>{count(list.length, "game")}</b> for at least 80% of {list.length === 1 ? "its" : "their"} length
-        {" "}({names.join(", ")}{more > 0 && ` and ${more} more`}). Mark {list.length === 1 ? "it" : "them"} Finished?
-      </p>
-      <p class="row-actions">
-        <button type="button" class="btn primary" onClick={() => finishPlayed(list.map(e => e.game.appid))}>Mark Finished</button>
-        <button type="button" class="btn ghost" onClick={dismissTriage}>No thanks</button>
-      </p>
-    </aside>
   );
 }
 
@@ -138,7 +120,7 @@ export function Library() {
     <div class="wrap">
       {openList ? <ListHeader key={openList.id} list={openList} /> : <>
         <Header />
-        <Triage />
+        <TriageOffer />
         {settings.value.nowPlaying && <NowPlaying />}
         <ViewTabs />
       </>}

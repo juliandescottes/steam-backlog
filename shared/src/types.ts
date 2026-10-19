@@ -31,4 +31,6 @@ export type Game = {
   note: string;
   my: Lengths | null;
   myKind: LenKind | null;
+  /** Said no to marking it Finished from its playtime (ONB-5); missing on games stored before. */
+  triageDeclined?: boolean;
 };
