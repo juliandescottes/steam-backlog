@@ -71,7 +71,7 @@ test("ONB-8: what was done before signing in comes along", async ({ page }) => {
 test("ONB-9: sign out clears this browser", async ({ page }) => {
   await signIn(page, steamId());
   await expect(page.locator(".bands .game")).toHaveCount(5);
-  await page.getByRole("button", { name: "Settings" }).click();
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
   await expect(page.locator(".account")).toContainText("Signed in as Dev user");
   await page.getByRole("button", { name: "Sign out" }).click();
   await expect(page.getByRole("button", { name: "Sign in with Steam" })).toBeVisible();
@@ -110,7 +110,7 @@ test("DATA-3 PRIN-2: deleting the account offers a backup, then removes everythi
   const id = steamId();
   await signIn(page, id);
   await expect(page.locator(".bands .game .name")).toHaveText(DEV_GAMES);
-  await page.getByRole("button", { name: "Settings" }).click();
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
   await page.getByRole("button", { name: "Delete account…" }).click();
   const [download] = await Promise.all([page.waitForEvent("download"), page.locator(".callout").getByRole("button", { name: "Export backup" }).click()]);
   expect(download.suggestedFilename()).toMatch(/^backlog-.*\.json$/);
@@ -269,7 +269,7 @@ test("LIST-14 LIST-15: public profile: off until turned on, at a random address,
   await page.getByRole("radio", { name: "Public" }).click();
 
   // Turn the profile on from Settings: its address is a random id, nothing to choose; public lists show on it
-  await page.getByRole("button", { name: "Settings" }).click();
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
   await page.getByRole("checkbox", { name: "Public profile", exact: true }).check();
   const href = await page.getByRole("link", { name: "View your profile →" }).getAttribute("href");
   expect(href).toMatch(/^\/u\/[0-9a-z]{12}$/);
@@ -295,7 +295,7 @@ test("LIST-14 LIST-15: public profile: off until turned on, at a random address,
   await page.getByRole("link", { name: "Backlog", exact: true }).click();
   await card(page, "Portal 2").hover(); // finished: hidden at first on the backlog page, like the owner's own view
   await card(page, "Portal 2").getByRole("button", { name: "Mark Finished" }).click();
-  await page.getByRole("button", { name: "Settings" }).click();
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
   await expect(async () => {
     await viewer.goto(href!);
     await viewer.getByRole("link", { name: /^Backlog/ }).click({ timeout: 1000 });

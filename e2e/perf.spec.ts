@@ -104,7 +104,7 @@ test("PRIN-1: a status change only renders and touches the changed card", async 
   await page.setInputFiles("input[type=file]", { name: "library.json", mimeType: "application/json", buffer: Buffer.from(library()) });
   await expect(page.locator("h1")).toContainText(`${COUNT.toLocaleString("en")} games`);
   // One game Playing first, so the Now playing shelf exists and doesn't push the grid down
-  await page.getByRole("button", { name: "Settings" }).click();
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
   await page.getByRole("checkbox", { name: /Now playing shelf/ }).check();
   await page.keyboard.press("Escape");
   await page.locator(".bands .game button.cover").first().focus();

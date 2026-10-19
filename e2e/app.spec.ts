@@ -169,7 +169,7 @@ test("DATA-1: export a backup", async ({ page }) => {
   await openLibrary(page);
   await card(page, "Mystery A").locator("button.cover").focus();
   await page.keyboard.press("p");
-  await page.getByRole("button", { name: "Settings" }).click();
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
   const [download] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Export backup" }).click()]);
   const backup = JSON.parse(readFileSync(await download.path(), "utf8"));
   expect(backup.format).toBe("backlog-export");
@@ -180,7 +180,7 @@ test("DATA-2 DATA-4 ONB-1: restore a backup after a summary, delete local data, 
   await openLibrary(page);
   await card(page, "Mid Game").locator("button.cover").focus();
   await page.keyboard.press("p");
-  await page.getByRole("button", { name: "Settings" }).click();
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
   const [download] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Export backup" }).click()]);
   const backup = await download.path();
   await page.keyboard.press("Escape");
@@ -188,7 +188,7 @@ test("DATA-2 DATA-4 ONB-1: restore a backup after a summary, delete local data, 
   await card(page, "Mid Game").locator("button.cover").focus();
   await page.keyboard.press("d");
   await expect(card(page, "Mid Game")).toHaveCount(0);
-  await page.getByRole("button", { name: "Settings" }).click();
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
   const [chooser] = await Promise.all([page.waitForEvent("filechooser"), page.getByRole("button", { name: "Restore backup" }).click()]);
   await chooser.setFiles(backup);
   await expect(page.locator(".sheet .callout")).toContainText("6 games, 1 with a status");
@@ -197,7 +197,7 @@ test("DATA-2 DATA-4 ONB-1: restore a backup after a summary, delete local data, 
   await page.keyboard.press("Escape");
   await expect(card(page, "Mid Game").locator(".status-chip")).toHaveText("Playing");
 
-  await page.getByRole("button", { name: "Settings" }).click();
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
   await page.getByRole("button", { name: "Delete local data…" }).click();
   await page.getByRole("button", { name: "Delete everything" }).click();
   await expect(page.getByRole("button", { name: "Sign in with Steam" })).toBeVisible();
@@ -213,7 +213,7 @@ test("SET-4: Colors switches the palette and is kept across reloads", async ({ p
   await expect(html).toHaveAttribute("data-palette", "default");
   const bg = () => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   const before = await bg();
-  await page.getByRole("button", { name: "Settings" }).click();
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
   await page.getByRole("radiogroup", { name: "Colors" }).getByRole("radio", { name: "Bubblegum" }).click();
   await expect(html).toHaveAttribute("data-palette", "bubblegum");
   expect(await bg()).not.toBe(before);
@@ -497,7 +497,7 @@ test("LIB-2: Now playing shelf: off by default; Playing games, latest first, hid
   }
   await expect(shelf).toHaveCount(0);
 
-  await page.getByRole("button", { name: "Settings" }).click();
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
   await page.getByRole("checkbox", { name: /Now playing shelf/ }).check();
   await page.keyboard.press("Escape");
   await expect(shelf.locator(".game .name")).toHaveText(["Mid Game", "Short One"]);
