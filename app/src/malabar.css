@@ -167,6 +167,7 @@
 [data-design="malabar"] .legend a { border: 2px solid var(--ink); font-weight: 700; box-shadow: 2px 2px 0 var(--drop); }
 [data-design="malabar"] .legend i { border: 1.5px solid var(--sticker-ink); border-radius: 3px; width: 11px; height: 11px; }
 [data-design="malabar"] .features b { font-weight: 700; text-transform: none; }
+[data-design="malabar"] .cta { border-color: var(--accent); background: color-mix(in srgb, var(--surface) 60%, transparent); }
 [data-design="malabar"] .triage { border: 2px solid var(--ink); border-radius: 14px; box-shadow: 6px 6px 0 var(--triage-shadow); }
 
 /* Panels: outlined, with a hard shadow; bottom sheets on phones */

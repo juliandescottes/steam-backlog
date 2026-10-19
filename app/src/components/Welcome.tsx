@@ -49,12 +49,10 @@ export function Welcome() {
         <h1>Your backlog,<br /><em>shortest first</em></h1>
         <p class="lede">Baquelogue sorts your Steam games by how long they take to complete, so you can pick something you'll actually finish.</p>
       </header>
-      <div class="option">
-        <p class="row-actions">
-          <button type="button" class="btn primary steam" onClick={signIn}>Sign in with Steam</button>
-          {import.meta.env.DEV && <button type="button" class="btn ghost" onClick={devSignIn}>Dev sign-in</button>}
-        </p>
+      <div class="cta">
+        <button type="button" class="btn primary steam" onClick={signIn}>Sign in with Steam</button>
         <p class="hint">We import your games and keep them in sync. Your Steam profile's game details need to be public.</p>
+        {import.meta.env.DEV && <button type="button" class="btn ghost dev" onClick={devSignIn}>Dev sign-in</button>}
       </div>
       {error && <p class="error" role="alert">{error}</p>}
       <div class="bar sample" aria-hidden="true">{TIMED_BANDS.map((b, i) => <span key={b.id} style={{ flex: SAMPLE[i], background: `var(${b.color})` }} />)}</div>
