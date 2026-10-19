@@ -99,7 +99,7 @@ A list is a named, ordered collection of games with an optional description, han
 - **LIST-13** Shared and profile pages have a title and a link preview.
 - **LIST-14** Public profile `/u/<profile id>`: off by default; the address is a random id, nothing to choose. Shows the Steam name and avatar, stats (games finished, hours cleared) and the user's public lists.
 - **LIST-15** Optionally the profile shows the whole library at `/u/<profile id>/backlog`: read-only, starting on Backlog + Playing. Turning the profile off hides both pages.
-- **LIST-16** Signed in, the library header says whether the profile is public. Public: "Your profile is public at" its address as a link, and a copy icon. Private: a link to the sharing settings.
+- **LIST-16** Signed in, the library header welcomes the user by Steam name and says whether the profile is public. Public: "Your profile is public at" its address as a link, and a copy icon. Private: a link to the sharing settings.
 
 ## 8. Data ownership
 

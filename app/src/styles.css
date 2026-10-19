@@ -88,7 +88,11 @@ p.in-place { white-space: pre-line; }
 /* The link of a public list: indented under the toggle it belongs to */
 .share-link { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0; padding: 4px 0 4px 14px; border-left: 2px solid var(--line); }
 .share-link a { font-size: 14px; color: var(--fg); overflow-wrap: anywhere; }
-.profile-share { margin: 0; color: var(--muted); font-size: 15px; }
+.profile-share { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 4px; margin: 0; color: var(--muted); font-size: 15px; }
+.profile-share .hello { display: inline-flex; align-items: center; gap: 8px; margin-right: 10px; padding: 4px 12px 4px 4px; border: 1px solid var(--line);
+  border-radius: 999px; background: var(--surface); color: var(--fg); font-weight: 700; }
+.profile-share .hello:not(:has(img)) { padding-left: 12px; }
+.profile-share .hello img { border-radius: 50%; }
 .profile-share a { color: var(--fg); overflow-wrap: anywhere; }
 .profile-share .copy-icon { padding: 4px 6px; margin-left: 2px; vertical-align: middle; }
 .eyebrow.owner { display: flex; align-items: center; gap: 8px; width: fit-content; }

@@ -317,11 +317,12 @@ test("LIST-14 LIST-15: public profile: off until turned on, at a random address,
   await expect(viewer.locator("h1")).toHaveText("Profile not found");
 });
 
-test("LIST-16: the library header shows the profile's sharing status and its link", async ({ page, context }) => {
+test("LIST-16: the library header welcomes the user and shows the profile's sharing status and its link", async ({ page, context }) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   await signIn(page, steamId());
   const line = page.locator(".profile-share");
-  await expect(line).toHaveText("Your profile is private. Open Settings to share it.");
+  await expect(line.locator(".hello")).toHaveText("Welcome Dev user");
+  await expect(line).toContainText("Your profile is private. Open Settings to share it.");
   await line.getByRole("button", { name: "Open Settings" }).click();
   await page.getByRole("checkbox", { name: "Public profile", exact: true }).check();
   const href = await page.getByRole("link", { name: "View your profile →" }).getAttribute("href");

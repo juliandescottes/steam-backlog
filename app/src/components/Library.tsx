@@ -18,22 +18,17 @@ import { Shelf } from "./Shelf.tsx";
 import { TriageOffer } from "./Triage.tsx";
 import { ConditionPills, ViewTabs } from "./Views.tsx";
 
-/** Signed in: whether the profile is public and, when it is, its address to copy (LIST-16). */
+/** Signed in: a welcome, whether the profile is public and, when it is, its address to copy (LIST-16). */
 function ProfileShare() {
   const me = account.value;
   if (!me) return null;
-  if (!me.profilePublic || !me.profileId) {
-    return (
-      <p class="profile-share">
-        Your profile is private. <button type="button" class="link" onClick={() => (settingsOpen.value = true)}>Open Settings</button> to share it.
-      </p>
-    );
-  }
-  const url = `${location.origin}${profilePath(me.profileId)}`;
+  const url = me.profilePublic && me.profileId ? `${location.origin}${profilePath(me.profileId)}` : null;
   return (
     <p class="profile-share">
-      Your profile is public at <a href={url} target="_blank" rel="noopener">{url.replace(/^https?:\/\//, "")}</a>
-      <CopyLink url={url} icon />
+      <span class="hello">{me.avatar && <img src={me.avatar} alt="" width={22} height={22} />}Welcome {me.name}</span>
+      {url
+        ? <>Your profile is public at <a href={url} target="_blank" rel="noopener">{url.replace(/^https?:\/\//, "")}</a><CopyLink url={url} icon /></>
+        : <>Your profile is private. <button type="button" class="link" onClick={() => (settingsOpen.value = true)}>Open Settings</button> to share it.</>}
     </p>
   );
 }
