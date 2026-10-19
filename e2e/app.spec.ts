@@ -207,6 +207,27 @@ test("DATA-2 DATA-4 ONB-1: restore a backup after a summary, delete local data, 
   await expect(card(page, "Mid Game").locator(".status-chip")).toHaveText("Playing");
 });
 
+test("SET-4: Colors switches the palette and is kept across reloads", async ({ page }) => {
+  await openLibrary(page);
+  const html = page.locator("html");
+  await expect(html).toHaveAttribute("data-palette", "default");
+  const bg = () => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+  const before = await bg();
+  await page.getByRole("button", { name: "Settings" }).click();
+  await page.getByRole("radiogroup", { name: "Colors" }).getByRole("radio", { name: "Bubblegum" }).click();
+  await expect(html).toHaveAttribute("data-palette", "bubblegum");
+  expect(await bg()).not.toBe(before);
+  // Settings reach IndexedDB a moment later
+  await page.waitForFunction(() => new Promise(resolve => {
+    indexedDB.open("backlog").onsuccess = e => {
+      const get = (e.target as IDBOpenDBRequest).result.transaction("meta").objectStore("meta").get("settings");
+      get.onsuccess = () => resolve(get.result?.palette === "bubblegum");
+    };
+  }));
+  await page.reload();
+  await expect(html).toHaveAttribute("data-palette", "bubblegum");
+});
+
 test("PLAT-1: no horizontal scrolling at phone width", async ({ page }) => {
   await page.setViewportSize({ width: 400, height: 800 });
   await openLibrary(page);

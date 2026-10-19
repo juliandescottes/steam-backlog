@@ -1,12 +1,14 @@
 # UI conventions
 
-Visual direction comes from the prototype (`tools/template.html`). Styles in `app/src/styles.css`.
+Layout and structure in `app/src/styles.css`; the Malabar design over it in `app/src/malabar.css` (`<html data-design="malabar">`).
 
 ## Look
 
-- Dark-first, light theme via `prefers-color-scheme` and `data-theme`.
-- Fonts: Big Shoulders Display (headings), Atkinson Hyperlegible (body), JetBrains Mono (numbers, badges).
-- One color per length band (`--b0`…`--b6`, `--bend` no ending, `--bnone` unknown).
+- Malabar, after the French bubble gum: 2px outlines (`--ink`), hard offset shadows (`--hard`), pill labels, flash-tattoo status chips.
+- Fonts: Fredoka (headings, labels), Nunito (body), Space Mono (numbers, badges).
+- Colors from a palette (`data-palette`, SET-4): Default, Bubblegum, Cottoncandy; each with a light and a dark page (`prefers-color-scheme`, `data-theme`). A palette sets every color token; the design rules only use tokens.
+- One color per length band (`--b0`…`--b6`, `--bend` no ending, `--bnone` unknown). Bubblegum's bands take the page's other color: pinks by day, yellows at night. Text on a band color is `--on-c`.
+- Dev only: the corner switcher (`Protos.tsx`) shows the original look and two prototypes over it.
 - Covers are the interface: 2:3 grid, wide art falls back over a blurred copy.
 
 ## Cover badges

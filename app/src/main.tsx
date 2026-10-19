@@ -17,6 +17,7 @@ import { installKeys } from "./keys.ts";
 import { route } from "./route.ts";
 import { fillInQueue, games, viewing, load, loaded, openId, paletteOpen, pickerFor, settingsOpen, shortcutsOpen, triageOpen } from "./store.ts";
 import "./styles.css";
+import "./malabar.css";
 
 // Dev only: which cards rendered, for e2e/perf.spec.ts
 if (import.meta.env.DEV) {

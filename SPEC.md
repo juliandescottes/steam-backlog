@@ -118,6 +118,7 @@ A list is a named, ordered collection of games with an optional description, han
 - **SET-1** Theme: system, dark or light. (manual)
 - **SET-2** Length measure for sorting and totals: Main + Extras (default) or Main story.
 - **SET-3** A link to the user's Steam profile. (planned)
+- **SET-4** Colors: Default, Bubblegum or Cottoncandy, each with a light and a dark page. Kept across reloads.
 
 Settings also holds the account, public profile, backup and delete controls covered above.
 

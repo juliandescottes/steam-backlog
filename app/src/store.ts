@@ -13,8 +13,11 @@ import { listPath, navigate, route } from "./route.ts";
 import { date, download } from "./util.ts";
 
 export type Theme = "system" | "dark" | "light";
-export type Settings = { theme: Theme; measure: Measure; nowPlaying: boolean };
-const DEFAULT_SETTINGS: Settings = { theme: "system", measure: "main_extra", nowPlaying: false };
+/** Colors of the Malabar design (SET-4); each has a light and a dark page. */
+export type Palette = "default" | "bubblegum" | "cottoncandy";
+const PALETTES: Palette[] = ["default", "bubblegum", "cottoncandy"];
+export type Settings = { theme: Theme; palette: Palette; measure: Measure; nowPlaying: boolean };
+const DEFAULT_SETTINGS: Settings = { theme: "system", palette: "default", measure: "main_extra", nowPlaying: false };
 
 // ---- Data ----
 
@@ -33,6 +36,7 @@ export async function load() {
     lists.value = l.lists.map(x => (x.shareId ? x : { ...x, shareId: newShareId() }));
     listItems.value = groupItems(l.items);
     settings.value = { ...DEFAULT_SETTINGS, ...s };
+    if (!PALETTES.includes(settings.value.palette)) settings.value = { ...settings.value, palette: DEFAULT_SETTINGS.palette };
     loaded.value = true;
   });
 }
@@ -46,6 +50,7 @@ effect(() => {
   const t = settings.value.theme;
   if (t === "system") delete document.documentElement.dataset.theme;
   else document.documentElement.dataset.theme = t;
+  document.documentElement.dataset.palette = settings.value.palette;
 });
 
 // ---- Derived ----
@@ -691,7 +696,7 @@ export async function restoreBackup(file: ExportFile, mode: "merge" | "replace")
   void db.replaceViews(nextViews);
   void db.saveLists(nextLists, [...nextItems].flatMap(([listId, m]) => [...m].map(([appid, position]) => ({ listId, appid, position }))), [], [], true);
   onUserChanges?.(userChanges);
-  if (s) updateSettings({ ...(s.theme ? { theme: s.theme } : {}), ...(s.measure ? { measure: s.measure } : {}) });
+  if (s) updateSettings({ ...(s.theme ? { theme: s.theme } : {}), ...(PALETTES.includes(s.palette!) ? { palette: s.palette } : {}), ...(s.measure ? { measure: s.measure } : {}) });
 }
 
 /**

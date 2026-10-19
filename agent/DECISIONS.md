@@ -32,3 +32,8 @@ Newest last. Don't reverse these without asking.
 - **Spec as numbered rules**, each cited by a test title (`tools/spec.test.ts`). Why: guard against drift as fixes pile up. Rejected: a separate spec repo (spec, test and code must change in one commit), Gherkin (ceremony).
 - **Leaving Finished clears the finish date**; the date can be edited in the detail panel. Why: a game moved back to Playing shouldn't count as finished on a date.
 - **Perf tests check work, not time.** `npm run e2e` asserts what's mounted and rendered; the 100 ms budget runs in `npm run perf` only. Why: timings depend on the machine, so a slower one would fail with nothing wrong.
+
+## 2026-10-19
+
+- **Name: Baquelogue**, after the domain. "Backlog" stays the first page's name.
+- **Malabar design**, with three palettes: Default (ex-Arcade), Bubblegum (ex-Malabar), Cottoncandy (ex-Arcade Pink). Why: the first look was decent but generic. Picked from prototypes (Arcade, then its pink and Malabar forks); rejected Bakelite, Catalogue, Rental, Editorial. Original, Terminal and Handheld stay in the dev switcher.
