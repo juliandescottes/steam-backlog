@@ -120,7 +120,7 @@ test("LEN-1 LEN-4 LEN-5 LEN-7 LEN-8: fill-in mode: typed time, rough guess, no e
 
 test("LEN-1 LEN-10: fill-in mode: a skipped game comes back once", async ({ page }) => {
   await openLibrary(page);
-  await page.getByRole("button", { name: "3 without a length" }).click();
+  await band(page, "unknown").getByRole("button", { name: "Fill in lengths" }).click();
   const title = page.getByRole("dialog").locator("h3");
   for (const name of ["Mystery B", "Mystery A", "Sandbox & Friends"]) {
     await expect(title).toHaveText(name);

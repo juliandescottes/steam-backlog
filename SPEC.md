@@ -28,7 +28,7 @@ Each rule has a bold ID like STATUS-4 and a test that cites it in its title, che
 
 ## 3. Library view (home)
 
-- **LIB-1** Header: "N games, H hours to clear" over Backlog + Playing, a link to fill in the games without a length, and the games finished with the share of hours cleared (finished hours over finished + remaining).
+- **LIB-1** Header: "N games, H hours to clear" over Backlog + Playing, and the games finished with the share of hours cleared (finished hours over finished + remaining).
 - **LIB-2** Now playing shelf, off by default (Settings): a row of Playing games above the grid, most recently changed first, shown whatever the view's statuses, hidden when empty.
 - **LIB-3** Length bands: Under 3 h, 3–6, 6–10, 10–20, 20–40, 40–80, 80 h and up, No ending, Unknown. Sorted by length, games are grouped by band, with a stacked bar and a legend that link to each band.
 - **LIB-4** Hours badges show quarter hours under 3 h (`1.75h`), whole hours above (`113h`), no space before the unit, colored by band. Stored to the quarter hour.
@@ -41,7 +41,7 @@ Each rule has a bold ID like STATUS-4 and a test that cites it in its title, che
 
 IGDB has no time for a large share of most libraries (38% of the prototype collection), so filling in lengths is a core flow. Goal: a few seconds per game.
 
-- **LEN-1** The Unknown band header shows its count and a **Fill in lengths** button; the header's "N without a length" link starts the same flow.
+- **LEN-1** The Unknown band header shows its count and a **Fill in lengths** button.
 - **LEN-2** A built-in "Needs a length" view lists open games without a length.
 - **LEN-3** After the first import, when more than 10 games lack a length, onboarding offers to fill them in. (planned)
 - **LEN-4** Fill-in mode shows one game at a time: cover, name, Steam playtime, a progress counter and a focused hours input. Played games come first, then by name. It also runs on a selection.

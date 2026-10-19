@@ -14,11 +14,6 @@ import { Shelf } from "./Shelf.tsx";
 import { TriageOffer } from "./Triage.tsx";
 import { ConditionPills, ViewTabs } from "./Views.tsx";
 
-const MEASURE_TEXT = {
-  main_extra: <>by <b>Main + Extras</b> time: the main story plus the side content most players do</>,
-  main: <>by <b>Main story</b> time</>,
-};
-
 function Header() {
   const t = totals.value;
   const done = t.finishedHours + t.leftHours > 0 ? t.finishedHours / (t.finishedHours + t.leftHours) : 0;
@@ -27,9 +22,7 @@ function Header() {
       <TopNav />
       <h1>{count(t.left, "game")}, <em>{count(t.leftHours, "hour")}</em> to clear</h1>
       <p class="lede">
-        Shortest first, {MEASURE_TEXT[settings.value.measure]}.
-        {t.unknown > 0 && <> Plus <button type="button" class="link" onClick={() => startFillIn()}>{t.unknown} without a length</button>.</>}
-        <br /><span class="cleared" title={`${thousands(t.finishedHours)}h finished`}>{t.finished} finished · {Math.round(done * 100)}% of hours cleared</span>
+        <span class="cleared" title={`${thousands(t.finishedHours)}h finished`}>{t.finished} finished · {Math.round(done * 100)}% of hours cleared</span>
       </p>
     </header>
   );
