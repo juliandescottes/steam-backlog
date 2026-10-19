@@ -2,17 +2,39 @@ import { UNKNOWN_BAND, type Band } from "@backlog/shared/bands";
 import { SORT_LABEL, type Entry, type SortKey } from "@backlog/shared/filter";
 import { STATUSES, STATUS_LABEL, type Status } from "@backlog/shared/types";
 import type { Signal } from "@preact/signals";
+import { profilePath } from "@backlog/shared/share";
+import { account } from "../account.ts";
 import { route } from "../route.ts";
 import {
   canReorder, currentList, editingId, listItems, listSort, listStatuses, moveInList, nowPlaying, played, query,
-  selection, settings, shelves, sortKey, sorting, startFillIn, statuses, totals, visible, type ListSort,
+  selection, settings, settingsOpen, shelves, sortKey, sorting, startFillIn, statuses, totals, visible, type ListSort,
 } from "../store.ts";
 import { count, thousands } from "../util.ts";
 import { Card } from "./Card.tsx";
-import { ListHeader, MissingList, TopNav } from "./Lists.tsx";
+import { CopyLink, ListHeader, MissingList, TopNav } from "./Lists.tsx";
 import { Shelf } from "./Shelf.tsx";
 import { TriageOffer } from "./Triage.tsx";
 import { ConditionPills, ViewTabs } from "./Views.tsx";
+
+/** Signed in: whether the profile is public and, when it is, its address to copy (LIST-16). */
+function ProfileShare() {
+  const me = account.value;
+  if (!me) return null;
+  if (!me.profilePublic || !me.profileId) {
+    return (
+      <p class="profile-share">
+        Your profile is private. <button type="button" class="link" onClick={() => (settingsOpen.value = true)}>Share it</button>
+      </p>
+    );
+  }
+  const url = `${location.origin}${profilePath(me.profileId)}`;
+  return (
+    <p class="profile-share">
+      Your profile is public at <a href={url} target="_blank" rel="noopener">{url.replace(/^https?:\/\//, "")}</a>
+      <CopyLink url={url} icon />
+    </p>
+  );
+}
 
 function Header() {
   const t = totals.value;
@@ -24,6 +46,7 @@ function Header() {
       <p class="lede">
         <span class="cleared" title={`${thousands(t.finishedHours)}h finished`}>{t.finished} finished · {Math.round(done * 100)}% of hours cleared</span>
       </p>
+      <ProfileShare />
     </header>
   );
 }

@@ -270,14 +270,28 @@ function Sharing({ list: l }: { list: List }) {
       {shared && (
         <p class="share-link">
           <a href={url} target="_blank" rel="noopener">{url.replace(/^https?:\/\//, "")}</a>
-          <button type="button" class="btn" onClick={() => navigator.clipboard.writeText(url).then(() => showToast("Link copied"), () => showToast("Couldn't copy the link"))}>
-            Copy link
-          </button>
+          <CopyLink url={url} />
         </p>
       )}
     </section>
   );
 }
+
+/** Copies the link, with a toast; `icon` for just a small copy icon. */
+export function CopyLink({ url, icon }: { url: string; icon?: boolean }) {
+  return (
+    <button type="button" class={icon ? "btn ghost copy-icon" : "btn"} aria-label={icon ? "Copy link" : undefined} title={icon ? "Copy link" : undefined}
+      onClick={() => navigator.clipboard.writeText(url).then(() => showToast("Link copied"), () => showToast("Couldn't copy the link"))}>
+      {icon ? <CopyIcon /> : "Copy link"}
+    </button>
+  );
+}
+
+const CopyIcon = () => (
+  <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
+    <rect x="5.5" y="5.5" width="8" height="8" rx="1.5" /><path d="M10.5 3.5V3A1.5 1.5 0 0 0 9 1.5H3A1.5 1.5 0 0 0 1.5 3v6A1.5 1.5 0 0 0 3 10.5h.5" />
+  </svg>
+);
 
 /** Shown for /l/<id> when there's no such list (deleted, or from another browser before it synced). */
 export function MissingList() {

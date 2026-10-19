@@ -84,7 +84,7 @@
   --display: "Fredoka", "Arial Rounded MT Bold", sans-serif; --body: "Nunito", system-ui, sans-serif; --mono: "Nunito", system-ui, sans-serif;
 }
 /* Two families: the small labels and numbers that the original sets in a monospace font use Nunito, with even-width digits and a size up */
-[data-design="malabar"] :is(.lede .cleared, .band-head p, .list-meta) { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+[data-design="malabar"] :is(.lede .cleared, .band-head p, .list-meta, .profile-share) { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
 [data-design="malabar"] :is(.sub, .source, .palette-meta, .triage-list .meta, .fill-top .count, .len-preview) { font-size: 13.5px; font-variant-numeric: tabular-nums; }
 [data-design="malabar"] body { background: radial-gradient(var(--dots) 1.2px, transparent 1.6px) 0 0 / 16px 16px, var(--bg); }
 [data-design="malabar"] :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }

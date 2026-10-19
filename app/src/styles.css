@@ -88,6 +88,9 @@ p.in-place { white-space: pre-line; }
 /* The link of a public list: indented under the toggle it belongs to */
 .share-link { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0; padding: 4px 0 4px 14px; border-left: 2px solid var(--line); }
 .share-link a { font-size: 14px; color: var(--fg); overflow-wrap: anywhere; }
+.profile-share { margin: 0; color: var(--muted); font-size: 15px; }
+.profile-share a { color: var(--fg); overflow-wrap: anywhere; }
+.profile-share .copy-icon { padding: 4px 6px; margin-left: 2px; vertical-align: middle; }
 .eyebrow.owner { display: flex; align-items: center; gap: 8px; width: fit-content; }
 .check:has(input:disabled) { color: var(--muted); }
 /* A setting with its description underneath */

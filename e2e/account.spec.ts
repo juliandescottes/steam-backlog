@@ -316,6 +316,23 @@ test("LIST-14 LIST-15: public profile: off until turned on, at a random address,
   await expect(viewer.locator("h1")).toHaveText("Profile not found");
 });
 
+test("LIST-16: the library header shows the profile's sharing status and its link", async ({ page, context }) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await signIn(page, steamId());
+  const line = page.locator(".profile-share");
+  await expect(line).toHaveText("Your profile is private. Share it");
+  await line.getByRole("button", { name: "Share it" }).click();
+  await page.getByRole("checkbox", { name: "Public profile", exact: true }).check();
+  const href = await page.getByRole("link", { name: "View your profile →" }).getAttribute("href");
+  await page.locator(".sheet .close").click();
+
+  await expect(line).toContainText("Your profile is public at ");
+  await expect(line.getByRole("link")).toHaveText(new URL(href!, page.url()).href.replace(/^https?:\/\//, ""));
+  await line.getByRole("button", { name: "Copy link" }).click();
+  await expect(page.locator(".toast")).toContainText("Link copied");
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(new URL(href!, page.url()).href);
+});
+
 test("LIST-8: a browser that synced with older code, which skipped lists, gets them in full once", async ({ page }) => {
   await signIn(page, steamId());
   await expect(page.locator(".bands .game .name")).toHaveText(DEV_GAMES);
