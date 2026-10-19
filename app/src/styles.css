@@ -254,7 +254,10 @@ html:has(.sheet-backdrop, .modal-backdrop) { overflow: hidden; scrollbar-gutter:
   .sheet { top: auto; max-height: 88vh; width: 100%; border-radius: 14px 14px 0 0; }
 }
 /* Settings: sections divided by a line */
-.settings > section + section { border-top: 1px solid var(--line); padding-top: 20px; }
+.settings { gap: 32px; }
+.settings > section + section { border-top: 1px solid var(--line); padding-top: 32px; }
+.settings .detail-section { gap: 18px; }
+.settings .option { gap: 6px; }
 .settings > section h3 { color: var(--fg); }
 .settings .setting { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; }
 /* Lists page */
