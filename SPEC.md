@@ -14,7 +14,7 @@ Each rule has a bold ID like STATUS-4 and a test that cites it in its title, che
 
 ## 2. Sign-in and onboarding
 
-- **ONB-1** The welcome page offers **Sign in with Steam**, or staying local by opening a library file or a backup.
+- **ONB-1** The welcome page offers **Sign in with Steam**. Without an account, a library file or a backup dropped on the page opens (no visible control: for local use and tests).
 - **ONB-2** After Steam sign-in, the library is imported automatically.
 - **ONB-3** When the Steam profile's game details are private, the import says so, explains how to make them public, and offers Retry.
 - **ONB-4** Games without an IGDB length get one as soon as the server finds it after an import; sync brings it to the browser.
@@ -28,7 +28,7 @@ Each rule has a bold ID like STATUS-4 and a test that cites it in its title, che
 
 ## 3. Library view (home)
 
-- **LIB-1** Header: "N games, H hours to clear" over Backlog + Playing, a link to fill in the games without a length, and the games finished with the share of hours cleared (finished hours over finished + remaining).
+- **LIB-1** Header: "N games, H hours to clear" over Backlog + Playing, and the games finished with the share of hours cleared (finished hours over finished + remaining). Signed in, it adds when the library last synced from Steam.
 - **LIB-2** Now playing shelf, off by default (Settings): a row of Playing games above the grid, most recently changed first, shown whatever the view's statuses, hidden when empty.
 - **LIB-3** Length bands: Under 3 h, 3–6, 6–10, 10–20, 20–40, 40–80, 80 h and up, No ending, Unknown. Sorted by length, games are grouped by band, with a stacked bar and a legend that link to each band.
 - **LIB-4** Hours badges show quarter hours under 3 h (`1.75h`), whole hours above (`113h`), no space before the unit, colored by band. Stored to the quarter hour.
@@ -41,7 +41,7 @@ Each rule has a bold ID like STATUS-4 and a test that cites it in its title, che
 
 IGDB has no time for a large share of most libraries (38% of the prototype collection), so filling in lengths is a core flow. Goal: a few seconds per game.
 
-- **LEN-1** The Unknown band header shows its count and a **Fill in lengths** button; the header's "N without a length" link starts the same flow.
+- **LEN-1** The Unknown band header shows its count and a **Fill in lengths** button.
 - **LEN-2** A built-in "Needs a length" view lists open games without a length.
 - **LEN-3** After the first import, when more than 10 games lack a length, onboarding offers to fill them in. (planned)
 - **LEN-4** Fill-in mode shows one game at a time: cover, name, Steam playtime, a progress counter and a focused hours input. Played games come first, then by name. It also runs on a selection.
@@ -99,6 +99,7 @@ A list is a named, ordered collection of games with an optional description, han
 - **LIST-13** Shared and profile pages have a title and a link preview.
 - **LIST-14** Public profile `/u/<profile id>`: off by default; the address is a random id, nothing to choose. Shows the Steam name and avatar, stats (games finished, hours cleared) and the user's public lists.
 - **LIST-15** Optionally the profile shows the whole library at `/u/<profile id>/backlog`: read-only, starting on Backlog + Playing. Turning the profile off hides both pages.
+- **LIST-16** Signed in, the library header welcomes the user by Steam name and says whether the profile is public. Public: "Your profile is public at" its address as a link, and a copy icon. Private: a link to the sharing settings.
 
 ## 8. Data ownership
 

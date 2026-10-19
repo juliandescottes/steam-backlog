@@ -15,9 +15,9 @@ npm run typecheck
 npm run build        # static site in app/dist
 ```
 
-Until Steam import exists (milestone 3), the app opens a library file. `npm run library` builds one from the prototype data:
+Without signing in, the app opens a library file dropped on the welcome page (there's no button for it). `npm run library` builds one from the prototype data:
 
-- `tools/out/library.json`: open it on the first screen. Uses IGDB lengths from `tools/igdb_results.json` when present (made by `tools/igdb_coverage.ts`).
+- `tools/out/library.json`: drop it on the first screen. Uses IGDB lengths from `tools/igdb_results.json` when present (made by `tools/igdb_coverage.ts`).
 
 ## Layout
 

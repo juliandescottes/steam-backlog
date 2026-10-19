@@ -5,7 +5,7 @@ Layout and structure in `app/src/styles.css`; the Malabar design over it in `app
 ## Look
 
 - Malabar, after the French bubble gum: 2px outlines (`--ink`), hard offset shadows (`--hard`), pill labels, flash-tattoo status chips.
-- Fonts: Fredoka (headings, labels), Nunito (body), Space Mono (numbers, badges).
+- Fonts: Fredoka (headings), Nunito (everything else; even-width digits for numbers). Two families, no more.
 - Colors from a palette (`data-palette`, SET-4): Default, Bubblegum, Cottoncandy; each with a light and a dark page (`prefers-color-scheme`, `data-theme`). A palette sets every color token; the design rules only use tokens.
 - One color per length band (`--b0`…`--b6`, `--bend` no ending, `--bnone` unknown). Bubblegum's bands take the page's other color: pinks by day, yellows at night. Text on a band color is `--on-c`.
 - Dev only: the corner switcher (`Protos.tsx`) shows the original look and two prototypes over it.

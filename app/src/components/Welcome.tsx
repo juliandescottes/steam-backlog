@@ -4,6 +4,7 @@ import { signIn } from "../account.ts";
 import { mergeLibrary, restoreBackup } from "../store.ts";
 import { readFile } from "../util.ts";
 import { Brand } from "./Brand.tsx";
+import { TIMED_BANDS } from "@backlog/shared/bands";
 
 /** npm run dev:api only: signs in without Steam. */
 async function devSignIn() {
@@ -13,7 +14,10 @@ async function devSignIn() {
 
 const signInFailed = new URLSearchParams(location.search).get("signin") === "failed";
 
-/** First run: sign in with Steam, or stay local with a library file (or a backup). */
+/** A made-up backlog's length bar, as a divider. */
+const SAMPLE = [24, 41, 37, 52, 30, 14, 6];
+
+/** First run: sign in with Steam. */
 export function Welcome() {
   const [error, setError] = useState<string | null>(signInFailed ? "Steam sign-in didn't go through. Try again?" : null);
   const [over, setOver] = useState(false);
@@ -35,28 +39,29 @@ export function Welcome() {
     }
   };
 
+  // No visible way in without an account: a file dropped on the page still opens, for local use and tests (ONB-1)
   return (
-    <div class="wrap welcome">
+    <div class={`wrap welcome${over ? " over" : ""}`}
+      onDragOver={e => { e.preventDefault(); setOver(true); }} onDragLeave={e => e.currentTarget === e.target && setOver(false)}
+      onDrop={e => { e.preventDefault(); setOver(false); void open(e.dataTransfer?.files[0]); }}>
       <header class="top">
         <div class="eyebrow-row"><Brand /></div>
-        <h1>What can you <em>finish</em> this weekend?</h1>
-        <p class="lede">Your Steam games, shortest first. Statuses in one click, and everything stays fast because your library lives in your browser.</p>
+        <h1>Your backlog,<br /><em>shortest first</em></h1>
+        <p class="lede">Baquelogue sorts your Steam games by how long they take to complete, so you can pick something you'll actually finish.</p>
       </header>
-      <p class="row-actions">
+      <div class="cta">
         <button type="button" class="btn primary steam" onClick={signIn}>Sign in with Steam</button>
-        <span class="hint">Imports your library. Steam only shares it when your profile's game details are public.</span>
-        {import.meta.env.DEV && <button type="button" class="btn ghost" onClick={devSignIn}>Dev sign-in</button>}
-      </p>
+        <p class="hint">We import your games and keep them in sync. Your Steam profile's game details need to be public.</p>
+        {import.meta.env.DEV && <button type="button" class="btn ghost dev" onClick={devSignIn}>Dev sign-in</button>}
+      </div>
       {error && <p class="error" role="alert">{error}</p>}
-      <h2 class="or">Or stay local</h2>
-      <label class={`drop${over ? " over" : ""}`}
-        onDragOver={e => { e.preventDefault(); setOver(true); }} onDragLeave={() => setOver(false)}
-        onDrop={e => { e.preventDefault(); setOver(false); void open(e.dataTransfer?.files[0]); }}>
-        <input type="file" accept=".json,application/json" hidden onChange={e => void open(e.currentTarget.files?.[0])} />
-        <b>Open a library file</b>
-        <span>Drop it here or click to choose. A backup works too.</span>
-      </label>
-      <p class="hint">Without an account nothing leaves this browser. A library file comes from <code>npm run library</code> in the repo.</p>
+      <div class="bar sample" aria-hidden="true">{TIMED_BANDS.map((b, i) => <span key={b.id} style={{ flex: SAMPLE[i], background: `var(${b.color})` }} />)}</div>
+      <ul class="features">
+        <li><b>Sort.</b>Sort by duration, from a lunch break to a whole season.<span>Clear your backlog at your own pace, one game at a time.</span></li>
+        <li><b>Click.</b>One click to mark games Playing, Finished or Dropped.<span>Your library lives in your browser, so every click is instant.</span></li>
+        <li><b>Share.</b>Share your whole backlog or <span class="nowrap">hand-crafted</span> lists.<span>Send a list to friends and let them help pick your next game.</span></li>
+      </ul>
+      <input type="file" accept=".json,application/json" hidden onChange={e => void open(e.currentTarget.files?.[0])} />
     </div>
   );
 }

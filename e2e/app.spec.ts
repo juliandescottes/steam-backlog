@@ -17,6 +17,20 @@ async function openLibrary(page: Page) {
 const card = (page: Page, name: string) => page.locator(".bands .game").filter({ has: page.locator(".name", { hasText: name }) });
 const band = (page: Page, id: string) => page.locator(`section[id="${id}"]`);
 
+test("ONB-1: the welcome page only offers Steam sign-in; a library file dropped on it opens", async ({ page }) => {
+  await page.route("**/*steamstatic.com/**", r => r.abort());
+  await page.goto("/");
+  await expect(page.getByRole("button", { name: "Sign in with Steam" })).toBeVisible();
+  await expect(page.locator("input[type=file]")).toBeHidden();
+  const data = await page.evaluateHandle(text => {
+    const dt = new DataTransfer();
+    dt.items.add(new File([text], "library.json", { type: "application/json" }));
+    return dt;
+  }, readFileSync(LIBRARY, "utf8"));
+  await page.locator(".welcome").dispatchEvent("drop", { dataTransfer: data });
+  await expect(page.locator("h1")).toHaveText(/^6 games/);
+});
+
 test("ONB-1 PRIN-4 LIB-1 LIB-3 LIB-5: opens a library file and groups games by length", async ({ page }) => {
   await openLibrary(page);
   await expect(page.locator("h1")).toHaveText(/6 games, 107 hours to clear/i);
@@ -120,7 +134,7 @@ test("LEN-1 LEN-4 LEN-5 LEN-7 LEN-8: fill-in mode: typed time, rough guess, no e
 
 test("LEN-1 LEN-10: fill-in mode: a skipped game comes back once", async ({ page }) => {
   await openLibrary(page);
-  await page.getByRole("button", { name: "3 without a length" }).click();
+  await band(page, "unknown").getByRole("button", { name: "Fill in lengths" }).click();
   const title = page.getByRole("dialog").locator("h3");
   for (const name of ["Mystery B", "Mystery A", "Sandbox & Friends"]) {
     await expect(title).toHaveText(name);
@@ -169,7 +183,7 @@ test("DATA-1: export a backup", async ({ page }) => {
   await openLibrary(page);
   await card(page, "Mystery A").locator("button.cover").focus();
   await page.keyboard.press("p");
-  await page.getByRole("button", { name: "Settings" }).click();
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
   const [download] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Export backup" }).click()]);
   const backup = JSON.parse(readFileSync(await download.path(), "utf8"));
   expect(backup.format).toBe("backlog-export");
@@ -180,7 +194,7 @@ test("DATA-2 DATA-4 ONB-1: restore a backup after a summary, delete local data, 
   await openLibrary(page);
   await card(page, "Mid Game").locator("button.cover").focus();
   await page.keyboard.press("p");
-  await page.getByRole("button", { name: "Settings" }).click();
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
   const [download] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Export backup" }).click()]);
   const backup = await download.path();
   await page.keyboard.press("Escape");
@@ -188,7 +202,7 @@ test("DATA-2 DATA-4 ONB-1: restore a backup after a summary, delete local data, 
   await card(page, "Mid Game").locator("button.cover").focus();
   await page.keyboard.press("d");
   await expect(card(page, "Mid Game")).toHaveCount(0);
-  await page.getByRole("button", { name: "Settings" }).click();
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
   const [chooser] = await Promise.all([page.waitForEvent("filechooser"), page.getByRole("button", { name: "Restore backup" }).click()]);
   await chooser.setFiles(backup);
   await expect(page.locator(".sheet .callout")).toContainText("6 games, 1 with a status");
@@ -197,7 +211,7 @@ test("DATA-2 DATA-4 ONB-1: restore a backup after a summary, delete local data, 
   await page.keyboard.press("Escape");
   await expect(card(page, "Mid Game").locator(".status-chip")).toHaveText("Playing");
 
-  await page.getByRole("button", { name: "Settings" }).click();
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
   await page.getByRole("button", { name: "Delete local data…" }).click();
   await page.getByRole("button", { name: "Delete everything" }).click();
   await expect(page.getByRole("button", { name: "Sign in with Steam" })).toBeVisible();
@@ -213,7 +227,7 @@ test("SET-4: Colors switches the palette and is kept across reloads", async ({ p
   await expect(html).toHaveAttribute("data-palette", "default");
   const bg = () => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   const before = await bg();
-  await page.getByRole("button", { name: "Settings" }).click();
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
   await page.getByRole("radiogroup", { name: "Colors" }).getByRole("radio", { name: "Bubblegum" }).click();
   await expect(html).toHaveAttribute("data-palette", "bubblegum");
   expect(await bg()).not.toBe(before);
@@ -497,7 +511,7 @@ test("LIB-2: Now playing shelf: off by default; Playing games, latest first, hid
   }
   await expect(shelf).toHaveCount(0);
 
-  await page.getByRole("button", { name: "Settings" }).click();
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
   await page.getByRole("checkbox", { name: /Now playing shelf/ }).check();
   await page.keyboard.press("Escape");
   await expect(shelf.locator(".game .name")).toHaveText(["Mid Game", "Short One"]);

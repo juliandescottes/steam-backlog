@@ -13,6 +13,16 @@ export const date = (ms: number | null) => (ms ? new Date(ms).toLocaleDateString
 /** A date input's "2026-03-01" for a time, and back (local noon, so time zones don't shift the day). */
 export const dayValue = (ms: number) => { const d = new Date(ms); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
 export const fromDayValue = (v: string) => { const [y, m, d] = v.split("-").map(Number); return y && m && d ? new Date(y, m - 1, d, 12).getTime() : null; };
+const RELATIVE = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+/** "just now", "5 minutes ago", "yesterday", "3 days ago"; a date after a week. */
+export function ago(ms: number, now = Date.now()): string {
+  const min = Math.round((now - ms) / 60_000);
+  if (min < 1) return "just now";
+  if (min < 60) return RELATIVE.format(-min, "minute");
+  if (min < 24 * 60) return RELATIVE.format(-Math.round(min / 60), "hour");
+  const days = Math.round(min / (24 * 60));
+  return days < 7 ? RELATIVE.format(-days, "day") : `on ${date(ms)}`;
+}
 export const thousands = (n: number) => Math.round(n).toLocaleString("en");
 /** "1 game", "342 games" */
 export const count = (n: number, word: string) => `${thousands(n)} ${word}${Math.round(n) === 1 ? "" : "s"}`;

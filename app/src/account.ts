@@ -99,6 +99,7 @@ async function firstSync() {
     return;
   }
   importing.value = null;
+  await librarySynced();
   startSync();
 }
 
@@ -106,10 +107,18 @@ export async function retryImport() {
   await firstSync();
 }
 
+/** The server just refreshed the library from Steam: shown in the library header. */
+async function librarySynced() {
+  if (!account.value) return;
+  account.value = { ...account.value, librarySyncedAt: Date.now() };
+  await db.setMeta("account", account.value);
+}
+
 /** Picks up games bought since the last import. */
 export async function refreshLibrary(quiet = false) {
   try {
     const r = await api<{ added: number }>("POST", "/library/refresh");
+    await librarySynced();
     await syncNow();
     if (!quiet) showToast(r.added ? `${r.added} new game${r.added === 1 ? "" : "s"} from Steam` : "Library is up to date");
   } catch (e) {

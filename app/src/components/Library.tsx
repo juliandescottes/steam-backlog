@@ -2,35 +2,76 @@ import { UNKNOWN_BAND, type Band } from "@backlog/shared/bands";
 import { SORT_LABEL, type Entry, type SortKey } from "@backlog/shared/filter";
 import { STATUSES, STATUS_LABEL, type Status } from "@backlog/shared/types";
 import type { Signal } from "@preact/signals";
+import type { RefObject } from "preact";
+import { useLayoutEffect, useRef } from "preact/hooks";
+import { profilePath } from "@backlog/shared/share";
+import { account } from "../account.ts";
 import { route } from "../route.ts";
 import {
   canReorder, currentList, editingId, listItems, listSort, listStatuses, moveInList, nowPlaying, played, query,
-  selection, settings, shelves, sortKey, sorting, startFillIn, statuses, totals, visible, type ListSort,
+  selection, settings, settingsOpen, shelves, sortKey, sorting, startFillIn, statuses, totals, visible, type ListSort,
 } from "../store.ts";
-import { count, thousands } from "../util.ts";
+import { ago, count, thousands } from "../util.ts";
 import { Card } from "./Card.tsx";
-import { ListHeader, MissingList, TopNav } from "./Lists.tsx";
+import { CopyLink, ListHeader, MissingList, TopNav } from "./Lists.tsx";
 import { Shelf } from "./Shelf.tsx";
 import { TriageOffer } from "./Triage.tsx";
 import { ConditionPills, ViewTabs } from "./Views.tsx";
 
-const MEASURE_TEXT = {
-  main_extra: <>by <b>Main + Extras</b> time: the main story plus the side content most players do</>,
-  main: <>by <b>Main story</b> time</>,
-};
+/** Signed in: a welcome, whether the profile is public and, when it is, its address to copy (LIST-16). */
+function ProfileShare() {
+  const me = account.value;
+  if (!me) return null;
+  const url = me.profilePublic && me.profileId ? `${location.origin}${profilePath(me.profileId)}` : null;
+  return (
+    <p class="profile-share">
+      <span class="hello">{me.avatar && <img src={me.avatar} alt="" width={22} height={22} />}Welcome {me.name}</span>
+      {url
+        ? <>Your profile is public at <a href={url} target="_blank" rel="noopener">{url.replace(/^https?:\/\//, "")}</a><CopyLink url={url} icon /></>
+        : <>Your profile is private. <button type="button" class="link" onClick={() => (settingsOpen.value = true)}>Open Settings</button> to share it.</>}
+    </p>
+  );
+}
+
+/** Shrinks a heading from its CSS size so it stays on one line, down to `min` px; narrower than that, it wraps at `min`. */
+function useOneLine(el: RefObject<HTMLElement | null>, text: string, min = 40) {
+  useLayoutEffect(() => {
+    const h = el.current;
+    if (!h) return;
+    const fit = () => {
+      const box = h.parentElement!, pad = getComputedStyle(box);
+      const room = box.clientWidth - parseFloat(pad.paddingLeft) - parseFloat(pad.paddingRight);
+      Object.assign(h.style, { fontSize: "", whiteSpace: "nowrap", width: "max-content" });
+      const ratio = room / h.getBoundingClientRect().width;
+      h.style.width = "";
+      if (ratio >= 1) return;
+      const size = Math.floor(parseFloat(getComputedStyle(h).fontSize) * ratio * 0.99);
+      if (size < min) h.style.whiteSpace = "";
+      h.style.fontSize = `${Math.max(size, min)}px`;
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(h.parentElement!);
+    void document.fonts.ready.then(fit);
+    return () => ro.disconnect();
+  }, [text]);
+}
 
 function Header() {
   const t = totals.value;
   const done = t.finishedHours + t.leftHours > 0 ? t.finishedHours / (t.finishedHours + t.leftHours) : 0;
+  const title = useRef<HTMLHeadingElement>(null);
+  const synced = account.value?.librarySyncedAt;
+  useOneLine(title, `${t.left} ${t.leftHours}`);
   return (
     <header class="top">
       <TopNav />
-      <h1>{count(t.left, "game")}, <em>{count(t.leftHours, "hour")}</em> to clear</h1>
+      <h1 ref={title}>{count(t.left, "game")}, <em>{count(t.leftHours, "hour")}</em> to clear</h1>
       <p class="lede">
-        Shortest first, {MEASURE_TEXT[settings.value.measure]}.
-        {t.unknown > 0 && <> Plus <button type="button" class="link" onClick={() => startFillIn()}>{t.unknown} without a length</button>.</>}
-        <br /><span class="cleared" title={`${thousands(t.finishedHours)}h finished`}>{t.finished} finished · {Math.round(done * 100)}% of hours cleared</span>
+        <span class="cleared" title={`${thousands(t.finishedHours)}h finished`}>{t.finished} finished · {Math.round(done * 100)}% of hours cleared</span>
+        {synced && <span class="cleared" title={new Date(synced).toLocaleString()}> · Synced from Steam {ago(synced)}</span>}
       </p>
+      <ProfileShare />
     </header>
   );
 }
@@ -65,7 +106,7 @@ function BandIndex({ groups }: { groups: { band: Band; entries: Entry[] }[] }) {
       </div>
       <div class="legend">
         {groups.map(({ band, entries }) => (
-          <a key={band.id} href={`#${band.id}`} style={{ "--c": `var(${band.color})` }}><i />{band.label} <span>{entries.length}</span></a>
+          <a key={band.id} href={`#${band.id}`} style={{ "--c": `var(${band.color})` }}><i />{band.label.replace(" h", "h")} <span>{entries.length}</span></a>
         ))}
       </div>
     </nav>

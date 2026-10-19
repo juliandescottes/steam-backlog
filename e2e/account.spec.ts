@@ -16,10 +16,11 @@ async function signIn(page: Page, id: string) {
 
 const card = (page: Page, name: string) => page.locator(".bands .game").filter({ has: page.locator(".name", { hasText: new RegExp(`^${name}$`) }) });
 
-test("ONB-2 SYNC-1: sign in, import the Steam library, and see a change on another device", async ({ page, browser }) => {
+test("ONB-2 SYNC-1 LIB-1: sign in, import the Steam library, and see a change on another device", async ({ page, browser }) => {
   const id = steamId();
   await signIn(page, id);
   await expect(page.locator(".bands .game .name")).toHaveText(DEV_GAMES);
+  await expect(page.locator(".lede")).toContainText("· Synced from Steam just now");
 
   // Never played, so finishing it adds no community length that would reorder parallel tests
   await card(page, "Stardew Valley").hover();
@@ -71,7 +72,7 @@ test("ONB-8: what was done before signing in comes along", async ({ page }) => {
 test("ONB-9: sign out clears this browser", async ({ page }) => {
   await signIn(page, steamId());
   await expect(page.locator(".bands .game")).toHaveCount(5);
-  await page.getByRole("button", { name: "Settings" }).click();
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
   await expect(page.locator(".account")).toContainText("Signed in as Dev user");
   await page.getByRole("button", { name: "Sign out" }).click();
   await expect(page.getByRole("button", { name: "Sign in with Steam" })).toBeVisible();
@@ -110,7 +111,7 @@ test("DATA-3 PRIN-2: deleting the account offers a backup, then removes everythi
   const id = steamId();
   await signIn(page, id);
   await expect(page.locator(".bands .game .name")).toHaveText(DEV_GAMES);
-  await page.getByRole("button", { name: "Settings" }).click();
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
   await page.getByRole("button", { name: "Delete account…" }).click();
   const [download] = await Promise.all([page.waitForEvent("download"), page.locator(".callout").getByRole("button", { name: "Export backup" }).click()]);
   expect(download.suggestedFilename()).toMatch(/^backlog-.*\.json$/);
@@ -269,7 +270,7 @@ test("LIST-14 LIST-15: public profile: off until turned on, at a random address,
   await page.getByRole("radio", { name: "Public" }).click();
 
   // Turn the profile on from Settings: its address is a random id, nothing to choose; public lists show on it
-  await page.getByRole("button", { name: "Settings" }).click();
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
   await page.getByRole("checkbox", { name: "Public profile", exact: true }).check();
   const href = await page.getByRole("link", { name: "View your profile →" }).getAttribute("href");
   expect(href).toMatch(/^\/u\/[0-9a-z]{12}$/);
@@ -295,7 +296,7 @@ test("LIST-14 LIST-15: public profile: off until turned on, at a random address,
   await page.getByRole("link", { name: "Backlog", exact: true }).click();
   await card(page, "Portal 2").hover(); // finished: hidden at first on the backlog page, like the owner's own view
   await card(page, "Portal 2").getByRole("button", { name: "Mark Finished" }).click();
-  await page.getByRole("button", { name: "Settings" }).click();
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
   await expect(async () => {
     await viewer.goto(href!);
     await viewer.getByRole("link", { name: /^Backlog/ }).click({ timeout: 1000 });
@@ -314,6 +315,24 @@ test("LIST-14 LIST-15: public profile: off until turned on, at a random address,
   }).toPass({ timeout: 10_000 });
   await viewer.goto(href!);
   await expect(viewer.locator("h1")).toHaveText("Profile not found");
+});
+
+test("LIST-16: the library header welcomes the user and shows the profile's sharing status and its link", async ({ page, context }) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await signIn(page, steamId());
+  const line = page.locator(".profile-share");
+  await expect(line.locator(".hello")).toHaveText("Welcome Dev user");
+  await expect(line).toContainText("Your profile is private. Open Settings to share it.");
+  await line.getByRole("button", { name: "Open Settings" }).click();
+  await page.getByRole("checkbox", { name: "Public profile", exact: true }).check();
+  const href = await page.getByRole("link", { name: "View your profile →" }).getAttribute("href");
+  await page.locator(".sheet .close").click();
+
+  await expect(line).toContainText("Your profile is public at ");
+  await expect(line.getByRole("link")).toHaveText(new URL(href!, page.url()).href.replace(/^https?:\/\//, ""));
+  await line.getByRole("button", { name: "Copy link" }).click();
+  await expect(page.locator(".toast")).toContainText("Link copied");
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(new URL(href!, page.url()).href);
 });
 
 test("LIST-8: a browser that synced with older code, which skipped lists, gets them in full once", async ({ page }) => {
