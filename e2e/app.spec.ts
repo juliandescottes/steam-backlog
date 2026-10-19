@@ -267,6 +267,13 @@ test("ONB-10: review the offer, unchecking games to keep in the Backlog", async 
   await triage.getByRole("button", { name: "Review…" }).click();
   const review = page.getByRole("dialog", { name: "Finished games" });
   await expect(review.getByRole("checkbox")).toHaveCount(2);
+  // The page behind stays still
+  await page.setViewportSize({ width: 1280, height: 500 });
+  await review.hover();
+  await page.mouse.wheel(0, 2000);
+  await page.waitForTimeout(200);
+  expect(await page.evaluate(() => scrollY)).toBe(0);
+  await page.setViewportSize({ width: 1280, height: 720 });
   await expect(review.getByRole("listitem").first()).toContainText(/Mid Game.*Played 14h of 15h/);
   await review.getByRole("checkbox", { name: /Short One/ }).uncheck();
   await review.getByRole("button", { name: "Mark 1 game Finished" }).click();
