@@ -132,7 +132,7 @@
 [data-design="malabar"] [style*="--b4)"], [data-design="malabar"] [style*="--b5)"], [data-design="malabar"] [style*="--b6)"] { --on-c: var(--on-deep); }
 [data-design="malabar"] .hrs { left: 8px; bottom: 8px; padding: 4px 7px; border: 2px solid var(--sticker-ink); border-radius: 6px; background: var(--c);
   color: var(--on-c); font: 700 13px/1 var(--mono); }
-[data-design="malabar"] .hrs.approx { background: var(--paper); border-style: dashed; color: var(--sticker-ink); box-shadow: inset 0 -4px 0 var(--c); }
+[data-design="malabar"] .hrs.approx { border-style: dashed; }
 [data-design="malabar"] .hrs.unknown { background: var(--paper); color: var(--sticker-ink); }
 /* Status chips in flash-tattoo style: outlined, glossy fill */
 [data-design="malabar"] .status-chip { --tat: var(--chip); --tat-text: var(--sticker-ink);
