@@ -37,7 +37,7 @@ npm run deploy     # build + wrangler deploy to baquelogue.com (ask first)
 
 - TypeScript everywhere, imports with `.ts`/`.tsx` extensions. Node 23.6+ runs `tools/*.ts` directly.
 - Match surrounding style; keep comments sparse.
-- After UI changes: run unit + e2e tests, then check in the browser (Firefox MCP) and measure, don't eyeball.
+- After UI changes: run unit + e2e tests, then check in the browser (Firefox MCP) and measure, don't eyeball. Check every palette (Default, Bubblegum, Cottoncandy) in light and dark, and phone width (~400px). Switch with `document.documentElement.dataset.palette` / `.theme` in the page, not Settings, so the user's choice stays. Colors are tokens set per palette in `app/src/malabar.css`: never hard-code one in a rule.
 - Commit only when asked. One branch per milestone.
 
 ## Gotchas
@@ -49,3 +49,4 @@ npm run deploy     # build + wrangler deploy to baquelogue.com (ask first)
 - Write regexes with `\u` escapes, not literal combining chars or BOM.
 - Firefox MCP upload doesn't reach hidden file inputs: fetch the file via `/@fs/<abs path>` in the dev server and set `input.files` with a DataTransfer.
 - Firefox MCP hover doesn't trigger `:hover`; inject a style to force states.
+- The Firefox MCP window is hidden: transitions and animations don't advance (call `document.getAnimations().forEach(a => a.finish())` before measuring or screenshotting) and `requestAnimationFrame` doesn't fire, so the grid doesn't mount covers after a jump scroll.
