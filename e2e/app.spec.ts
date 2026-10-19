@@ -17,6 +17,20 @@ async function openLibrary(page: Page) {
 const card = (page: Page, name: string) => page.locator(".bands .game").filter({ has: page.locator(".name", { hasText: name }) });
 const band = (page: Page, id: string) => page.locator(`section[id="${id}"]`);
 
+test("ONB-1: the welcome page only offers Steam sign-in; a library file dropped on it opens", async ({ page }) => {
+  await page.route("**/*steamstatic.com/**", r => r.abort());
+  await page.goto("/");
+  await expect(page.getByRole("button", { name: "Sign in with Steam" })).toBeVisible();
+  await expect(page.locator("input[type=file]")).toBeHidden();
+  const data = await page.evaluateHandle(text => {
+    const dt = new DataTransfer();
+    dt.items.add(new File([text], "library.json", { type: "application/json" }));
+    return dt;
+  }, readFileSync(LIBRARY, "utf8"));
+  await page.locator(".welcome").dispatchEvent("drop", { dataTransfer: data });
+  await expect(page.locator("h1")).toHaveText(/^6 games/);
+});
+
 test("ONB-1 PRIN-4 LIB-1 LIB-3 LIB-5: opens a library file and groups games by length", async ({ page }) => {
   await openLibrary(page);
   await expect(page.locator("h1")).toHaveText(/6 games, 107 hours to clear/i);

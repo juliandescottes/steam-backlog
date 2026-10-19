@@ -14,7 +14,7 @@ Each rule has a bold ID like STATUS-4 and a test that cites it in its title, che
 
 ## 2. Sign-in and onboarding
 
-- **ONB-1** The welcome page offers **Sign in with Steam**, or staying local by opening a library file or a backup.
+- **ONB-1** The welcome page offers **Sign in with Steam**. Without an account, a library file or a backup dropped on the page opens (no visible control: for local use and tests).
 - **ONB-2** After Steam sign-in, the library is imported automatically.
 - **ONB-3** When the Steam profile's game details are private, the import says so, explains how to make them public, and offers Retry.
 - **ONB-4** Games without an IGDB length get one as soon as the server finds it after an import; sync brings it to the browser.

@@ -13,7 +13,7 @@ async function devSignIn() {
 
 const signInFailed = new URLSearchParams(location.search).get("signin") === "failed";
 
-/** First run: sign in with Steam, or stay local with a library file (or a backup). */
+/** First run: sign in with Steam. */
 export function Welcome() {
   const [error, setError] = useState<string | null>(signInFailed ? "Steam sign-in didn't go through. Try again?" : null);
   const [over, setOver] = useState(false);
@@ -35,8 +35,11 @@ export function Welcome() {
     }
   };
 
+  // No visible way in without an account: a file dropped on the page still opens, for local use and tests (ONB-1)
   return (
-    <div class="wrap welcome">
+    <div class={`wrap welcome${over ? " over" : ""}`}
+      onDragOver={e => { e.preventDefault(); setOver(true); }} onDragLeave={e => e.currentTarget === e.target && setOver(false)}
+      onDrop={e => { e.preventDefault(); setOver(false); void open(e.dataTransfer?.files[0]); }}>
       <header class="top">
         <div class="eyebrow-row"><Brand /></div>
         <h1>Your backlog,<br /><em>shortest first</em></h1>
@@ -50,17 +53,7 @@ export function Welcome() {
         <p class="hint">We import your games and keep them in sync. Your Steam profile's game details need to be public.</p>
       </div>
       {error && <p class="error" role="alert">{error}</p>}
-      <div class="option">
-        <h2 class="or">No account?</h2>
-        <label class={`drop${over ? " over" : ""}`}
-          onDragOver={e => { e.preventDefault(); setOver(true); }} onDragLeave={() => setOver(false)}
-          onDrop={e => { e.preventDefault(); setOver(false); void open(e.dataTransfer?.files[0]); }}>
-          <input type="file" accept=".json,application/json" hidden onChange={e => void open(e.currentTarget.files?.[0])} />
-          <span class="btn">Open a backup</span>
-          <span class="hint">or drop it here.</span>
-        </label>
-        <p class="hint">Everything stays in this browser. Sharing needs an account.</p>
-      </div>
+      <input type="file" accept=".json,application/json" hidden onChange={e => void open(e.currentTarget.files?.[0])} />
     </div>
   );
 }
