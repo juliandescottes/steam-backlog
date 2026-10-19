@@ -111,7 +111,8 @@
 [data-design="malabar"] .btn.settings-btn:not(.ghost):hover:not(:disabled) { color: var(--fg); }
 [data-design="malabar"] .btn.risky { border: 2px solid var(--danger); color: var(--danger); box-shadow: 3px 3px 0 var(--drop); }
 [data-design="malabar"] .btn.danger { color: var(--sticker-ink); }
-[data-design="malabar"] .chip { border: 2px solid var(--line); font-weight: 700; }
+[data-design="malabar"] .chip { border: 2px solid var(--line); font-weight: 700; background: var(--surface); color: var(--fg); }
+[data-design="malabar"] button.chip:hover { border-color: var(--ink); }
 [data-design="malabar"] .chip[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
 [data-design="malabar"] .chip.pill { background: var(--surface-2); border-color: var(--ink); color: var(--fg); }
 [data-design="malabar"] .tools { background: color-mix(in srgb, var(--bg) 92%, transparent); }
