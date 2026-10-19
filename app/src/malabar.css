@@ -97,7 +97,9 @@
   box-shadow: 3px 3px 0 var(--drop); }
 [data-design="malabar"] .brand:hover { transform: rotate(-3deg) translate(-1px, -1px); box-shadow: 4px 4px 0 var(--drop); }
 [data-design="malabar"] .eyebrow { font-family: var(--mono); font-size: 13px; font-weight: 800; letter-spacing: .1em; }
-[data-design="malabar"] .top-nav a.active, [data-design="malabar"] .view.active { border-bottom-width: 4px; }
+[data-design="malabar"] .top-nav a.active { border-bottom-width: 4px; }
+[data-design="malabar"] .view { border-bottom-width: 4px; } /* every tab, so the row keeps its height whichever is active */
+[data-design="malabar"] .view.save { border-bottom: 4px solid transparent; }
 [data-design="malabar"] .view button { font-weight: 700; }
 [data-design="malabar"] .empty { font-style: normal; }
 [data-design="malabar"] kbd { border: 2px solid var(--ink); border-radius: 5px; box-shadow: 2px 2px 0 var(--drop); font-weight: 700; }
