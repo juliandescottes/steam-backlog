@@ -239,6 +239,9 @@ section.band { display: grid; gap: 14px; scroll-margin-top: 72px; }
 
 /* Side sheet (detail, settings) */
 .sheet-backdrop, .modal-backdrop { position: fixed; inset: 0; z-index: 50; background: rgba(5, 6, 10, .55); }
+/* An open panel keeps the page behind it still; the gutter stops the page shifting when its scrollbar goes */
+html:has(.sheet-backdrop, .modal-backdrop) { overflow: hidden; scrollbar-gutter: stable; }
+.sheet, .modal, .modal ul { overscroll-behavior: contain; }
 .sheet { position: absolute; top: 0; right: 0; bottom: 0; width: min(480px, 100%); overflow-y: auto; display: grid; gap: 20px; align-content: start;
   padding: max(24px, env(safe-area-inset-top, 0px)) 24px max(24px, env(safe-area-inset-bottom, 0px)); background: var(--surface); box-shadow: var(--shadow); }
 .sheet h2 { margin: 0; font: 800 34px/1 var(--display); text-transform: uppercase; padding-right: 40px; }
