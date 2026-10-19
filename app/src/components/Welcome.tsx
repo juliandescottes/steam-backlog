@@ -4,6 +4,7 @@ import { signIn } from "../account.ts";
 import { mergeLibrary, restoreBackup } from "../store.ts";
 import { readFile } from "../util.ts";
 import { Brand } from "./Brand.tsx";
+import { TIMED_BANDS } from "@backlog/shared/bands";
 
 /** npm run dev:api only: signs in without Steam. */
 async function devSignIn() {
@@ -12,6 +13,9 @@ async function devSignIn() {
 }
 
 const signInFailed = new URLSearchParams(location.search).get("signin") === "failed";
+
+/** A made-up backlog's length bar, as a divider. */
+const SAMPLE = [24, 41, 37, 52, 30, 14, 6];
 
 /** First run: sign in with Steam. */
 export function Welcome() {
@@ -43,7 +47,7 @@ export function Welcome() {
       <header class="top">
         <div class="eyebrow-row"><Brand /></div>
         <h1>Your backlog,<br /><em>shortest first</em></h1>
-        <p class="lede">Baquelogue sorts your Steam games by how long they take to complete, so you can pick something you'll actually finish. Mark games as playing, finished or dropped in one click, and share your whole backlog or just the lists you pick.</p>
+        <p class="lede">Baquelogue sorts your Steam games by how long they take to complete, so you can pick something you'll actually finish.</p>
       </header>
       <div class="option">
         <p class="row-actions">
@@ -53,6 +57,12 @@ export function Welcome() {
         <p class="hint">We import your games and keep them in sync. Your Steam profile's game details need to be public.</p>
       </div>
       {error && <p class="error" role="alert">{error}</p>}
+      <div class="bar sample" aria-hidden="true">{TIMED_BANDS.map((b, i) => <span key={b.id} style={{ flex: SAMPLE[i], background: `var(${b.color})` }} />)}</div>
+      <ul class="features">
+        <li><b>Sort by duration</b>Every game grouped by how long it takes to complete, from a lunch break to a whole season.</li>
+        <li><b>One click</b>Mark games Playing, Finished or Dropped right from the cover.</li>
+        <li><b>Share</b>Your whole backlog, or just the lists you pick, at a link of your own.</li>
+      </ul>
       <input type="file" accept=".json,application/json" hidden onChange={e => void open(e.currentTarget.files?.[0])} />
     </div>
   );

@@ -367,11 +367,16 @@ textarea { width: 100%; padding: 10px 12px; border-radius: 6px; border: 1px soli
 @keyframes toast-in { from { transform: translateY(8px); opacity: 0; } }
 
 /* Welcome */
-.welcome { max-width: 760px; }
+.welcome { max-width: 860px; min-height: 100svh; align-content: center; gap: 44px; }
+.bar.sample span { display: block; }
+.features { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px 28px; margin: 0; padding: 0;
+  list-style: none; color: var(--muted); }
+.features b { display: block; margin-bottom: 4px; color: var(--fg); font: 800 20px/1.1 var(--display); text-transform: uppercase; }
 .welcome .lede { font-size: 18px; }
 .welcome .option { gap: 10px; }
 .welcome.over { outline: 2px dashed var(--accent); outline-offset: 8px; border-radius: 12px; }
 .btn.steam { padding: 12px 18px; font-size: 16px; }
+.welcome .btn.steam { padding: 16px 30px; font-size: 20px; }
 .account { display: flex; align-items: center; gap: 10px; margin: 0; }
 .account img { border-radius: 4px; }
 .welcome ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
