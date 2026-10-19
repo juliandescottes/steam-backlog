@@ -81,8 +81,11 @@
 /* ---- Design ---- */
 
 :root[data-design="malabar"] {
-  --display: "Fredoka", "Arial Rounded MT Bold", sans-serif; --body: "Nunito", system-ui, sans-serif; --mono: "Space Mono", ui-monospace, monospace;
+  --display: "Fredoka", "Arial Rounded MT Bold", sans-serif; --body: "Nunito", system-ui, sans-serif; --mono: "Nunito", system-ui, sans-serif;
 }
+/* Two families: the small labels and numbers that the original sets in a monospace font use Nunito, with even-width digits and a size up */
+[data-design="malabar"] :is(.lede .cleared, .band-head p, .list-meta) { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+[data-design="malabar"] :is(.sub, .source, .palette-meta, .triage-list .meta, .fill-top .count, .len-preview) { font-size: 13.5px; font-variant-numeric: tabular-nums; }
 [data-design="malabar"] body { background: radial-gradient(var(--dots) 1.2px, transparent 1.6px) 0 0 / 16px 16px, var(--bg); }
 [data-design="malabar"] :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 [data-design="malabar"] h1 { font: 700 clamp(40px, 7vw, 80px)/.92 var(--display); text-transform: none; letter-spacing: -.015em; }
@@ -93,7 +96,7 @@
   background: var(--brand-bg); color: var(--brand-fg); font: 700 19px/1 var(--display); text-transform: none; transform: rotate(-3deg);
   box-shadow: 3px 3px 0 var(--drop); }
 [data-design="malabar"] .brand:hover { transform: rotate(-3deg) translate(-1px, -1px); box-shadow: 4px 4px 0 var(--drop); }
-[data-design="malabar"] .eyebrow { font-family: var(--mono); font-weight: 700; letter-spacing: .06em; }
+[data-design="malabar"] .eyebrow { font-family: var(--mono); font-size: 13px; font-weight: 800; letter-spacing: .1em; }
 [data-design="malabar"] .top-nav a.active, [data-design="malabar"] .view.active { border-bottom-width: 4px; }
 [data-design="malabar"] .view button { font-weight: 700; }
 [data-design="malabar"] .empty { font-style: normal; }
@@ -131,7 +134,7 @@
 [data-design="malabar"] { --on-c: var(--band-text); }
 [data-design="malabar"] [style*="--b4)"], [data-design="malabar"] [style*="--b5)"], [data-design="malabar"] [style*="--b6)"] { --on-c: var(--on-deep); }
 [data-design="malabar"] .hrs { left: 8px; bottom: 8px; padding: 4px 7px; border: 2px solid var(--sticker-ink); border-radius: 6px; background: var(--c);
-  color: var(--on-c); font: 700 13px/1 var(--mono); }
+  color: var(--on-c); font: 700 13.5px/1 var(--mono); font-variant-numeric: tabular-nums; }
 [data-design="malabar"] .hrs.approx { border-style: dashed; }
 [data-design="malabar"] .hrs.unknown { background: var(--paper); color: var(--sticker-ink); }
 /* Status chips in flash-tattoo style: outlined, glossy fill */
@@ -165,7 +168,7 @@
 [data-design="malabar"] .sheet h2, [data-design="malabar"] .fill-top h2, [data-design="malabar"] .fill-main h3, [data-design="malabar"] .fill-done h3 {
   font-family: var(--display); font-weight: 700; text-transform: none; letter-spacing: -.01em; }
 [data-design="malabar"] .detail-section h3, [data-design="malabar"] .shortcuts h3, [data-design="malabar"] .settings h3 {
-  width: fit-content; padding: 4px 8px; border-radius: 6px; background: var(--fg); color: var(--bg); font: 700 11.5px/1 var(--mono); letter-spacing: .06em; }
+  width: fit-content; padding: 4px 8px; border-radius: 6px; background: var(--fg); color: var(--bg); font: 800 12px/1 var(--mono); letter-spacing: .08em; }
 [data-design="malabar"] .settings > section + section { border-top: 2px dashed var(--line); }
 [data-design="malabar"] .big-len { font: 700 40px/1 var(--display); letter-spacing: -.01em; }
 [data-design="malabar"] .callout { border: 2px dashed var(--ink); background: transparent; }
