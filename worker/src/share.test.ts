@@ -3,7 +3,7 @@ import type { ListOp, Op, SyncResponse } from "@backlog/shared/sync";
 import type { Profile, SharedList } from "@backlog/shared/share";
 import { testWorker } from "./testing.ts";
 
-const INDEX = `<!doctype html><html><head><title>Backlog</title></head><body></body></html>`;
+const INDEX = `<!doctype html><html><head><title>Baquelogue</title></head><body></body></html>`;
 let w: Awaited<ReturnType<typeof testWorker>>;
 beforeAll(async () => {
   w = await testWorker({ DEV_LOGIN: "true", ASSETS: { fetch: async () => new Response(INDEX, { headers: { "content-type": "text/html" } }) } as never });
@@ -63,7 +63,7 @@ test("LIST-14: a public profile: every public list with its size, and stats; off
   });
   // Shared lists link to a public profile
   expect(((await (await w.call("GET", "/api/s/linkonly0001")).json()) as SharedList).owner.profileId).toBe(profileId);
-  expect(await (await w.call("GET", `/u/${profileId}`)).text()).toContain("<title>Dev user on Backlog</title>");
+  expect(await (await w.call("GET", `/u/${profileId}`)).text()).toContain("<title>Dev user on Baquelogue</title>");
 
   await w.call("POST", "/api/auth/dev", { steamId }); // signed in again
   await w.call("POST", "/api/profile", { public: false });

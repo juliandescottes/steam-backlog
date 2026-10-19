@@ -9,6 +9,7 @@ import { navigate } from "../route.ts";
 import { settings } from "../store.ts";
 import { count, steamUrl } from "../util.ts";
 import { Art } from "./Art.tsx";
+import { Brand } from "./Brand.tsx";
 import { MiniCovers } from "./MiniCovers.tsx";
 
 const POLL_MS = 30_000;
@@ -75,8 +76,8 @@ export function ProfilePage({ id }: { id: string }) {
   const state = useRemote<Profile>(`/api/u/${encodeURIComponent(id)}`, false);
   const p = state.kind === "ok" ? state.data : null;
   useEffect(() => {
-    document.title = p ? `${p.name} on Backlog` : "Backlog";
-    return () => { document.title = "Backlog"; };
+    document.title = p ? `${p.name} on Baquelogue` : "Baquelogue";
+    return () => { document.title = "Baquelogue"; };
   }, [p?.name]);
   if (!p) return <NotThere state={state} what="Profile" />;
   return (
@@ -135,8 +136,8 @@ export function SharedPage({ src, whole = false }: { src: string; whole?: boolea
   if (order !== "list") shown.sort(compare(order));
 
   useEffect(() => {
-    document.title = data ? (whole ? `${data.owner.name}'s backlog` : `${data.list.title} · ${data.owner.name}`) : "Backlog";
-    return () => { document.title = "Backlog"; };
+    document.title = data ? (whole ? `${data.owner.name}'s backlog` : `${data.list.title} · ${data.owner.name}`) : "Baquelogue";
+    return () => { document.title = "Baquelogue"; };
   }, [data?.list.title, data?.owner.name]);
 
   if (state.kind !== "ok") return <NotThere state={state} what={whole ? "Backlog" : "List"} />;
@@ -161,6 +162,7 @@ export function SharedPage({ src, whole = false }: { src: string; whole?: boolea
                 {owner.avatar && <img src={owner.avatar} alt="" width={20} height={20} />}
                 {owner.name}'s {whole ? "games" : "list"}
               </div>}
+          <Brand />
         </div>
         <h1>{list.title}</h1>
         {list.description && <p class="lede">{list.description}</p>}
@@ -215,7 +217,7 @@ function Footer() {
   return (
     <footer>
       Lengths from IGDB and players. Box art from Steam.{" "}
-      <a href="/" onClick={e => { e.preventDefault(); navigate("/"); }}>Track your own Steam backlog →</a>
+      <a href="/" onClick={e => { e.preventDefault(); navigate("/"); }}>Track your own Steam backlog on Baquelogue →</a>
     </footer>
   );
 }

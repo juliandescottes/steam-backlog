@@ -159,7 +159,7 @@ async function preview(env: Env, path: string): Promise<{ title: string; descrip
   const p = u ? await profile(env, u[1]) : null;
   if (!p) return null;
   return {
-    title: `${p.name} on Backlog`,
+    title: `${p.name} on Baquelogue`,
     description: [plural(p.lists.length, "list"), `${p.stats.finished} finished`].join(" · "),
     image: p.lists[0]?.covers[0] ?? null,
   };

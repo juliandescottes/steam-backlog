@@ -10,6 +10,7 @@ import {
   toggleInList, updateList,
 } from "../store.ts";
 import { count } from "../util.ts";
+import { Brand } from "./Brand.tsx";
 import { MiniCovers } from "./MiniCovers.tsx";
 
 /** A link that opens in the app, or in a new tab with a modifier key. */
@@ -30,6 +31,7 @@ export function TopNav() {
   const inLists = p === "lists" || currentList.value != null;
   return (
     <div class="eyebrow-row">
+      <Brand />
       <nav class="top-nav" aria-label="Pages">
         <Link href="/" class={`eyebrow${p === "library" ? " active" : ""}`} aria-current={p === "library" ? "page" : undefined}>Backlog</Link>
         <Link href={LISTS_PATH} class={`eyebrow${inLists ? " active" : ""}`} aria-current={p === "lists" ? "page" : undefined}>Lists</Link>
