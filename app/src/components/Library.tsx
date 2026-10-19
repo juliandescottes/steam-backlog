@@ -65,7 +65,7 @@ function BandIndex({ groups }: { groups: { band: Band; entries: Entry[] }[] }) {
       </div>
       <div class="legend">
         {groups.map(({ band, entries }) => (
-          <a key={band.id} href={`#${band.id}`} style={{ "--c": `var(${band.color})` }}><i />{band.label} <span>{entries.length}</span></a>
+          <a key={band.id} href={`#${band.id}`} style={{ "--c": `var(${band.color})` }}><i />{band.label.replace(" h", "h")} <span>{entries.length}</span></a>
         ))}
       </div>
     </nav>
