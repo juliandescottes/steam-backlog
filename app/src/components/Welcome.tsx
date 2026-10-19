@@ -57,9 +57,9 @@ export function Welcome() {
       {error && <p class="error" role="alert">{error}</p>}
       <div class="bar sample" aria-hidden="true">{TIMED_BANDS.map((b, i) => <span key={b.id} style={{ flex: SAMPLE[i], background: `var(${b.color})` }} />)}</div>
       <ul class="features">
-        <li><b>Sort by duration</b>Every game grouped by how long it takes to complete, from a lunch break to a whole season.</li>
-        <li><b>One click</b>Mark games Playing, Finished or Dropped right from the cover.</li>
-        <li><b>Share</b>Your whole backlog, or just the lists you pick, at a link of your own.</li>
+        <li><b>Sort.</b>Sort by duration, from a lunch break to a whole season.<span>Clear your backlog at your own pace, one game at a time.</span></li>
+        <li><b>Click.</b>One click to mark games Playing, Finished or Dropped.<span>Your library lives in your browser, so every click is instant.</span></li>
+        <li><b>Share.</b>Share your whole backlog or <span class="nowrap">hand-crafted</span> lists.<span>Send a list to friends and let them help pick your next game.</span></li>
       </ul>
       <input type="file" accept=".json,application/json" hidden onChange={e => void open(e.currentTarget.files?.[0])} />
     </div>
