@@ -123,7 +123,7 @@ The client's cursor carries a `schema` number (`app/src/account.ts`): when sync 
 - An empty response means a private profile → error code `profile_private`, which the client turns into the guide from the spec.
 - Upsert catalog rows (name from `appinfo`) and `user_games` rows (playtime, last played; new games get status Backlog). Queue appids without lengths for enrichment.
 - Runs automatically after sign-in when `library_synced_at` is older than 24 h.
-- **Triage prompt** (spec §2.4): computed on the client once lengths arrive: games with `playtime ≥ 0.8 × length`.
+- **Triage prompt** (ONB-5): computed on the client: Backlog games with `playtime ≥ 0.8 × length` and no `triageDeclined`, a synced game field (`user_games.triage_declined`).
 
 **Steam collections import** was planned (parse `cloud-storage-namespace-1.json` in the browser, one list per static collection) and dropped on 2026-10-17.
 

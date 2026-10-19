@@ -21,10 +21,10 @@ describe("library file", () => {
 describe("DATA-1: export", () => {
   it("round-trips the user's fields", () => {
     const g = { ...newGame({ appid: 7, name: "Seven" }, 1000), status: "finished" as const, finishedAt: 2000, note: "great",
-      my: { main: null, main_extra: 3, comp: null }, myKind: "exact" as const };
+      my: { main: null, main_extra: 3, comp: null }, myKind: "exact" as const, triageDeclined: true };
     const back = parseExport(JSON.stringify(makeExport([g], { theme: "dark" })));
     expect(back.games[0]).toEqual({ appid: 7, name: "Seven", status: "finished", statusAt: null, finishedAt: 2000, note: "great",
-      my: { main: null, main_extra: 3, comp: null }, myKind: "exact", playtimeMin: 0, addedAt: 1000 });
+      my: { main: null, main_extra: 3, comp: null }, myKind: "exact", triageDeclined: true, playtimeMin: 0, addedAt: 1000 });
     expect(back.settings).toEqual({ theme: "dark" });
     expect(back.lists).toEqual([]);
   });

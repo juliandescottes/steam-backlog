@@ -37,7 +37,6 @@ Spec guardrails (2026-10-18, uncommitted): `SPEC.md` rewritten as numbered rules
 
 ## Backlog
 
-- Triage marks all candidates at once (125 on the real library, some fighting games among them); maybe a "Review them" view.
 - No preview deployments per branch yet (TECH §12).
 - Delisted apps show "Steam app 11420"; IGDB has names for some.
 - Covers are blank tiles while art loads.

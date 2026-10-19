@@ -29,7 +29,7 @@ type ListRow = {
 const entry = (game: Game): Entry => ({ game, len: resolveLength(game, "main_extra"), key: normalizeName(game.name) });
 
 /** What viewers may see of a game: lengths and status. */
-const forViewers = (g: Game): Game => ({ ...g, note: "", playtimeMin: 0, lastPlayedAt: null, addedAt: 0, statusAt: null, finishedAt: null });
+const forViewers = (g: Game): Game => ({ ...g, note: "", playtimeMin: 0, lastPlayedAt: null, addedAt: 0, statusAt: null, finishedAt: null, triageDeclined: false });
 
 /**
  * A list shared by link or on a profile, with an ETag that changes when the owner changes anything
@@ -52,7 +52,7 @@ export async function sharedList(env: Env, shareId: string): Promise<{ etag: str
        LEFT JOIN user_games ug ON ug.user_id = ?1 AND ug.appid = li.appid
        WHERE li.list_id = ?2 AND li.deleted = 0 ORDER BY li.position`,
     ).bind(l.user_id, l.id).all<Row & { updated_at: number }>()).results;
-    games = rows.map(r => toGame({ ...r, status: r.status ?? "backlog", note: r.note ?? "", playtime_min: r.playtime_min ?? 0, first_seen_at: r.first_seen_at ?? 0 }, communityOn(env)));
+    games = rows.map(r => toGame({ ...r, status: r.status ?? "backlog", note: r.note ?? "", triage_declined: r.triage_declined ?? 0, playtime_min: r.playtime_min ?? 0, first_seen_at: r.first_seen_at ?? 0 }, communityOn(env)));
   } else {
     // Filter lists are computed here with the client's filter code; lengths by Main + Extras, the default measure
     rows = await allGames(env, l.user_id);

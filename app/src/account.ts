@@ -81,9 +81,9 @@ export async function initAccount() {
  * then the account's library replaces the local one.
  */
 async function firstSync() {
-  const local = [...games.value.values()].filter(g => g.status !== "backlog" || g.note || g.myKind);
+  const local = [...games.value.values()].filter(g => g.status !== "backlog" || g.note || g.myKind || g.triageDeclined);
   record([
-    ...local.map(g => ({ appid: g.appid, set: { status: g.status, statusAt: g.statusAt, finishedAt: g.finishedAt, note: g.note, my: g.my, myKind: g.myKind } })),
+    ...local.map(g => ({ appid: g.appid, set: { status: g.status, statusAt: g.statusAt, finishedAt: g.finishedAt, note: g.note, my: g.my, myKind: g.myKind, triageDeclined: !!g.triageDeclined } })),
     ...localViewChanges(),
     ...localListChanges(),
   ], false);

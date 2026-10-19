@@ -18,7 +18,9 @@ Each rule has a bold ID like STATUS-4 and a test that cites it in its title, che
 - **ONB-2** After Steam sign-in, the library is imported automatically.
 - **ONB-3** When the Steam profile's game details are private, the import says so, explains how to make them public, and offers Retry.
 - **ONB-4** Games without an IGDB length get one as soon as the server finds it after an import; sync brings it to the browser.
-- **ONB-5** Cards of played games show "Played Xh". Once, the app offers to mark Finished the games played for at least 80% of their length: one click, undoable, never asked again.
+- **ONB-5** Cards of played games show "Played Xh". While any Backlog game played for at least 80% of its length is unanswered, the library offers to mark them Finished: **Mark Finished**, **Review…** or **No thanks**, one undo. An answer is per game and syncs: a declined game isn't offered again; a game newly past 80% is.
+- **ONB-10** **Review…** lists those games, checked, to uncheck some: checked ones become Finished, unchecked ones stay in the Backlog as declined.
+- **ONB-11** "Review finished games" in the palette opens the same review any time, with every Backlog game past 80%; declined ones start unchecked.
 - **ONB-6** Refresh library (Settings, palette) adds newly bought games as Backlog and keeps everything the user set.
 - **ONB-7** Signing in refreshes the library when the last import is more than a day old. (manual)
 - **ONB-8** On first sign-in, what was done in this browser (statuses, notes, lengths, views, lists) moves into the account, for owned games only.
@@ -100,7 +102,7 @@ A list is a named, ordered collection of games with an optional description, han
 
 ## 8. Data ownership
 
-- **DATA-1** Export backup (Settings, palette): a JSON file of statuses and dates, notes, the user's lengths, views and lists.
+- **DATA-1** Export backup (Settings, palette): a JSON file of statuses and dates, notes, the user's lengths, answers to the finished-games offer, views and lists.
 - **DATA-2** Restore backup shows a summary of the file, then merges it into the library or replaces it.
 - **DATA-3** Delete account offers a backup first, then removes all server data, community entries included. Signing in again starts empty.
 - **DATA-4** Without an account, "Delete local data" removes everything from this browser after asking.

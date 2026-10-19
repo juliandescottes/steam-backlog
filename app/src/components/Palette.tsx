@@ -8,7 +8,7 @@ import { account, refreshLibrary, signIn } from "../account.ts";
 import { LISTS_PATH, listPath, navigate } from "../route.ts";
 import {
   applyView, clearSelection, currentList, entries, exportBackup, openId, paletteOpen, pickerFor, selectAll, selection, setStatus,
-  settingsOpen, shortcutsOpen, sortedLists, sortKey, startFillIn, statuses, undo, updateSettings, views, type Theme,
+  settingsOpen, shortcutsOpen, sortedLists, sortKey, startFillIn, statuses, triageOpen, undo, updateSettings, views, type Theme,
 } from "../store.ts";
 import { isMac } from "../util.ts";
 
@@ -30,6 +30,7 @@ function actions(): Item[] {
   }
   out.push(
     { label: "Fill in lengths", run: () => startFillIn() },
+    { label: "Review finished games", run: () => (triageOpen.value = true) },
     { label: "Select all shown", keys: `${MOD}A`, run: selectAll },
     { label: "Undo", keys: `${MOD}Z`, run: undo },
   );

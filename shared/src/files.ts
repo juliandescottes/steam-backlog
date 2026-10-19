@@ -20,7 +20,7 @@ export type LibraryGame = {
 };
 export type LibraryFile = { format: "backlog-library"; version: 1; games: LibraryGame[] };
 
-export type ExportGame = Pick<Game, "appid" | "name" | "status" | "statusAt" | "finishedAt" | "note" | "my" | "myKind" | "playtimeMin" | "addedAt">;
+export type ExportGame = Pick<Game, "appid" | "name" | "status" | "statusAt" | "finishedAt" | "note" | "my" | "myKind" | "triageDeclined" | "playtimeMin" | "addedAt">;
 export type ExportFile = {
   format: "backlog-export";
   version: 1;
@@ -51,7 +51,7 @@ export function newGame(l: LibraryGame, now: number): Game {
     appid: l.appid, name: l.name, portrait: null,
     playtimeMin: l.playtimeMin ?? 0, lastPlayedAt: l.lastPlayedAt ?? null, addedAt: l.addedAt ?? now,
     igdb: l.igdb ?? null, community: null,
-    status: "backlog", statusAt: null, finishedAt: null, note: "", my: null, myKind: null,
+    status: "backlog", statusAt: null, finishedAt: null, note: "", my: null, myKind: null, triageDeclined: false,
   };
 }
 
@@ -102,7 +102,7 @@ export function makeExport(games: Game[], settings: Record<string, unknown>, min
     format: "backlog-export", version: 1, exportedAt: now.toISOString(), settings, ...mine,
     games: games.map(g => ({
       appid: g.appid, name: g.name, status: g.status, statusAt: g.statusAt, finishedAt: g.finishedAt,
-      note: g.note, my: g.my, myKind: g.myKind, playtimeMin: g.playtimeMin, addedAt: g.addedAt,
+      note: g.note, my: g.my, myKind: g.myKind, triageDeclined: !!g.triageDeclined, playtimeMin: g.playtimeMin, addedAt: g.addedAt,
     })),
   };
 }
@@ -122,6 +122,7 @@ export function parseExport(text: string): ExportFile {
     note: typeof g.note === "string" ? g.note : "",
     my: g.my ? { main: hours(g.my.main), main_extra: hours(g.my.main_extra), comp: hours(g.my.comp) } : null,
     myKind: KINDS.includes(g.myKind) ? g.myKind : null,
+    triageDeclined: g.triageDeclined === true,
     playtimeMin: num(g.playtimeMin) ?? 0,
     addedAt: num(g.addedAt) ?? Date.now(),
   }));

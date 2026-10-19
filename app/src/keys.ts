@@ -2,7 +2,7 @@ import { move, type Direction } from "@backlog/shared/grid";
 import type { Status } from "@backlog/shared/types";
 import {
   canReorder, clearSelection, currentList, editingId, fillInQueue, focusTarget, games, moveInList, openId, paletteOpen, pickerFor,
-  selectAll, selection, setStatus, settingsOpen, shelves, shortcutsOpen, toggleSelected, undo, viewing, visible,
+  selectAll, selection, setStatus, settingsOpen, shelves, shortcutsOpen, toggleSelected, triageOpen, undo, viewing, visible,
 } from "./store.ts";
 import { inTextField } from "./util.ts";
 
@@ -53,6 +53,7 @@ export function installKeys() {
       if (paletteOpen.value) paletteOpen.value = false;
       else if (pickerFor.value) pickerFor.value = null;
       else if (shortcutsOpen.value) shortcutsOpen.value = false;
+      else if (triageOpen.value) triageOpen.value = false;
       else if (editingId.value != null) editingId.value = null;
       else if (openId.value != null) openId.value = null;
       else if (settingsOpen.value) settingsOpen.value = false;
@@ -61,7 +62,7 @@ export function installKeys() {
     }
     if (inTextField(e)) return;
     if (mod && !e.shiftKey && e.key.toLowerCase() === "z") { e.preventDefault(); undo(); return; }
-    const inPanel = openId.value != null || settingsOpen.value || shortcutsOpen.value || paletteOpen.value || !!pickerFor.value;
+    const inPanel = openId.value != null || settingsOpen.value || shortcutsOpen.value || triageOpen.value || paletteOpen.value || !!pickerFor.value;
     if (mod && !e.shiftKey && e.key.toLowerCase() === "a" && !inPanel) { e.preventDefault(); selectAll(); return; }
     // Alt+←/→ moves the focused game within a hand-picked list
     if (e.altKey && !mod && (e.key === "ArrowLeft" || e.key === "ArrowRight") && canReorder.value && !inPanel) {
@@ -79,7 +80,7 @@ export function installKeys() {
 
     if (e.key === "?") { e.preventDefault(); shortcutsOpen.value = !shortcutsOpen.value; return; }
     const dir = ARROWS[e.key];
-    if (dir && !e.shiftKey && openId.value == null && !settingsOpen.value && !shortcutsOpen.value && editingId.value == null) {
+    if (dir && !e.shiftKey && openId.value == null && !settingsOpen.value && !shortcutsOpen.value && !triageOpen.value && editingId.value == null) {
       e.preventDefault();
       moveFocus(dir);
       return;

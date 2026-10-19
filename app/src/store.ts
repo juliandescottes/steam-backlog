@@ -21,12 +21,10 @@ const DEFAULT_SETTINGS: Settings = { theme: "system", measure: "main_extra", now
 export const games = signal<ReadonlyMap<number, Game>>(new Map());
 export const settings = signal<Settings>(DEFAULT_SETTINGS);
 export const loaded = signal(false);
-/** The one-time triage prompt was answered (SPEC §2.4). */
-export const triaged = signal(false);
 
 export async function load() {
-  const [all, s, t, v, l] = await Promise.all([
-    db.loadGames(), db.getMeta<Settings>("settings"), db.getMeta<boolean>("triaged"), db.loadViews(), db.loadLists(),
+  const [all, s, v, l] = await Promise.all([
+    db.loadGames(), db.getMeta<Settings>("settings"), db.loadViews(), db.loadLists(),
   ]);
   batch(() => {
     games.value = new Map(all.map(g => [g.appid, g]));
@@ -35,7 +33,6 @@ export async function load() {
     lists.value = l.lists.map(x => (x.shareId ? x : { ...x, shareId: newShareId() }));
     listItems.value = groupItems(l.items);
     settings.value = { ...DEFAULT_SETTINGS, ...s };
-    triaged.value = t ?? false;
     loaded.value = true;
   });
 }
@@ -76,9 +73,13 @@ export const entries = computed<Entry[]>(() => {
 
 export const byId = computed(() => new Map(entries.value.map(e => [e.game.appid, e])));
 
-/** Backlog games played for at least 80% of their length: probably finished before the import. */
-export const triageCandidates = computed(() =>
+/** Backlog games played for at least 80% of their length: probably finished already (ONB-5). */
+export const playedThrough = computed(() =>
   entries.value.filter(e => e.game.status === "backlog" && e.len.hours != null && e.game.playtimeMin >= 0.8 * e.len.hours * 60));
+/** The ones the user hasn't answered yet. */
+export const triageCandidates = computed(() => playedThrough.value.filter(e => !e.game.triageDeclined));
+/** The review of played-through games is open (ONB-10). */
+export const triageOpen = signal(false);
 
 export const isOpen = (s: Status) => s === "backlog" || s === "playing";
 const needsLength = (e: Entry) => e.len.hours == null && !e.len.endless;
@@ -580,17 +581,19 @@ export function setFinishedAt(appid: number, at: number) {
   run(`${nameOf(appid)}: finished ${date(at)}`, patches([appid], g => (g.status !== "finished" || g.finishedAt === at ? null : { finishedAt: at })));
 }
 
-/** Answers the triage prompt. Finished on the day they were last played, the best guess Steam gives. */
-export function finishPlayed(appids: number[]) {
+/**
+ * Answers the triage offer, with one undo: `finish` become Finished on the day they were last played,
+ * the best guess Steam gives; `decline` stay in the Backlog and aren't offered again.
+ */
+export function answerTriage(finish: number[], decline: number[]) {
   const now = Date.now();
-  const ps = patches(appids, g => (g.status !== "backlog" ? null : { status: "finished", statusAt: now, finishedAt: g.lastPlayedAt ?? now }));
-  run(`${subject(ps.map(p => p.appid))} → Finished`, ps);
-  dismissTriage();
-}
-
-export function dismissTriage() {
-  triaged.value = true;
-  void db.setMeta("triaged", true);
+  const ps = [
+    ...patches(finish, g => (g.status !== "backlog" ? null : { status: "finished", statusAt: now, finishedAt: g.lastPlayedAt ?? now })),
+    ...patches(decline, g => (g.triageDeclined ? null : { triageDeclined: true })),
+  ];
+  const done = ps.filter(p => p.after.status).map(p => p.appid);
+  const kept = decline.length ? `${subject(decline)} kept in Backlog` : "";
+  run(done.length ? `${subject(done)} → Finished${kept && `, ${kept}`}` : kept, ps);
 }
 
 /** Set the user's own length. `null` lengths with kind "endless" mark a game as having no ending. */
@@ -654,7 +657,7 @@ export async function restoreBackup(file: ExportFile, mode: "merge" | "replace")
   const userChanges: UserChange[] = [];
   for (const e of list) {
     const base = next.get(e.appid) ?? newGame({ appid: e.appid, name: e.name, playtimeMin: e.playtimeMin, addedAt: e.addedAt }, now);
-    const set = { status: e.status, statusAt: e.statusAt, finishedAt: e.finishedAt, note: e.note, my: e.my, myKind: e.myKind };
+    const set = { status: e.status, statusAt: e.statusAt, finishedAt: e.finishedAt, note: e.note, my: e.my, myKind: e.myKind, triageDeclined: e.triageDeclined };
     next.set(e.appid, { ...base, ...set });
     userChanges.push({ appid: e.appid, set });
   }
@@ -725,7 +728,6 @@ export async function deleteEverything() {
   batch(() => {
     games.value = new Map();
     settings.value = DEFAULT_SETTINGS;
-    triaged.value = false;
     selection.value = new Set();
     userViews.value = [];
     lists.value = [];
@@ -733,6 +735,7 @@ export async function deleteEverything() {
     pickerFor.value = null;
     openId.value = null;
     settingsOpen.value = false;
+    triageOpen.value = false;
   });
   await db.clearAll();
 }

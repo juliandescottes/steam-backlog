@@ -5,8 +5,8 @@ import { STATUSES, type Game, type LenKind } from "./types.ts";
 import type { View } from "./views.ts";
 
 /** The user's own fields of a game: the only ones the client changes. */
-export type GameFields = Pick<Game, "status" | "statusAt" | "finishedAt" | "note" | "my" | "myKind">;
-export const GAME_FIELDS = ["status", "statusAt", "finishedAt", "note", "my", "myKind"] as const satisfies (keyof GameFields)[];
+export type GameFields = Pick<Game, "status" | "statusAt" | "finishedAt" | "note" | "my" | "myKind" | "triageDeclined">;
+export const GAME_FIELDS = ["status", "statusAt", "finishedAt", "note", "my", "myKind", "triageDeclined"] as const satisfies (keyof GameFields)[];
 
 /** The user's own fields within a change to a game, or null when it only touches catalog fields. */
 export function userFields(change: Partial<Game>): Partial<GameFields> | null {
@@ -61,6 +61,7 @@ export function validOp(o: unknown): o is Op {
     && (!("statusAt" in s) || time(s.statusAt))
     && (!("finishedAt" in s) || time(s.finishedAt))
     && (!("note" in s) || (typeof s.note === "string" && s.note.length <= 10_000))
+    && (!("triageDeclined" in s) || typeof s.triageDeclined === "boolean")
     && (!("myKind" in s) || s.myKind === null || KINDS.includes(s.myKind!))
     && (!("my" in s) || s.my === null || (typeof s.my === "object" && hours(s.my.main) && hours(s.my.main_extra) && hours(s.my.comp)));
 }
