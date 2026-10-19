@@ -320,8 +320,8 @@ test("LIST-16: the library header shows the profile's sharing status and its lin
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   await signIn(page, steamId());
   const line = page.locator(".profile-share");
-  await expect(line).toHaveText("Your profile is private. Share it");
-  await line.getByRole("button", { name: "Share it" }).click();
+  await expect(line).toHaveText("Your profile is private. Open Settings to share it.");
+  await line.getByRole("button", { name: "Open Settings" }).click();
   await page.getByRole("checkbox", { name: "Public profile", exact: true }).check();
   const href = await page.getByRole("link", { name: "View your profile →" }).getAttribute("href");
   await page.locator(".sheet .close").click();

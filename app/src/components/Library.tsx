@@ -25,7 +25,7 @@ function ProfileShare() {
   if (!me.profilePublic || !me.profileId) {
     return (
       <p class="profile-share">
-        Your profile is private. <button type="button" class="link" onClick={() => (settingsOpen.value = true)}>Share it</button>
+        Your profile is private. <button type="button" class="link" onClick={() => (settingsOpen.value = true)}>Open Settings</button> to share it.
       </p>
     );
   }
