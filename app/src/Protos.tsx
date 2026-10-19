@@ -8,13 +8,14 @@ const FONTS: Record<string, string> = {
   arcade: "Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Space+Grotesk:wght@400..700&family=Space+Mono:wght@400;700",
   "arcade-pink": "Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Space+Grotesk:wght@400..700&family=Space+Mono:wght@400;700",
   "arcade-malabar": "Fredoka:wght@400..700&family=Nunito:wght@400..900&family=Space+Mono:wght@400;700",
+  "arcade-malabar-pink": "Fredoka:wght@400..700&family=Nunito:wght@400..900&family=Space+Mono:wght@400;700",
   rental: "Anton&family=Archivo:wght@400..800&family=Archivo+Narrow:wght@500;700",
   terminal: "VT323&family=IBM+Plex+Mono:wght@400;600",
   editorial: "Inter+Tight:wght@400..800",
   handheld: "Press+Start+2P&family=Silkscreen",
 };
 const NAMES: Record<string, string> = {
-  "": "Current", bakelite: "Bakelite", catalogue: "Catalogue", arcade: "Arcade", "arcade-pink": "Arcade Pink", "arcade-malabar": "Malabar",
+  "": "Current", bakelite: "Bakelite", catalogue: "Catalogue", arcade: "Arcade", "arcade-pink": "Arcade Pink", "arcade-malabar": "Malabar", "arcade-malabar-pink": "Malabar Pink bands",
   rental: "Rental (dark only)", terminal: "Terminal (dark only)", editorial: "Editorial", handheld: "Handheld (light only)",
 };
 

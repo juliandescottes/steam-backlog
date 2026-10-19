@@ -273,37 +273,53 @@
 [data-proto="arcade-pink"] .brand, [data-proto="arcade-pink"] .brand:hover { background: var(--fg); color: var(--accent); }
 
 /* Malabar: the bubble gum. Pink and yellow as equals, a raspberry ink, round and chewy type */
-:root[data-proto="arcade-malabar"] {
+:root[data-proto|="arcade-malabar"] {
   --bg: #3b0a2c; --surface: #4c0f39; --surface-2: #5e1647; --line: #7d2a63; --fg: #fff3c4; --muted: #f2a9cf; --accent: #ff3d9e; --on-accent: #2b0620;
   --pop: #ffd92e; --on-pop: #3b0a2c; --ink: #a14a85; --hard: #1c0414; --dots: rgba(255, 217, 46, .1); --shadow: 8px 8px 0 #1c0414;
   --display: "Fredoka", "Arial Rounded MT Bold", sans-serif; --body: "Nunito", system-ui, sans-serif;
   color-scheme: dark;
 }
-@media (prefers-color-scheme: light) { :root[data-proto="arcade-malabar"]:not([data-theme="dark"]) {
+@media (prefers-color-scheme: light) { :root[data-proto|="arcade-malabar"]:not([data-theme="dark"]) {
   --bg: #ffe766; --surface: #fffbe6; --surface-2: #fff2a8; --line: #f2c94c; --fg: #4a0b35; --muted: #8a3a6b; --accent: #ff2e93; --on-accent: #fffbe6;
   --pop: #ff2e93; --on-pop: #ffe766; --ink: #4a0b35; --hard: #4a0b35; --cover-shadow: #ff8cc4; --dots: rgba(255, 46, 147, .18); --shadow: 8px 8px 0 #4a0b35;
   color-scheme: light; } }
-:root[data-proto="arcade-malabar"][data-theme="light"] {
+:root[data-proto|="arcade-malabar"][data-theme="light"] {
   --bg: #ffe766; --surface: #fffbe6; --surface-2: #fff2a8; --line: #f2c94c; --fg: #4a0b35; --muted: #8a3a6b; --accent: #ff2e93; --on-accent: #fffbe6;
   --pop: #ff2e93; --on-pop: #ffe766; --ink: #4a0b35; --hard: #4a0b35; --cover-shadow: #ff8cc4; --dots: rgba(255, 46, 147, .18); --shadow: 8px 8px 0 #4a0b35;
   color-scheme: light; }
 /* Round type wants room: Arcade's tight tracking would glue Fredoka's letters together */
-[data-proto="arcade-malabar"] h1 { font-weight: 700; letter-spacing: -.015em; }
-[data-proto="arcade-malabar"] h1 em { background: var(--pop); color: var(--on-pop); border-radius: .18em; }
-[data-proto="arcade-malabar"] .brand, [data-proto="arcade-malabar"] .brand:hover { background: var(--accent); color: #ffe766; font-weight: 700; letter-spacing: 0;
+[data-proto|="arcade-malabar"] h1 { font-weight: 700; letter-spacing: -.015em; }
+[data-proto|="arcade-malabar"] h1 em { background: var(--pop); color: var(--on-pop); border-radius: .18em; }
+[data-proto|="arcade-malabar"] .brand, [data-proto|="arcade-malabar"] .brand:hover { background: var(--accent); color: #ffe766; font-weight: 700; letter-spacing: 0;
   border-radius: 999px; padding: 6px 14px 7px; }
-[data-proto="arcade-malabar"] .band-head h2 { font-weight: 700; letter-spacing: -.01em; border-radius: 999px; padding-inline: 16px; }
-[data-proto="arcade-malabar"] .sheet h2, [data-proto="arcade-malabar"] .fill-top h2, [data-proto="arcade-malabar"] .big-len { font-weight: 700; letter-spacing: -.01em; }
-[data-proto="arcade-malabar"] .btn.primary { color: var(--on-accent); }
+[data-proto|="arcade-malabar"] .band-head h2 { font-weight: 700; letter-spacing: -.01em; border-radius: 999px; padding-inline: 16px; }
+[data-proto|="arcade-malabar"] .sheet h2, [data-proto|="arcade-malabar"] .fill-top h2, [data-proto|="arcade-malabar"] .big-len { font-weight: 700; letter-spacing: -.01em; }
+[data-proto|="arcade-malabar"] .btn.primary { color: var(--on-accent); }
 /* Status chips in flash-tattoo style: outlined, glossy fill */
-[data-proto="arcade-malabar"] .status-chip { --tat: #ffd92e; --tat-text: #4a0b35;
+[data-proto|="arcade-malabar"] .status-chip { --tat: #ffd92e; --tat-text: #4a0b35;
   top: 7px; right: 7px; padding: 5px 9px 4px; border: 2px solid #4a0b35; border-radius: 999px;
   background: linear-gradient(155deg, rgba(255, 255, 255, .55), rgba(255, 255, 255, 0) 45%), var(--tat); color: var(--tat-text);
   font: 700 12px/1 var(--display); letter-spacing: .07em; transform: none; box-shadow: 1px 2px 0 rgba(74, 11, 53, .55); }
-[data-proto="arcade-malabar"] .status-playing .status-chip { --tat: #ff2e93; --tat-text: #fff; text-shadow: 1px 1px 0 #4a0b35; }
-[data-proto="arcade-malabar"] .status-dropped .status-chip { --tat: #b9a7ff; }
-[data-proto="arcade-malabar"] .name { font-weight: 800; }
-[data-proto="arcade-malabar"] .triage { box-shadow: 6px 6px 0 var(--pop); }
+[data-proto|="arcade-malabar"] .status-playing .status-chip { --tat: #ff2e93; --tat-text: #fff; text-shadow: 1px 1px 0 #4a0b35; }
+[data-proto|="arcade-malabar"] .status-dropped .status-chip { --tat: #b9a7ff; }
+[data-proto|="arcade-malabar"] .name { font-weight: 800; }
+[data-proto|="arcade-malabar"] .triage { box-shadow: 6px 6px 0 var(--pop); }
+
+/* Malabar Pink bands: lengths go from blush to deep raspberry instead of a rainbow (yellows at night). No ending and Unknown stay apart in
+   lilac and grey. Outranks Arcade's light-mode band colors, which are more specific than a plain :root rule. */
+html:root[data-proto="arcade-malabar-pink"]:not([data-theme="none"]) {
+  --b0: #ffd6ea; --b1: #ffb3d6; --b2: #ff8cc4; --b3: #ff5fab; --b4: #f0307f; --b5: #c41a68; --b6: #8e0f50; --bend: #b9a7ff; --bnone: #b39aa8;
+  --on-deep: #fff;
+}
+/* At night the page is raspberry, so the bands turn yellow: pale cream to deep amber, all light enough for dark text */
+@media (prefers-color-scheme: dark) { html:root[data-proto="arcade-malabar-pink"]:not([data-theme="light"]) {
+  --b0: #fff6c2; --b1: #ffec8a; --b2: #ffe04d; --b3: #ffd014; --b4: #f5b400; --b5: #e09600; --b6: #c47c00; --on-deep: #2a0820; } }
+html:root[data-proto="arcade-malabar-pink"][data-theme="dark"] {
+  --b0: #fff6c2; --b1: #ffec8a; --b2: #ffe04d; --b3: #ffd014; --b4: #f5b400; --b5: #e09600; --b6: #c47c00; --on-deep: #2a0820; }
+/* Text on the deep pinks turns light */
+[data-proto="arcade-malabar-pink"] { --on-c: #2a0820; }
+[data-proto="arcade-malabar-pink"] [style*="--b4)"], [data-proto="arcade-malabar-pink"] [style*="--b5)"], [data-proto="arcade-malabar-pink"] [style*="--b6)"] { --on-c: var(--on-deep); }
+[data-proto="arcade-malabar-pink"] .hrs:not(.approx, .unknown), [data-proto="arcade-malabar-pink"] .band-head h2 { color: var(--on-c); }
 
 /* ============ Rental: a 90s video rental store. Navy carpet, marquee yellow, price stickers, plastic case spines. ============ */
 :root[data-proto="rental"] {
