@@ -2,6 +2,8 @@ import { UNKNOWN_BAND, type Band } from "@backlog/shared/bands";
 import { SORT_LABEL, type Entry, type SortKey } from "@backlog/shared/filter";
 import { STATUSES, STATUS_LABEL, type Status } from "@backlog/shared/types";
 import type { Signal } from "@preact/signals";
+import type { RefObject } from "preact";
+import { useLayoutEffect, useRef } from "preact/hooks";
 import { profilePath } from "@backlog/shared/share";
 import { account } from "../account.ts";
 import { route } from "../route.ts";
@@ -36,13 +38,39 @@ function ProfileShare() {
   );
 }
 
+/** Shrinks a heading from its CSS size so it stays on one line, down to `min` px; narrower than that, it wraps at `min`. */
+function useOneLine(el: RefObject<HTMLElement | null>, text: string, min = 40) {
+  useLayoutEffect(() => {
+    const h = el.current;
+    if (!h) return;
+    const fit = () => {
+      const box = h.parentElement!, pad = getComputedStyle(box);
+      const room = box.clientWidth - parseFloat(pad.paddingLeft) - parseFloat(pad.paddingRight);
+      Object.assign(h.style, { fontSize: "", whiteSpace: "nowrap", width: "max-content" });
+      const ratio = room / h.getBoundingClientRect().width;
+      h.style.width = "";
+      if (ratio >= 1) return;
+      const size = Math.floor(parseFloat(getComputedStyle(h).fontSize) * ratio * 0.99);
+      if (size < min) h.style.whiteSpace = "";
+      h.style.fontSize = `${Math.max(size, min)}px`;
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(h.parentElement!);
+    void document.fonts.ready.then(fit);
+    return () => ro.disconnect();
+  }, [text]);
+}
+
 function Header() {
   const t = totals.value;
   const done = t.finishedHours + t.leftHours > 0 ? t.finishedHours / (t.finishedHours + t.leftHours) : 0;
+  const title = useRef<HTMLHeadingElement>(null);
+  useOneLine(title, `${t.left} ${t.leftHours}`);
   return (
     <header class="top">
       <TopNav />
-      <h1>{count(t.left, "game")}, <em>{count(t.leftHours, "hour")}</em> to clear</h1>
+      <h1 ref={title}>{count(t.left, "game")}, <em>{count(t.leftHours, "hour")}</em> to clear</h1>
       <p class="lede">
         <span class="cleared" title={`${thousands(t.finishedHours)}h finished`}>{t.finished} finished · {Math.round(done * 100)}% of hours cleared</span>
       </p>
