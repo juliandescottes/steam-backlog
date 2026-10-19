@@ -28,7 +28,7 @@ Each rule has a bold ID like STATUS-4 and a test that cites it in its title, che
 
 ## 3. Library view (home)
 
-- **LIB-1** Header: "N games, H hours to clear" over Backlog + Playing, and the games finished with the share of hours cleared (finished hours over finished + remaining).
+- **LIB-1** Header: "N games, H hours to clear" over Backlog + Playing, and the games finished with the share of hours cleared (finished hours over finished + remaining). Signed in, it adds when the library last synced from Steam.
 - **LIB-2** Now playing shelf, off by default (Settings): a row of Playing games above the grid, most recently changed first, shown whatever the view's statuses, hidden when empty.
 - **LIB-3** Length bands: Under 3 h, 3–6, 6–10, 10–20, 20–40, 40–80, 80 h and up, No ending, Unknown. Sorted by length, games are grouped by band, with a stacked bar and a legend that link to each band.
 - **LIB-4** Hours badges show quarter hours under 3 h (`1.75h`), whole hours above (`113h`), no space before the unit, colored by band. Stored to the quarter hour.

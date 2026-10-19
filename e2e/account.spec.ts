@@ -16,10 +16,11 @@ async function signIn(page: Page, id: string) {
 
 const card = (page: Page, name: string) => page.locator(".bands .game").filter({ has: page.locator(".name", { hasText: new RegExp(`^${name}$`) }) });
 
-test("ONB-2 SYNC-1: sign in, import the Steam library, and see a change on another device", async ({ page, browser }) => {
+test("ONB-2 SYNC-1 LIB-1: sign in, import the Steam library, and see a change on another device", async ({ page, browser }) => {
   const id = steamId();
   await signIn(page, id);
   await expect(page.locator(".bands .game .name")).toHaveText(DEV_GAMES);
+  await expect(page.locator(".lede")).toContainText("· Synced from Steam just now");
 
   // Never played, so finishing it adds no community length that would reorder parallel tests
   await card(page, "Stardew Valley").hover();

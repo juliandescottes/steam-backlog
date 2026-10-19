@@ -11,7 +11,7 @@ import {
   canReorder, currentList, editingId, listItems, listSort, listStatuses, moveInList, nowPlaying, played, query,
   selection, settings, settingsOpen, shelves, sortKey, sorting, startFillIn, statuses, totals, visible, type ListSort,
 } from "../store.ts";
-import { count, thousands } from "../util.ts";
+import { ago, count, thousands } from "../util.ts";
 import { Card } from "./Card.tsx";
 import { CopyLink, ListHeader, MissingList, TopNav } from "./Lists.tsx";
 import { Shelf } from "./Shelf.tsx";
@@ -66,6 +66,7 @@ function Header() {
   const t = totals.value;
   const done = t.finishedHours + t.leftHours > 0 ? t.finishedHours / (t.finishedHours + t.leftHours) : 0;
   const title = useRef<HTMLHeadingElement>(null);
+  const synced = account.value?.librarySyncedAt;
   useOneLine(title, `${t.left} ${t.leftHours}`);
   return (
     <header class="top">
@@ -73,6 +74,7 @@ function Header() {
       <h1 ref={title}>{count(t.left, "game")}, <em>{count(t.leftHours, "hour")}</em> to clear</h1>
       <p class="lede">
         <span class="cleared" title={`${thousands(t.finishedHours)}h finished`}>{t.finished} finished · {Math.round(done * 100)}% of hours cleared</span>
+        {synced && <span class="cleared" title={new Date(synced).toLocaleString()}> · Synced from Steam {ago(synced)}</span>}
       </p>
       <ProfileShare />
     </header>
