@@ -201,7 +201,8 @@
 [data-design="malabar"] .profile-list:hover { border-color: var(--ink); transform: translate(-2px, -2px); box-shadow: 7px 7px 0 var(--drop); }
 [data-design="malabar"] .profile-list-text b { font: 700 20px/1.1 var(--display); }
 [data-design="malabar"] .mini-covers span { border: 1.5px solid var(--ink); border-radius: 5px; }
-[data-design="malabar"] .share-link { border-left: 4px solid var(--accent); }
+[data-design="malabar"] .share-link { border: 2px solid var(--line); box-shadow: 3px 3px 0 var(--drop); }
+[data-design="malabar"] .share-link a { font-weight: 600; }
 [data-design="malabar"] .profile-head img, [data-design="malabar"] .eyebrow.owner img { border: 2px solid var(--ink); box-shadow: 3px 3px 0 var(--drop); }
 [data-design="malabar"] footer { border-top: 2px solid var(--ink); }
 [data-design="malabar"] .new-list > label:not(.check) { font: 700 20px/1 var(--display); }

@@ -270,7 +270,7 @@ function Sharing({ list: l }: { list: List }) {
       {shared && (
         <p class="share-link">
           <a href={url} target="_blank" rel="noopener">{url.replace(/^https?:\/\//, "")}</a>
-          <CopyLink url={url} />
+          <CopyLink url={url} icon />
         </p>
       )}
     </section>
