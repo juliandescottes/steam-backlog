@@ -79,15 +79,17 @@ h1.in-place .pen { vertical-align: .15em; }
 p.in-place { white-space: pre-line; }
 .in-place textarea { display: block; width: 100%; margin: 0; padding: 0; border: 0; border-radius: 0; background: none; resize: none; overflow: hidden;
   font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; outline: none; box-shadow: 0 2px 0 var(--accent); }
-.share { display: grid; gap: 8px; }
+.share { display: grid; gap: 14px; } /* as the header, so the link field sits midway */
 .share p { margin: 0; }
 /* A control with its description on the same line */
 .action { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
 .action .hint { flex: 1 1 240px; }
 .share .hint b { color: var(--fg); }
-/* The link of a public list: indented under the toggle it belongs to */
-.share-link { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0; padding: 4px 0 4px 14px; border-left: 2px solid var(--line); }
+/* The link of a public list, in a field with its copy icon */
+.share-link { display: flex; align-items: center; gap: 8px; width: fit-content; max-width: 100%; margin: 0; padding: 4px 4px 4px 12px;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
 .share-link a { font-size: 14px; color: var(--fg); overflow-wrap: anywhere; }
+.share-link .copy-icon { flex: none; padding: 4px 6px; }
 .profile-share { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 4px; margin: 0; color: var(--muted); font-size: 15px; }
 .profile-share .hello { display: inline-flex; align-items: center; gap: 8px; margin-right: 10px; padding: 4px 12px 4px 4px; border: 1px solid var(--line);
   border-radius: 999px; background: var(--surface); color: var(--fg); font-weight: 700; }
